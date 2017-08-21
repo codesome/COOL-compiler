@@ -39,13 +39,13 @@ class_list returns [List<AST.class_> value]
 class_ returns [AST.class_ value] 
     : 
     cl=CLASS t=TYPEID LBRACE fl=feature_list RBRACE {
-        $value = new AST.class_($t.getText(), filename, null 
-                $fl.value. $cl.getLine());
+        $value = new AST.class_($t.getText(), filename, null, 
+                $fl.value, $cl.getLine());
     }
     |
     cl=CLASS t=TYPEID (INHERITS pcl=TYPEID) LBRACE fl=feature_list RBRACE {
-        $value = new AST.class_($t.getText(), filename, $pcl.getText() 
-                $fl.value. $cl.getLine());
+        $value = new AST.class_($t.getText(), filename, $pcl.getText(),
+                $fl.value, $cl.getLine());
     };
 
 feature_list returns [List<AST.feature> value] 
@@ -68,13 +68,13 @@ feature returns [AST.feature value]:
     }
     // attr without assignment
     | v=OBJECTID COLON t=TYPEID {
-        $value = new AST.attr($v.getText(), t.getText(), new AST.no_expr($v.getLine()),
+        $value = new AST.attr($v.getText(), $t.getText(), new AST.no_expr($v.getLine()),
             $v.getLine());
     }
     |
     // attr with assignment
     | v=OBJECTID COLON t=TYPEID ( ASSIGN e=expr ) {
-        $value = new AST.attr($v.getText(), t.getText(), $e.value, $v.getLine());
+        $value = new AST.attr($v.getText(), $t.getText(), $e.value, $v.getLine());
     };
 
 formal_list returns [List<AST.formal> value]
@@ -82,29 +82,29 @@ formal_list returns [List<AST.formal> value]
         $value = new ArrayList<>();
     }
     : f=formal { $value.add($f.value); } 
-    (COMMA f2=formal { $value.add($f2.value); })*
+    (COMMA f2=formal { $value.add($f2.value); })*;
 
 formal returns [AST.formal value] : 
     o=OBJECTID COLON t=TYPEID {
         $value = new AST.formal($o.getText(), $t.getText(), $o.getLine());
     };
 
-branch_list returns [List<SAT.branch> value]
+branch_list returns [List<AST.branch> value]
     @init {
         $value = new ArrayList<>();
     }
-    : (b=branch { $value.add($b.value); })+
+    : (b=branch { $value.add($b.value); })+;
 
 branch returns [AST.branch value] :
     o=OBJECTID COLON t=TYPEID DARROW e=expr SEMICOLON {
-        $value = AST.branch(o.getText(), $t.getText(), $e.value, $o.getLine());
-    }
+        $value = new AST.branch($o.getText(), $t.getText(), $e.value, $o.getLine());
+    };
 
 block_expression_list returns [List<AST.expression> value] 
     @init {
         $value = new ArrayList<>();
     }
-    : (e=expr SEMICOLON { $value.add($e.value); } )*
+    : (e=expr SEMICOLON { $value.add($e.value); } )*;
 
 expr_list returns [List<AST.expression> value]
     @init {
@@ -114,7 +114,7 @@ expr_list returns [List<AST.expression> value]
     (
         e1=expr { $value.add($e1.value); }
                 (COMMA e2=expr { $value.add($e2.value); })*
-    )?
+    )?;
 
 let_assignment_list returns [List<AST.attr> value]
     @init {
@@ -122,7 +122,7 @@ let_assignment_list returns [List<AST.attr> value]
     }
     : 
     f=first_let_assignment { $value.add($f.value); }
-    ( la=next_let_assignment { $value.add($la.value); } )*
+    ( la=next_let_assignment { $value.add($la.value); } )*;
 
 first_let_assignment returns [AST.attr value]
     :
@@ -132,17 +132,17 @@ first_let_assignment returns [AST.attr value]
     |
     o=OBJECTID COLON t=TYPEID ASSIGN e=expr {
         $value = new AST.attr($o.getText(), $t.getText(), $e.value, $o.getLine());
-    }
+    };
 
 next_let_assignment returns [AST.attr value]
     :
     c=COMMA o=OBJECTID COLON t=TYPEID {
-        $value = new AST.attr($o.getText(), $t.getText(), new ASt.no_expr($c.getLine()), $c.getLine());
+        $value = new AST.attr($o.getText(), $t.getText(), new AST.no_expr($c.getLine()), $c.getLine());
     }
     |
     c=COMMA o=OBJECTID COLON t=TYPEID ASSIGN e=expr{
         $value = new AST.attr($o.getText(), $t.getText(), $e.value, $c.getLine());
-    }
+    };
     
 
 
@@ -150,13 +150,13 @@ expr returns [AST.expression value]:
         
         // dispatch
         e1=expr DOT o=OBJECTID LPAREN el=expr_list RPAREN {
-            $value = new AST.dispatch($e1.value, $o.getText(), $el.value, $e1.getLine());
+            $value = new AST.dispatch($e1.value, $o.getText(), $el.value, $e1.value.lineNo);
         }
         | 
         // static dispatch
         e1=expr ATSYM t=TYPEID DOT o=OBJECTID LPAREN el=expr_list RPAREN {
             $value = new AST.static_dispatch($e1.value, $t.getText(), $o.getText(), 
-                $el.value, $e1.getLine());
+                $el.value, $e1.value.lineNo);
         }
         | 
         o=OBJECTID LPAREN el=expr_list RPAREN {
@@ -190,7 +190,7 @@ expr returns [AST.expression value]:
         | 
         // case e of bl esac
         c=CASE e=expr OF bl=branch_list ESAC {
-            $value = new AST.typecase($e.value, $bl.value, $c.getLine());
+            $value = new AST.typcase($e.value, $bl.value, $c.getLine());
         }
         | 
         // new t
@@ -210,37 +210,37 @@ expr returns [AST.expression value]:
         | 
         // multiplication
         e1=expr STAR e2=expr {
-            $value = new AST.mul($e1.value, $e2.value, $e1.getLine());
+            $value = new AST.mul($e1.value, $e2.value, $e1.value.lineNo);
         }
         | 
         // division
         e1=expr SLASH e2=expr {
-            $value = new AST.divide($e1.value, $e2.value, $e1.getLine());
+            $value = new AST.divide($e1.value, $e2.value, $e1.value.lineNo);
         }
         | 
         // addition
         e1=expr PLUS e2=expr {
-            $value = new AST.plus($e1.value, $e2.value, $e1.getLine());
+            $value = new AST.plus($e1.value, $e2.value, $e1.value.lineNo);
         }
         | 
         // e1 - e2
         e1=expr MINUS e2=expr {
-            $value = new AST.sub($e1.value, $e2.value, $e1.getLine());
+            $value = new AST.sub($e1.value, $e2.value, $e1.value.lineNo);
         }
         | 
         // e1 < e2
         e1=expr LT e2=expr {
-            $value = new AST.lt($e1.value, $e2.value, $e1.getLine());
+            $value = new AST.lt($e1.value, $e2.value, $e1.value.lineNo);
         }
         | 
         // e1 <= e2
         e1=expr LE e2=expr {
-            $value = new AST.leq($e1.value, $e2.value, $e1.getLine());
+            $value = new AST.leq($e1.value, $e2.value, $e1.value.lineNo);
         }
         | 
         // e1 = e2
         e1=expr EQUALS e2=expr {
-            $value = new AST.eq($e1.value, $e2.value, $e1.getLine());
+            $value = new AST.eq($e1.value, $e2.value, $e1.value.lineNo);
         }
         | 
         // not expr
@@ -265,12 +265,12 @@ expr returns [AST.expression value]:
         | 
         // integer constant
         i=INT_CONST {
-            $value = new AST.int_const(Integer.parseInt($i.getText(), $i.getLine()));
+            $value = new AST.int_const(Integer.parseInt($i.getText()), $i.getLine());
         }
         | 
         // string constant
         s=STR_CONST {
-            $value = new AST.string_constant($s.getText(), $s.getLine());
+            $value = new AST.string_const($s.getText(), $s.getLine());
         }
         | 
         // bool constant
