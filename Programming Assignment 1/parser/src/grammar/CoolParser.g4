@@ -27,14 +27,14 @@ options {
 
 program returns [AST.program value] : 
     cl=class_list EOF {
-        $value = new AST.program($cl.value, $cl.value.get(0).lineNo);
+        $value = new AST.program($cl.value, $cl.value.get(0).lineNo);    
     };                    
 
 class_list returns [List<AST.class_> value] 
     @init {
         $value = new ArrayList<>();
     }
-    : (cl = class_ SEMICOLON { $value.add($cl.value); })*;
+    : (cl = class_ SEMICOLON { $value.add($cl.value); })+;
 
 class_ returns [AST.class_ value] 
     : 
