@@ -112,9 +112,39 @@ expr_list returns [List<AST.expression> value]
     }
     : 
     (
-        (e1=expr { $value.add($e1.value); }
-                (COMMA e2=expr { $value.add($e2.value); })*)?
+        e1=expr { $value.add($e1.value); }
+                (COMMA e2=expr { $value.add($e2.value); })*
     )?
+
+let_assignment_list returns [List<AST.attr> value]
+    @init {
+        $value = new ArrayList<>();
+    }
+    : 
+    f=first_let_assignment { $value.add($f.value); }
+    ( la=next_let_assignment { $value.add($la.value); } )*
+
+first_let_assignment returns [AST.attr value]
+    :
+    o=OBJECTID COLON t=TYPEID {
+        $value = new AST.attr($o.getText(), $t.getText(), new AST.no_expr($o.getLine()), $o.getLine());
+    }
+    |
+    o=OBJECTID COLON t=TYPEID ASSIGN e=expr {
+        $value = new AST.attr($o.getText(), $t.getText(), $e.value, $o.getLine());
+    }
+
+next_let_assignment returns [AST.attr value]
+    :
+    c=COMMA o=OBJECTID COLON t=TYPEID {
+        $value = new AST.attr($o.getText(), $t.getText(), new ASt.no_expr($c.getLine()), $c.getLine());
+    }
+    |
+    c=COMMA o=OBJECTID COLON t=TYPEID ASSIGN e=expr{
+        $value = new AST.attr($o.getText(), $t.getText(), $e.value, $c.getLine());
+    }
+    
+
 
 expr returns [AST.expression value]: 
         
@@ -129,7 +159,10 @@ expr returns [AST.expression value]:
                 $el.value, $e1.getLine());
         }
         | 
-        OBJECTID LPAREN expr_list RPAREN
+        o=OBJECTID LPAREN el=expr_list RPAREN {
+            $value = new AST.dispatch(new AST.no_expr($o.getLine()), $o.getText(),
+                $el.value, $o.getLine());
+        }
         | 
         // if e2 then e2 else e3 fi
         i=IF e1=expr THEN e2=expr ELSE e3=expr FI {
@@ -146,7 +179,14 @@ expr returns [AST.expression value]:
             $value = new AST.block($bel.value, $lb.getLine());
         }
         | 
-        LET OBJECTID COLON TYPEID ( ASSIGN expr )? ( COMMA OBJECTID COLON TYPEID ( ASSIGN expr )?)* IN expr
+        l=LET lal=let_assignment_list IN e=expr {
+            int size = $lal.value.size();
+            for(int i=size-1; i>=0; i--) {
+                AST.attr let_attr = $lal.value.get(i);
+                $value = new AST.let(let_attr.name, let_attr.typeid, let_attr.value, $e.value, $l.getLine());
+                break;
+            }
+        }
         | 
         // case e of bl esac
         c=CASE e=expr OF bl=branch_list ESAC {

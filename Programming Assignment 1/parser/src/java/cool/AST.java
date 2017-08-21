@@ -277,6 +277,7 @@ public class AST{
             typeid = t;
             value = v;
             body = b;
+            lineNo = l;
         }
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_let\n"+space+sp+name+"\n"+space+sp+typeid+"\n"+value.getString(space+sp)+"\n"+body.getString(space+sp)+"\n"+space+": "+type;
