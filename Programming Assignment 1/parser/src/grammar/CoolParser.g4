@@ -39,7 +39,7 @@ class_list returns [List<AST.class_> value]
 class_ returns [AST.class_ value] 
     : 
     cl=CLASS t=TYPEID LBRACE fl=feature_list RBRACE {
-        $value = new AST.class_($t.getText(), filename, null, 
+        $value = new AST.class_($t.getText(), filename, "Object", 
                 $fl.value, $cl.getLine());
     }
     |
@@ -160,7 +160,7 @@ expr returns [AST.expression value]:
         }
         | 
         o=OBJECTID LPAREN el=expr_list RPAREN {
-            $value = new AST.dispatch(new AST.no_expr($o.getLine()), $o.getText(),
+            $value = new AST.dispatch(new AST.object("self", $o.getLine()), $o.getText(),
                 $el.value, $o.getLine());
         }
         | 
@@ -180,12 +180,13 @@ expr returns [AST.expression value]:
         }
         | 
         l=LET lal=let_assignment_list IN e=expr {
+            AST.expression current_expr = $e.value;
             int size = $lal.value.size();
             for(int i=size-1; i>=0; i--) {
                 AST.attr let_attr = $lal.value.get(i);
-                $value = new AST.let(let_attr.name, let_attr.typeid, let_attr.value, $e.value, $l.getLine());
-                break;
+                current_expr = new AST.let(let_attr.name, let_attr.typeid, let_attr.value, current_expr, $l.getLine());
             }
+            $value = current_expr;
         }
         | 
         // case e of bl esac

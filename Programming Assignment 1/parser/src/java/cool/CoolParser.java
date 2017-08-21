@@ -277,7 +277,7 @@ public class CoolParser extends Parser {
 				setState(47);
 				match(RBRACE);
 
-				        ((Class_Context)_localctx).value =  new AST.class_(((Class_Context)_localctx).t.getText(), filename, null, 
+				        ((Class_Context)_localctx).value =  new AST.class_(((Class_Context)_localctx).t.getText(), filename, "Object", 
 				                ((Class_Context)_localctx).fl.value, ((Class_Context)_localctx).cl.getLine());
 				    
 				}
@@ -1231,12 +1231,13 @@ public class CoolParser extends Parser {
 				setState(202);
 				((ExprContext)_localctx).e = expr(19);
 
+				            AST.expression current_expr = ((ExprContext)_localctx).e.value;
 				            int size = ((ExprContext)_localctx).lal.value.size();
 				            for(int i=size-1; i>=0; i--) {
 				                AST.attr let_attr = ((ExprContext)_localctx).lal.value.get(i);
-				                ((ExprContext)_localctx).value =  new AST.let(let_attr.name, let_attr.typeid, let_attr.value, ((ExprContext)_localctx).e.value, ((ExprContext)_localctx).l.getLine());
-				                break;
+				                current_expr = new AST.let(let_attr.name, let_attr.typeid, let_attr.value, current_expr, ((ExprContext)_localctx).l.getLine());
 				            }
+				            ((ExprContext)_localctx).value =  current_expr;
 				        
 				}
 				break;
@@ -1297,7 +1298,7 @@ public class CoolParser extends Parser {
 				setState(225);
 				match(RPAREN);
 
-				            ((ExprContext)_localctx).value =  new AST.dispatch(new AST.no_expr(((ExprContext)_localctx).o.getLine()), ((ExprContext)_localctx).o.getText(),
+				            ((ExprContext)_localctx).value =  new AST.dispatch(new AST.object("self", ((ExprContext)_localctx).o.getLine()), ((ExprContext)_localctx).o.getText(),
 				                ((ExprContext)_localctx).el.value, ((ExprContext)_localctx).o.getLine());
 				        
 				}
