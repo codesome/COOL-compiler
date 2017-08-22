@@ -117,7 +117,7 @@ block_expression_list returns [List<AST.expression> value]
     @init {
         $value = new ArrayList<>();
     }
-    : (e=expr SEMICOLON { $value.add($e.value); } )*;
+    : (e=expr SEMICOLON { $value.add($e.value); } )+;
 
 // list of expressions separated by comma
 expr_list returns [List<AST.expression> value]

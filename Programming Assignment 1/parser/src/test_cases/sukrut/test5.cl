@@ -41,6 +41,7 @@ class A {
 class B {
     a : Int;
     b : Int;
+    c : Int;
     
     func1() : Int {
         a + b -- expr PLUS expr
@@ -68,6 +69,14 @@ class B {
     
     func7() : Bool {
         (a+b) * (a-b) < a -- LPAREN expr RPAREN
+    };
+    
+    func8() : Int {
+        a - b * c
+    };
+    
+    func9() : Int {
+        a * b - c
     };
 };
 
