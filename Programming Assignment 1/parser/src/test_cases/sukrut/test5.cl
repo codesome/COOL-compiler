@@ -72,11 +72,11 @@ class B {
     };
     
     func8() : Int {
-        a - b * c
+        a - b * c -- precedence of * over -
     };
     
     func9() : Int {
-        a * b - c
+        a * b - c -- precedence of * over -
     };
 };
 

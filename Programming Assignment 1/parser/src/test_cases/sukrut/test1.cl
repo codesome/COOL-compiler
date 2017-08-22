@@ -13,7 +13,7 @@ class A { -- class not inheriting with one feature
 class B inherits IO { -- class inheriting with one feature
     func() : Int {
       {
-          
+        0;
       }  
     };
 };

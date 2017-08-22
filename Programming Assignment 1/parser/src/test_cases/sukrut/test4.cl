@@ -1,6 +1,6 @@
 (* Verifies rules : expr    : IF expr THEN expr ELSE expr FI
 	                        | WHILE expr LOOP expr POOL
-	                        | LBRACE (expr SEMICOLON)* RBRACE
+	                        | LBRACE (expr SEMICOLON)+ RBRACE
 	                        | TILDE expr
 	                        | expr EQUALS expr
 	                        | NOT expr
@@ -20,7 +20,7 @@ class A {
           }
           else
           {
-             
+             0;
           }
           fi;
         }      
