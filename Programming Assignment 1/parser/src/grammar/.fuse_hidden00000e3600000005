@@ -25,43 +25,35 @@ options {
     Add appropriate actions to grammar rules for building AST below.
 */
 
-// Root of all grammars. Entire program converges to this.
 program returns [AST.program value] : 
     cl=class_list EOF {
-        $value = new AST.program($cl.value, $cl.value.get(0).lineNo);    
+        $value = new AST.program($cl.value, $cl.value.get(0).lineNo);
     };                    
 
-// List of all the classes
 class_list returns [List<AST.class_> value] 
     @init {
         $value = new ArrayList<>();
     }
-    : (cl = class_ SEMICOLON { $value.add($cl.value); })+;
+    : (cl = class_ SEMICOLON { $value.add($cl.value); })*;
 
-// A single class
 class_ returns [AST.class_ value] 
     : 
-    // class without inheritance
     cl=CLASS t=TYPEID LBRACE fl=feature_list RBRACE {
-        // By default "Object" class is parent of all class
         $value = new AST.class_($t.getText(), filename, "Object", 
                 $fl.value, $cl.getLine());
     }
     |
-    // class with inheritance
     cl=CLASS t=TYPEID (INHERITS pcl=TYPEID) LBRACE fl=feature_list RBRACE {
         $value = new AST.class_($t.getText(), filename, $pcl.getText(),
                 $fl.value, $cl.getLine());
     };
 
-// list of features
 feature_list returns [List<AST.feature> value] 
     @init {
         $value = new ArrayList<>();
     }
     : (f = feature SEMICOLON { $value.add($f.value); })*;
 
-// a function or variable declaration (with or without assignment)
 feature returns [AST.feature value]: 
     // method without formal_list
     m=OBJECTID LPAREN RPAREN COLON t=TYPEID LBRACE b=expr RBRACE {
@@ -74,18 +66,17 @@ feature returns [AST.feature value]:
         $value = new AST.method($m.getText(), $f.value, $t.getText(), 
             $b.value, $m.getLine());
     }
-    // variable declaration without assignment
+    // attr without assignment
     | v=OBJECTID COLON t=TYPEID {
         $value = new AST.attr($v.getText(), $t.getText(), new AST.no_expr($v.getLine()),
             $v.getLine());
     }
     |
-    // variable declaration with assignment
+    // attr with assignment
     | v=OBJECTID COLON t=TYPEID ( ASSIGN e=expr ) {
         $value = new AST.attr($v.getText(), $t.getText(), $e.value, $v.getLine());
     };
 
-// list of formals
 formal_list returns [List<AST.formal> value]
     @init {
         $value = new ArrayList<>();
@@ -93,33 +84,28 @@ formal_list returns [List<AST.formal> value]
     : f=formal { $value.add($f.value); } 
     (COMMA f2=formal { $value.add($f2.value); })*;
 
-// variable declarations
 formal returns [AST.formal value] : 
     o=OBJECTID COLON t=TYPEID {
         $value = new AST.formal($o.getText(), $t.getText(), $o.getLine());
     };
 
-// list branches of type case
 branch_list returns [List<AST.branch> value]
     @init {
         $value = new ArrayList<>();
     }
     : (b=branch { $value.add($b.value); })+;
 
-// a branch in type case
 branch returns [AST.branch value] :
     o=OBJECTID COLON t=TYPEID DARROW e=expr SEMICOLON {
         $value = new AST.branch($o.getText(), $t.getText(), $e.value, $o.getLine());
     };
 
-// list of expressions ending with semicolon
 block_expression_list returns [List<AST.expression> value] 
     @init {
         $value = new ArrayList<>();
     }
     : (e=expr SEMICOLON { $value.add($e.value); } )*;
 
-// list of expressions separated by comma
 expr_list returns [List<AST.expression> value]
     @init {
         $value = new ArrayList<>();
@@ -130,8 +116,6 @@ expr_list returns [List<AST.expression> value]
                 (COMMA e2=expr { $value.add($e2.value); })*
     )?;
 
-/* LET assignments */
-// list of assignments in a let statement
 let_assignment_list returns [List<AST.attr> value]
     @init {
         $value = new ArrayList<>();
@@ -140,7 +124,6 @@ let_assignment_list returns [List<AST.attr> value]
     f=first_let_assignment { $value.add($f.value); }
     ( la=next_let_assignment { $value.add($la.value); } )*;
 
-// first varaible declaration in let statement (which doesnt start with comma)
 first_let_assignment returns [AST.attr value]
     :
     o=OBJECTID COLON t=TYPEID {
@@ -151,7 +134,6 @@ first_let_assignment returns [AST.attr value]
         $value = new AST.attr($o.getText(), $t.getText(), $e.value, $o.getLine());
     };
 
-// variable declarations in let statement which starts with comma (2nd and further declarations)
 next_let_assignment returns [AST.attr value]
     :
     c=COMMA o=OBJECTID COLON t=TYPEID {
@@ -161,11 +143,12 @@ next_let_assignment returns [AST.attr value]
     c=COMMA o=OBJECTID COLON t=TYPEID ASSIGN e=expr{
         $value = new AST.attr($o.getText(), $t.getText(), $e.value, $c.getLine());
     };
+    
 
-/* All kinds of expressions */
+
 expr returns [AST.expression value]: 
         
-        // dispatch (a function call of an object)
+        // dispatch
         e1=expr DOT o=OBJECTID LPAREN el=expr_list RPAREN {
             $value = new AST.dispatch($e1.value, $o.getText(), $el.value, $e1.value.lineNo);
         }
@@ -176,7 +159,6 @@ expr returns [AST.expression value]:
                 $el.value, $e1.value.lineNo);
         }
         | 
-        // function call of self
         o=OBJECTID LPAREN el=expr_list RPAREN {
             $value = new AST.dispatch(new AST.object("self", $o.getLine()), $o.getText(),
                 $el.value, $o.getLine());
@@ -192,13 +174,11 @@ expr returns [AST.expression value]:
             $value = new AST.loop($e1.value, $e2.value, $wh.getLine());
         }
         | 
-        // block expression
         // { e1; e2; e3; ... }
         lb=LBRACE bel=block_expression_list RBRACE {
             $value = new AST.block($bel.value, $lb.getLine());
         }
         | 
-        // let statement with declarations and expression
         l=LET lal=let_assignment_list IN e=expr {
             AST.expression current_expr = $e.value;
             int size = $lal.value.size();
