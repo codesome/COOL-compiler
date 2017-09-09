@@ -1,4 +1,5 @@
 # COOL Compiler - Parser Phase B #
+> Group 5, Ganesh Vernekar (CS15BTECH11018), Sukrut Rao (CS15BTECH11036)
 
 The project implements phase B of the COOL parser. An AST is generated.
 
