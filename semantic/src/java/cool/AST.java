@@ -3,6 +3,9 @@ import java.util.List;
 public class AST{
 	public static class ASTNode {
 		int lineNo;
+		public int getLineNo() {
+			return lineNo;
+		}
 	}
 	public static String sp = "  ";
 
@@ -431,6 +434,15 @@ public class AST{
 			}
 			str += space+sp+")";
 			return str;
+		}
+		public String getName() {
+			return name;
+		}
+		public String getParentName() {
+			return parent;
+		}
+		public String getFilename() {
+			return filename;
 		}
 	}
 	public static class program extends ASTNode {

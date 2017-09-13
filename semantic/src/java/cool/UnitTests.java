@@ -2,19 +2,41 @@ package cool;
 
 public class UnitTests {
 
-	// TODO: add assert statements
-	public static void testInheritanceGraph() {
+	private static AST.class_ getEmptyClass(String name, String parentName) {
+		return new AST.class_(name, null, parentName, null, 0);
+	}
+
+	// TODO: add assert statements if needed
+	public static void testInheritanceGraph1() {
+		System.out.println("testInheritanceGraph1:");
 		InheritanceGraph ig = new InheritanceGraph();
-		System.out.println(ig.addClass("Main"));
-		System.out.println(ig.addClass("Classx"));
-		System.out.println(ig.addClass("Class1", "Class2"));
-		System.out.println(ig.addClass("Class2", "Class3"));
-		System.out.println(ig.addClass("Class3", "Class1"));
-		System.out.println(ig.analyze());
+		ig.addClass(getEmptyClass("Main", null));
+		ig.addClass(getEmptyClass("Classx", null));
+		ig.addClass(getEmptyClass("Class1", "Class2"));
+		ig.addClass(getEmptyClass("Class2", "Class3"));
+		ig.addClass(getEmptyClass("Class3", "Class1"));
+		ig.addClass(getEmptyClass("Classx", "Classy"));
+		ig.analyze();
+		for(String error: ig.getErrors()) {
+			System.out.println(error);
+		}
+	}
+
+	public static void testInheritanceGraph2() {
+		System.out.println("testInheritanceGraph2:");
+		InheritanceGraph ig = new InheritanceGraph();
+		ig.addClass(getEmptyClass("Classx", null));
+		ig.addClass(getEmptyClass("Class1", "Class2"));
+		ig.addClass(getEmptyClass("Class2", "Class3"));
+		ig.analyze();
+		for(String error: ig.getErrors()) {
+			System.out.println(error);
+		}
 	}
 
 	public static void main(String[] args) {
-		testInheritanceGraph();
+		testInheritanceGraph1();
+		testInheritanceGraph2();
 	}
 	
 }

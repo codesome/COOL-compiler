@@ -9,95 +9,93 @@ import java.lang.StringBuilder;
 
 public class InheritanceGraph {
 
-	public static final String ROOT_CLASS_NAME = "Object";
+	private static final String ROOT_CLASS_NAME = "Object";
+	private static final int ROOT_CLASS_INDEX = 0;
 
-	private StringBuilder errorString;
 	private Map<String,Integer> classNameToIndexMap;
 	private List<Node> graph;
 	private int totalNodes;
 	private boolean hasMain;
+	private List<String> errors;
 
 	public InheritanceGraph() {
-
-		errorString = new StringBuilder();
 		
 		graph = new ArrayList<>();
-		graph.add(new Node(InheritanceGraph.ROOT_CLASS_NAME, 0));
+		graph.add(new Node(new AST.class_(InheritanceGraph.ROOT_CLASS_NAME, null, null, null, 0)
+			, InheritanceGraph.ROOT_CLASS_INDEX));
 		
 		classNameToIndexMap = new HashMap<>();
-		classNameToIndexMap.put(InheritanceGraph.ROOT_CLASS_NAME, 0);
+		classNameToIndexMap.put(InheritanceGraph.ROOT_CLASS_NAME, InheritanceGraph.ROOT_CLASS_INDEX);
 		
+		errors = new ArrayList<>();
+
 		totalNodes = 1;
 		hasMain = false;
 	}
 
-	public String addClass(String className) {
-		return addClass(className, null);
-	}
-
-	public String addClass(String className, String parentClassName) {
-		if(classNameToIndexMap.containsKey(className)) {
-			return new StringBuilder().append("class \"").append(className).append("\" has been redeclared\n").toString();
+	public void addClass(AST.class_ astClass) {
+		if(classNameToIndexMap.containsKey(astClass.getName())) {
+			errors.add(new StringBuilder().append("class \"").append(astClass.getName())
+				.append("\" has been redeclared").toString());
+			return;
 		}
-		graph.add(new Node(className, totalNodes, parentClassName));
-		classNameToIndexMap.put(className, totalNodes);
+		graph.add(new Node(astClass, totalNodes, astClass.getParentName()));
+		classNameToIndexMap.put(astClass.getName(), totalNodes);
 		totalNodes++;
 
-		if("Main".equals(className)) {
+		if("Main".equals(astClass.getName())) {
 			hasMain = true;
 		}
 
-		return null;
 	}
 
 	public boolean hasMain() {
 		return hasMain;
 	}
 
-	public String analyze() {
-		boolean errorExists = false;
-		StringBuilder errorString = new StringBuilder();
-		String parentExistsPassError;
-		if((parentExistsPassError = parentUpdatePass())!=null) {
-			errorString.append(parentExistsPassError);
-			errorExists = true;
-		} else if(!hasMain()) {
-			System.out.println("hello");
-			errorString.append("'Main' class is missing.");
-			errorExists = true;
-		} else { 
-			Stack<Node> cycle = hasCyclePass();
-			if(!cycle.isEmpty()) {
-				errorString.append("Classes have cyclic dependency: ");
-				int size = cycle.size();
-				StringBuilder cyclePath = new StringBuilder();
-				for(int i=0; i<size-1; i++) {
-					cyclePath.append(cycle.pop().getName()).append(" -> ");
-				}
-				String lastClassName = cycle.pop().getName();
-				errorString.append(lastClassName).append(" -> ");
-				errorString.append(cyclePath).append(lastClassName);
-				errorExists = true;
-			}
+	public void analyze() {
+		parentUpdatePass();
+
+		if(!hasMain()) {
+			errors.add("'Main' class is missing.");
 		}
 
-		return (errorExists)? errorString.toString(): null;
+		Stack<Node> cycle = hasCyclePass();
+		if(!cycle.isEmpty()) {
+			StringBuilder errorString = new StringBuilder();
+			errorString.append("Classes have cyclic dependency: ");
+			int size = cycle.size();
+			StringBuilder cyclePath = new StringBuilder();
+			for(int i=0; i<size-1; i++) {
+				cyclePath.append(cycle.pop().getAstClass().getName()).append(" -> ");
+			}
+			String lastClassName = cycle.pop().getAstClass().getName();
+			errorString.append(lastClassName).append(" -> ");
+			errorString.append(cyclePath).append(lastClassName);
+			errors.add(errorString.toString());
+		}
 	}
 
-	private String parentUpdatePass() {
+	private void parentUpdatePass() {
 		for(Node cl: graph) {
 			if(cl.parentExists()) {
 				if(classNameToIndexMap.containsKey(cl.getParentName())) {
 					int parentIndex = classNameToIndexMap.get(cl.getParentName());
 					cl.setParentIndex(parentIndex);
+					cl.setParent(graph.get(parentIndex));
 					graph.get(parentIndex).addChild(cl);
 				} else {
-					return new StringBuilder().append("Parent class \"").append(cl.getParentName()).append("\" for \"")
-						.append(cl.getName()).append("\" has not been declared\n").toString();
+					errors.add(new StringBuilder().append("Parent class \"").append(cl.getParentName())
+									.append("\" for \"").append(cl.getAstClass().getName())
+									.append("\" has not been declared").toString());
+				}
+			} else {
+				if(!InheritanceGraph.ROOT_CLASS_NAME.equals(cl.getAstClass().getName())) {
+					cl.setParentName(InheritanceGraph.ROOT_CLASS_NAME);
+					cl.setParentIndex(InheritanceGraph.ROOT_CLASS_INDEX);
 				}
 			}
 		}
-		return null;		
 	}
 
 	private boolean isCyclicUtil(int v, List<Boolean> visited, List<Boolean> recStack, Stack<Node> cycle) {
@@ -106,24 +104,21 @@ public class InheritanceGraph {
 	    if(visited.get(v) == false) {
 	        visited.set(v, true);
 	        recStack.set(v, true);
-	 
 	        if(currentNode.parentExists()) {
 	        	int parentIndex = currentNode.getParentIndex();
 	        	if(parentIndex != Node.NO_PARENT) {
-					// System.out.println(currentNode.getName() + " -> " + currentNode.getParentName());
-		            if ( (!visited.get(parentIndex) && isCyclicUtil(parentIndex, visited, recStack, cycle)) || recStack.get(parentIndex) ) {
+		            if ( (!visited.get(parentIndex) && isCyclicUtil(parentIndex, visited, recStack, cycle)) 
+		            	  || recStack.get(parentIndex) ) {
 		                return true;
 		            }
 	        	}
 	        }
-	 
 	    }
 	    cycle.pop();
 	    recStack.set(v, false);
 	    return false;
 	}
 
-	// TODO: return cycle if exists
 	public Stack<Node> hasCyclePass() {
 
 	    int V = graph.size();
@@ -142,33 +137,44 @@ public class InheritanceGraph {
 	    return cycle;
 	}
 
+	public List<String> getErrors() {
+		return errors;
+	}
+
 }
 
 class Node {
 
 	public static final int NO_PARENT = -1;
 
-	private String name;
+	private AST.class_ astClass;
 	private int index;
 	private String parentName;
 	private int parentIndex;
+	private Node parent;
 	private List<Node> children;
+	private boolean isInitiated;
 
-	public Node(String name, int index, String parentName) {
+	public Node(AST.class_ astClass, int index, String parentName) {
 		this.parentName = parentName;
-		init(name, index);
+		this.isInitiated = false;
+		init(astClass, index);
 	}
 
-	public Node(String name, int index) {
+	public Node(AST.class_ astClass, int index) {
 		this.parentName = null;
-		init(name, index);
+		this.isInitiated = false;
+		init(astClass, index);
 	}
 
-	private void init(String name, int index) {
-		this.name = name;
+	private void init(AST.class_ astClass, int index) {
+		if(isInitiated) return;
+		this.astClass = astClass;
 		this.index = index;
 		this.parentIndex = Node.NO_PARENT;
-		children = new ArrayList<>();
+		this.children = new ArrayList<>();
+		this.parent = null;
+		this.isInitiated = true;
 	}
 
 	public boolean parentExists() {
@@ -183,12 +189,16 @@ class Node {
 		return index;
 	}
 
-	public String getName() {
-		return name;
+	public AST.class_ getAstClass() {
+		return astClass;
 	}
 
 	public String getParentName() {
 		return parentName;
+	}
+
+	public void setParentName(String parentName) {
+		this.parentName = parentName;
 	}
 
 	public int getParentIndex() {
@@ -197,6 +207,14 @@ class Node {
 
 	public void setParentIndex(int parentIndex) {
 		this.parentIndex = parentIndex;
+	}
+
+	public Node getParent() {
+		return parent;
+	}
+
+	public void setParent(Node parent) {
+		this.parent = parent;
 	}
 
 }
