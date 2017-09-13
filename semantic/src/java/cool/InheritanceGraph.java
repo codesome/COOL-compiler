@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Stack;
 import java.lang.StringBuilder;
 
 public class InheritanceGraph {
@@ -60,6 +61,24 @@ public class InheritanceGraph {
 		if((parentExistsPassError = parentUpdatePass())!=null) {
 			errorString.append(parentExistsPassError);
 			errorExists = true;
+		} else if(!hasMain()) {
+			System.out.println("hello");
+			errorString.append("'Main' class is missing.");
+			errorExists = true;
+		} else { 
+			Stack<Node> cycle = hasCyclePass();
+			if(!cycle.isEmpty()) {
+				errorString.append("Classes have cyclic dependency: ");
+				int size = cycle.size();
+				StringBuilder cyclePath = new StringBuilder();
+				for(int i=0; i<size-1; i++) {
+					cyclePath.append(cycle.pop().getName()).append(" -> ");
+				}
+				String lastClassName = cycle.pop().getName();
+				errorString.append(lastClassName).append(" -> ");
+				errorString.append(cyclePath).append(lastClassName);
+				errorExists = true;
+			}
 		}
 
 		return (errorExists)? errorString.toString(): null;
@@ -81,38 +100,46 @@ public class InheritanceGraph {
 		return null;		
 	}
 
-	private boolean isCyclicUtil(int v, List<Boolean> visited, List<Boolean> recStack) {
+	private boolean isCyclicUtil(int v, List<Boolean> visited, List<Boolean> recStack, Stack<Node> cycle) {
+		Node currentNode = graph.get(v);
+	    cycle.push(currentNode);
 	    if(visited.get(v) == false) {
 	        visited.set(v, true);
 	        recStack.set(v, true);
 	 
-	        if(graph.get(v).parentExists()) {
-	        	int parentIndex = graph.get(v).getParentIndex();
-	            if ( (!visited.get(parentIndex) && isCyclicUtil(parentIndex, visited, recStack)) || recStack.get(parentIndex) )
-	                return true;
+	        if(currentNode.parentExists()) {
+	        	int parentIndex = currentNode.getParentIndex();
+	        	if(parentIndex != Node.NO_PARENT) {
+					// System.out.println(currentNode.getName() + " -> " + currentNode.getParentName());
+		            if ( (!visited.get(parentIndex) && isCyclicUtil(parentIndex, visited, recStack, cycle)) || recStack.get(parentIndex) ) {
+		                return true;
+		            }
+	        	}
 	        }
 	 
 	    }
+	    cycle.pop();
 	    recStack.set(v, false);
 	    return false;
 	}
 
 	// TODO: return cycle if exists
-	private boolean hasCyclePass() {
+	public Stack<Node> hasCyclePass() {
 
 	    int V = graph.size();
 	    List<Boolean> visited = new ArrayList<>();
 	    List<Boolean> recStack = new ArrayList<>();
+	    Stack<Node> cycle = new Stack<>();
 	    for(int i = 0; i < V; i++) {
 	        visited.add(false);
 	        recStack.add(false);
 	    }
 	 
 	    for(int i = 0; i < V; i++)
-	        if (isCyclicUtil(i, visited, recStack))
-	            return true;
+	        if (isCyclicUtil(i, visited, recStack, cycle))
+	            return cycle;
 	 
-	    return false;
+	    return cycle;
 	}
 
 }
