@@ -435,15 +435,6 @@ public class AST{
 			str += space+sp+")";
 			return str;
 		}
-		public String getName() {
-			return name;
-		}
-		public String getParentName() {
-			return parent;
-		}
-		public String getFilename() {
-			return filename;
-		}
 	}
 	public static class program extends ASTNode {
 		public List<class_> classes;

@@ -2,8 +2,15 @@ package cool;
 
 public class UnitTests {
 
+	public static void reportError(String filename, int lineNo, String error){
+		System.err.println(filename+":"+lineNo+": "+error);
+	}
+	public static void reportError(Error error) {
+		reportError(error.getFilename(), error.getLineNo(), error.getError());
+	}
+
 	private static AST.class_ getEmptyClass(String name, String parentName) {
-		return new AST.class_(name, null, parentName, null, 0);
+		return new AST.class_(name, "MyFile.cool", parentName, null, 0);
 	}
 
 	// TODO: add assert statements if needed
@@ -11,14 +18,16 @@ public class UnitTests {
 		System.out.println("testInheritanceGraph1:");
 		InheritanceGraph ig = new InheritanceGraph();
 		ig.addClass(getEmptyClass("Main", null));
-		ig.addClass(getEmptyClass("Classx", null));
 		ig.addClass(getEmptyClass("Class1", "Class2"));
 		ig.addClass(getEmptyClass("Class2", "Class3"));
 		ig.addClass(getEmptyClass("Class3", "Class1"));
 		ig.addClass(getEmptyClass("Classx", "Classy"));
+		ig.addClass(getEmptyClass("Classy", "Classz"));
+		ig.addClass(getEmptyClass("Classz", "Classx"));
+		ig.addClass(getEmptyClass("Classx", null));
 		ig.analyze();
-		for(String error: ig.getErrors()) {
-			System.out.println(error);
+		for(Error error: ig.getErrors()) {
+			reportError(error);
 		}
 	}
 
@@ -29,8 +38,8 @@ public class UnitTests {
 		ig.addClass(getEmptyClass("Class1", "Class2"));
 		ig.addClass(getEmptyClass("Class2", "Class3"));
 		ig.analyze();
-		for(String error: ig.getErrors()) {
-			System.out.println(error);
+		for(Error error: ig.getErrors()) {
+			reportError(error);
 		}
 	}
 

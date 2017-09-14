@@ -17,7 +17,10 @@ public class InheritanceGraph {
 	private Map<String,Integer> classNameToIndexMap;
 	private List<Node> graph;
 	private boolean hasMain;
-	private List<String> errors;
+	private List<Error> errors;
+
+	// TODO: better way to store file name (only for 'No Main' error)
+	private String filename;
 
 	public InheritanceGraph() {
 		
@@ -33,15 +36,15 @@ public class InheritanceGraph {
 	}
 
 	public void addClass(AST.class_ astClass) {
-		if(classNameToIndexMap.containsKey(astClass.getName())) {
-			errors.add(new StringBuilder().append("class \"").append(astClass.getName())
-				.append("\" has been redeclared").toString());
+		if(classNameToIndexMap.containsKey(astClass.name)) {
+			errors.add(new Error(astClass.filename, astClass.getLineNo(),new StringBuilder().append("class \"")
+				.append(astClass.name).append("\" has been redeclared").toString()));
 			return;
 		}
-		classNameToIndexMap.put(astClass.getName(), graph.size());
+		classNameToIndexMap.put(astClass.name, graph.size());
 		graph.add(new Node(astClass, graph.size()));
-
-		if("Main".equals(astClass.getName())) {
+		filename = astClass.filename;
+		if("Main".equals(astClass.name)) {
 			hasMain = true;
 		}
 
@@ -55,39 +58,43 @@ public class InheritanceGraph {
 		parentUpdatePass();
 
 		if(!hasMain()) {
-			errors.add("'Main' class is missing.");
+			// TODO: what to do for line number
+			errors.add(new Error(filename, 0,"'Main' class is missing."));
 		}
 
-		Stack<Node> cycle = hasCyclePass();
-		if(!cycle.isEmpty()) {
-			StringBuilder errorString = new StringBuilder();
-			errorString.append("Classes have cyclic dependency: ");
-			int size = cycle.size();
-			StringBuilder cyclePath = new StringBuilder();
-			for(int i=0; i<size-1; i++) {
-				cyclePath.append(cycle.pop().getAstClass().getName()).append(" -> ");
+		List<Stack<Node>> cycles = hasCyclePass();
+		if(!cycles.isEmpty()) {
+			for(Stack<Node> cycle: cycles) {
+				StringBuilder errorString = new StringBuilder();
+				errorString.append("Classes have cyclic dependency: ");
+				int size = cycle.size();
+				StringBuilder cyclePath = new StringBuilder();
+				for(int i=0; i<size-1; i++) {
+					cyclePath.append(cycle.pop().getAstClass().name).append(" -> ");
+				}
+				AST.class_ lastClass = cycle.pop().getAstClass();
+				String lastClassName = lastClass.name;
+				errorString.append(lastClassName).append(" -> ");
+				errorString.append(cyclePath).append(lastClassName);
+				errors.add(new Error(lastClass.filename, lastClass.getLineNo(), errorString.toString()));
 			}
-			String lastClassName = cycle.pop().getAstClass().getName();
-			errorString.append(lastClassName).append(" -> ");
-			errorString.append(cyclePath).append(lastClassName);
-			errors.add(errorString.toString());
 		}
 	}
 
 	private void parentUpdatePass() {
 		for(Node cl: graph) {
-			if(cl.getAstClass().getParentName()!=null) {
-				if(classNameToIndexMap.containsKey(cl.getAstClass().getParentName())) {
-					int parentIndex = classNameToIndexMap.get(cl.getAstClass().getParentName());
+			if(cl.getAstClass().parent!=null) {
+				if(classNameToIndexMap.containsKey(cl.getAstClass().parent)) {
+					int parentIndex = classNameToIndexMap.get(cl.getAstClass().parent);
 					cl.setParent(graph.get(parentIndex));
 					graph.get(parentIndex).addChild(cl);
 				} else {
-					errors.add(new StringBuilder().append("Parent class \"").append(cl.getAstClass().getParentName())
-									.append("\" for \"").append(cl.getAstClass().getName())
-									.append("\" has not been declared").toString());
+					errors.add(new Error(cl.getAstClass().filename, cl.getAstClass().getLineNo(), 
+								new StringBuilder().append("Parent class \"").append(cl.getAstClass().parent)
+								.append("\" for \"").append(cl.getAstClass().name).append("\" has not been declared").toString()));
 				}
 			} else {
-				if(!InheritanceGraph.ROOT_CLASS_NAME.equals(cl.getAstClass().getName())) {
+				if(!InheritanceGraph.ROOT_CLASS_NAME.equals(cl.getAstClass().name)) {
 					cl.setParent(InheritanceGraph.ROOT_AST_NODE);
 				}
 			}
@@ -115,7 +122,7 @@ public class InheritanceGraph {
 	    return false;
 	}
 
-	public Stack<Node> hasCyclePass() {
+	public List<Stack<Node>> hasCyclePass() {
 
 	    int V = graph.size();
 	    List<Boolean> visited = new ArrayList<>();
@@ -125,15 +132,18 @@ public class InheritanceGraph {
 	        visited.add(false);
 	        recStack.add(false);
 	    }
-	 
+	 	
+	 	List<Stack<Node>> cycles = new ArrayList<>();
 	    for(int i = 0; i < V; i++)
-	        if (isCyclicUtil(i, visited, recStack, cycle))
-	            return cycle;
+	        if (isCyclicUtil(i, visited, recStack, cycle)) {
+	        	cycles.add(cycle);
+	        	cycle = new Stack<>();
+	        }
 	 
-	    return cycle;
+	    return cycles;
 	}
 
-	public List<String> getErrors() {
+	public List<Error> getErrors() {
 		return errors;
 	}
 

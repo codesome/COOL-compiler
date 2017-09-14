@@ -12,7 +12,7 @@ public class Error {
 		this.error = error;
 	}
 
-	public int getFilename() {
+	public String getFilename() {
 		return filename;
 	}
 	public void setFilename(String filename) {
