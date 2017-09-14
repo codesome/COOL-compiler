@@ -11,25 +11,24 @@ public class InheritanceGraph {
 
 	private static final String ROOT_CLASS_NAME = "Object";
 	private static final int ROOT_CLASS_INDEX = 0;
+	private static AST.class_ ROOT_AST_CLASS = new AST.class_(InheritanceGraph.ROOT_CLASS_NAME, null, null, null, 0);
+	private static Node ROOT_AST_NODE = new Node(InheritanceGraph.ROOT_AST_CLASS, InheritanceGraph.ROOT_CLASS_INDEX);
 
 	private Map<String,Integer> classNameToIndexMap;
 	private List<Node> graph;
-	private int totalNodes;
 	private boolean hasMain;
 	private List<String> errors;
 
 	public InheritanceGraph() {
 		
 		graph = new ArrayList<>();
-		graph.add(new Node(new AST.class_(InheritanceGraph.ROOT_CLASS_NAME, null, null, null, 0)
-			, InheritanceGraph.ROOT_CLASS_INDEX));
+		graph.add(InheritanceGraph.ROOT_AST_NODE);
 		
 		classNameToIndexMap = new HashMap<>();
 		classNameToIndexMap.put(InheritanceGraph.ROOT_CLASS_NAME, InheritanceGraph.ROOT_CLASS_INDEX);
 		
 		errors = new ArrayList<>();
 
-		totalNodes = 1;
 		hasMain = false;
 	}
 
@@ -39,9 +38,8 @@ public class InheritanceGraph {
 				.append("\" has been redeclared").toString());
 			return;
 		}
-		graph.add(new Node(astClass, totalNodes, astClass.getParentName()));
-		classNameToIndexMap.put(astClass.getName(), totalNodes);
-		totalNodes++;
+		classNameToIndexMap.put(astClass.getName(), graph.size());
+		graph.add(new Node(astClass, graph.size()));
 
 		if("Main".equals(astClass.getName())) {
 			hasMain = true;
@@ -78,21 +76,19 @@ public class InheritanceGraph {
 
 	private void parentUpdatePass() {
 		for(Node cl: graph) {
-			if(cl.parentExists()) {
-				if(classNameToIndexMap.containsKey(cl.getParentName())) {
-					int parentIndex = classNameToIndexMap.get(cl.getParentName());
-					cl.setParentIndex(parentIndex);
+			if(cl.getAstClass().getParentName()!=null) {
+				if(classNameToIndexMap.containsKey(cl.getAstClass().getParentName())) {
+					int parentIndex = classNameToIndexMap.get(cl.getAstClass().getParentName());
 					cl.setParent(graph.get(parentIndex));
 					graph.get(parentIndex).addChild(cl);
 				} else {
-					errors.add(new StringBuilder().append("Parent class \"").append(cl.getParentName())
+					errors.add(new StringBuilder().append("Parent class \"").append(cl.getAstClass().getParentName())
 									.append("\" for \"").append(cl.getAstClass().getName())
 									.append("\" has not been declared").toString());
 				}
 			} else {
 				if(!InheritanceGraph.ROOT_CLASS_NAME.equals(cl.getAstClass().getName())) {
-					cl.setParentName(InheritanceGraph.ROOT_CLASS_NAME);
-					cl.setParentIndex(InheritanceGraph.ROOT_CLASS_INDEX);
+					cl.setParent(InheritanceGraph.ROOT_AST_NODE);
 				}
 			}
 		}
@@ -105,7 +101,7 @@ public class InheritanceGraph {
 	        visited.set(v, true);
 	        recStack.set(v, true);
 	        if(currentNode.parentExists()) {
-	        	int parentIndex = currentNode.getParentIndex();
+	        	int parentIndex = currentNode.getParent().getIndex();
 	        	if(parentIndex != Node.NO_PARENT) {
 		            if ( (!visited.get(parentIndex) && isCyclicUtil(parentIndex, visited, recStack, cycle)) 
 		            	  || recStack.get(parentIndex) ) {
@@ -149,20 +145,11 @@ class Node {
 
 	private AST.class_ astClass;
 	private int index;
-	private String parentName;
-	private int parentIndex;
 	private Node parent;
 	private List<Node> children;
 	private boolean isInitiated;
 
-	public Node(AST.class_ astClass, int index, String parentName) {
-		this.parentName = parentName;
-		this.isInitiated = false;
-		init(astClass, index);
-	}
-
 	public Node(AST.class_ astClass, int index) {
-		this.parentName = null;
 		this.isInitiated = false;
 		init(astClass, index);
 	}
@@ -171,14 +158,13 @@ class Node {
 		if(isInitiated) return;
 		this.astClass = astClass;
 		this.index = index;
-		this.parentIndex = Node.NO_PARENT;
 		this.children = new ArrayList<>();
 		this.parent = null;
 		this.isInitiated = true;
 	}
 
 	public boolean parentExists() {
-		return parentName!=null || parentIndex!=Node.NO_PARENT;
+		return parent!=null;
 	}
 
 	public void addChild(Node child) {
@@ -191,22 +177,6 @@ class Node {
 
 	public AST.class_ getAstClass() {
 		return astClass;
-	}
-
-	public String getParentName() {
-		return parentName;
-	}
-
-	public void setParentName(String parentName) {
-		this.parentName = parentName;
-	}
-
-	public int getParentIndex() {
-		return parentIndex;
-	}
-
-	public void setParentIndex(int parentIndex) {
-		this.parentIndex = parentIndex;
 	}
 
 	public Node getParent() {
