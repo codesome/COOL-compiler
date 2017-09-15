@@ -19,7 +19,6 @@ public class InheritanceGraph {
 	public static Map<String,Integer> classNameToIndexMap;
 	private List<Node> graph;
 	private boolean hasMain;
-	private List<Error> errors;
 
 	public InheritanceGraph() {
 		
@@ -29,14 +28,12 @@ public class InheritanceGraph {
 		classNameToIndexMap = new HashMap<>();
 		classNameToIndexMap.put(InheritanceGraph.ROOT_CLASS_NAME, InheritanceGraph.ROOT_CLASS_INDEX);
 		
-		errors = new ArrayList<>();
-
 		hasMain = false;
 	}
 
 	public void addClass(AST.class_ astClass) {
 		if(classNameToIndexMap.containsKey(astClass.name)) {
-			errors.add(new Error(GlobalData.filename, astClass.getLineNo(),new StringBuilder().append("class \"")
+			GlobalData.errors.add(new Error(GlobalData.filename, astClass.getLineNo(),new StringBuilder().append("class \"")
 				.append(astClass.name).append("\" has been redeclared").toString()));
 			return;
 		}
@@ -57,7 +54,7 @@ public class InheritanceGraph {
 
 		if(!hasMain()) {
 			// TODO: what to do for line number
-			errors.add(new Error(GlobalData.filename, 0,"'Main' class is missing."));
+			GlobalData.errors.add(new Error(GlobalData.filename, 0,"'Main' class is missing."));
 		}
 
 		List<Stack<Node>> cycles = hasCyclePass();
@@ -74,7 +71,7 @@ public class InheritanceGraph {
 				String lastClassName = lastClass.name;
 				errorString.append(lastClassName).append(" -> ");
 				errorString.append(cyclePath).append(lastClassName);
-				errors.add(new Error(GlobalData.filename, lastClass.getLineNo(), errorString.toString()));
+				GlobalData.errors.add(new Error(GlobalData.filename, lastClass.getLineNo(), errorString.toString()));
 			}
 		}
 	}
@@ -87,7 +84,7 @@ public class InheritanceGraph {
 					cl.setParent(graph.get(parentIndex));
 					graph.get(parentIndex).addChild(cl);
 				} else {
-					errors.add(new Error(GlobalData.filename, cl.getAstClass().getLineNo(), 
+					GlobalData.errors.add(new Error(GlobalData.filename, cl.getAstClass().getLineNo(), 
 								new StringBuilder().append("Inherited class \"").append(cl.getAstClass().parent)
 								.append("\" for \"").append(cl.getAstClass().name).append("\" has not been declared").toString()));
 				}
@@ -140,10 +137,6 @@ public class InheritanceGraph {
 	        }
 	 
 	    return cycles;
-	}
-
-	public List<Error> getErrors() {
-		return errors;
 	}
 
 }

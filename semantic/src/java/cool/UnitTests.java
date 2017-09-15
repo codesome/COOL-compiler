@@ -26,7 +26,7 @@ public class UnitTests {
 		ig.addClass(getEmptyClass("Classz", "Classx"));
 		ig.addClass(getEmptyClass("Classx", null));
 		ig.analyze();
-		for(Error error: ig.getErrors()) {
+		for(Error error: GlobalData.errors) {
 			reportError(error);
 		}
 	}
@@ -38,7 +38,7 @@ public class UnitTests {
 		ig.addClass(getEmptyClass("Class1", "Class2"));
 		ig.addClass(getEmptyClass("Class2", "Class3"));
 		ig.analyze();
-		for(Error error: ig.getErrors()) {
+		for(Error error: GlobalData.errors) {
 			reportError(error);
 		}
 	}

@@ -9,34 +9,34 @@ class VisitorImpl implements Visitor {
     }
 
     // TODO
-    public void visit(AST.no_expr expr, List<Error> errors) {}
+    public void visit(AST.no_expr expr) {}
 
     // TODO
-    public void visit(AST.assign expr, List<Error> errors) {}
+    public void visit(AST.assign expr) {}
 
     // TODO
-    public void visit(AST.static_dispatch expr, List<Error> errors) {}
+    public void visit(AST.static_dispatch expr) {}
 
     // TODO
-    public void visit(AST.dispatch expr, List<Error> errors) {}
+    public void visit(AST.dispatch expr) {}
 
     // TODO
-    public void visit(AST.cond expr, List<Error> errors) {}
+    public void visit(AST.cond expr) {}
 
     // TODO
-    public void visit(AST.loop expr, List<Error> errors) {}
+    public void visit(AST.loop expr) {}
 
     // TODO
-    public void visit(AST.block expr, List<Error> errors) {}
+    public void visit(AST.block expr) {}
 
     // TODO
-    public void visit(AST.let expr, List<Error> errors) {}
+    public void visit(AST.let expr) {}
 
     // TODO
-    public void visit(AST.typcase expr, List<Error> errors) {}
+    public void visit(AST.typcase expr) {}
 
     // TODO
-    public void visit(AST.new_ expr, List<Error> errors) {
+    public void visit(AST.new_ expr) {
 
         // TODO: check if the typeid is valid
 
@@ -44,68 +44,68 @@ class VisitorImpl implements Visitor {
     }
 
     // TODO
-    public void visit(AST.isvoid expr, List<Error> errors) {}
+    public void visit(AST.isvoid expr) {}
 
-    public void visit(AST.plus expr, List<Error> errors) {
-        expr.e1.accept(this, errors);
-        expr.e2.accept(this, errors);
+    public void visit(AST.plus expr) {
+        expr.e1.accept(this);
+        expr.e2.accept(this);
         if(notIntegerExpression(expr.e1, expr.e2)) {
-            errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Addition of non int type"));
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Addition of non int type"));
         }
         expr.type = GlobalData.INT_TYPE;
     }
 
-    public void visit(AST.sub expr, List<Error> errors) {
-        expr.e1.accept(this, errors);
-        expr.e2.accept(this, errors);
+    public void visit(AST.sub expr) {
+        expr.e1.accept(this);
+        expr.e2.accept(this);
         if(notIntegerExpression(expr.e1, expr.e2)) {
-            errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Subtraction of non int type"));
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Subtraction of non int type"));
         }
         expr.type = GlobalData.INT_TYPE;
     }
 
-    public void visit(AST.mul expr, List<Error> errors) {
-        expr.e1.accept(this, errors);
-        expr.e2.accept(this, errors);
+    public void visit(AST.mul expr) {
+        expr.e1.accept(this);
+        expr.e2.accept(this);
         if(notIntegerExpression(expr.e1, expr.e2)) {
-            errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Multiplication of non int type"));
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Multiplication of non int type"));
         }
         expr.type = GlobalData.INT_TYPE;
     }
 
-    public void visit(AST.divide expr, List<Error> errors) {
-        expr.e1.accept(this, errors);
-        expr.e2.accept(this, errors);
+    public void visit(AST.divide expr) {
+        expr.e1.accept(this);
+        expr.e2.accept(this);
         if(notIntegerExpression(expr.e1, expr.e2)) {
-            errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Division of non int type"));
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Division of non int type"));
         }
         expr.type = GlobalData.INT_TYPE;
     }
 
     // TODO
-    public void visit(AST.comp expr, List<Error> errors) {}
+    public void visit(AST.comp expr) {}
 
-    public void visit(AST.lt expr, List<Error> errors) {
-        expr.e1.accept(this, errors);
-        expr.e2.accept(this, errors);
+    public void visit(AST.lt expr) {
+        expr.e1.accept(this);
+        expr.e2.accept(this);
         if(notIntegerExpression(expr.e1, expr.e2)) {
-            errors.add(new Error(GlobalData.filename, expr.getLineNo(), "< of non int types"));
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "< of non int types"));
         }
         expr.type = GlobalData.BOOL_TYPE;
     }
 
-    public void visit(AST.leq expr, List<Error> errors) {
-        expr.e1.accept(this, errors);
-        expr.e2.accept(this, errors);
+    public void visit(AST.leq expr) {
+        expr.e1.accept(this);
+        expr.e2.accept(this);
         if(notIntegerExpression(expr.e1, expr.e2)) {
-            errors.add(new Error(GlobalData.filename, expr.getLineNo(), "<= of non int types"));
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "<= of non int types"));
         }
         expr.type = GlobalData.BOOL_TYPE;
     }
 
-    public void visit(AST.eq expr, List<Error> errors) {
-        expr.e1.accept(this, errors);
-        expr.e2.accept(this, errors);
+    public void visit(AST.eq expr) {
+        expr.e1.accept(this);
+        expr.e2.accept(this);
         if(!expr.e1.type.equals(expr.e2.type)) {
             boolean e1p = GlobalData.INT_TYPE.equals(expr.e1.type) || GlobalData.BOOL_TYPE.equals(expr.e1.type) 
                 || GlobalData.STRING_TYPE.equals(expr.e1.type);
@@ -113,35 +113,35 @@ class VisitorImpl implements Visitor {
                 || GlobalData.BOOL_TYPE.equals(expr.e2.type) || GlobalData.STRING_TYPE.equals(expr.e2.type);  
             if(e1p || e2p) {
                 if(e1p && e2p) {
-                    errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Equality of different primitive types"));
+                    GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Equality of different primitive types"));
                 } else {
-                    errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Equality of primitive types with non primitive type"));
+                    GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Equality of primitive types with non primitive type"));
                 }
             }
         }
         expr.type = GlobalData.BOOL_TYPE;
     }
 
-    public void visit(AST.neg expr, List<Error> errors) {
+    public void visit(AST.neg expr) {
         if(!GlobalData.BOOL_TYPE.equals(expr.type)) {
-            errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Negation of non bool type"));
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Negation of non bool type"));
         }
         expr.type = GlobalData.BOOL_TYPE;
     }
 
-    public void visit(AST.object expr, List<Error> errors) {
+    public void visit(AST.object expr) {
         // TODO: get from scope/context data
     }
 
-    public void visit(AST.int_const expr, List<Error> errors) {
+    public void visit(AST.int_const expr) {
         expr.type = GlobalData.INT_TYPE;
     }
 
-    public void visit(AST.string_const expr, List<Error> errors) {
+    public void visit(AST.string_const expr) {
         expr.type = GlobalData.STRING_TYPE;
     }
 
-    public void visit(AST.bool_const expr, List<Error> errors) {
+    public void visit(AST.bool_const expr) {
         expr.type = GlobalData.BOOL_TYPE;
     }
 	

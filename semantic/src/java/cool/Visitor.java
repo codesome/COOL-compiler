@@ -16,11 +16,11 @@ interface Visitor {
      * Non-Expression visitors
      **/
 
-    // public void visit(AST.class_ expr, List<Error> errors);
+    // public void visit(AST.class_ expr);
 
     
     // This method should add the feature declaration to global context data
-    // public void visit(AST.feature expr, List<Error> errors);
+    // public void visit(AST.feature expr);
 
 
     /*
@@ -30,29 +30,29 @@ interface Visitor {
      * return the type of the expression
      **/
 
-    public void visit(AST.no_expr expr, List<Error> errors);
-    public void visit(AST.assign expr, List<Error> errors);
-    public void visit(AST.static_dispatch expr, List<Error> errors);
-    public void visit(AST.dispatch expr, List<Error> errors);
-    public void visit(AST.cond expr, List<Error> errors);
-    public void visit(AST.loop expr, List<Error> errors);
-    public void visit(AST.block expr, List<Error> errors);
-    public void visit(AST.let expr, List<Error> errors);
-    public void visit(AST.typcase expr, List<Error> errors);
-    public void visit(AST.new_ expr, List<Error> errors);
-    public void visit(AST.isvoid expr, List<Error> errors);
-    public void visit(AST.plus expr, List<Error> errors);
-    public void visit(AST.sub expr, List<Error> errors);
-    public void visit(AST.mul expr, List<Error> errors);
-    public void visit(AST.divide expr, List<Error> errors);
-    public void visit(AST.comp expr, List<Error> errors);
-    public void visit(AST.lt expr, List<Error> errors);
-    public void visit(AST.leq expr, List<Error> errors);
-    public void visit(AST.eq expr, List<Error> errors);
-    public void visit(AST.neg expr, List<Error> errors);
-    public void visit(AST.object expr, List<Error> errors);
-    public void visit(AST.int_const expr, List<Error> errors);
-    public void visit(AST.string_const expr, List<Error> errors);
-    public void visit(AST.bool_const expr, List<Error> errors);
+    public void visit(AST.no_expr expr);
+    public void visit(AST.assign expr);
+    public void visit(AST.static_dispatch expr);
+    public void visit(AST.dispatch expr);
+    public void visit(AST.cond expr);
+    public void visit(AST.loop expr);
+    public void visit(AST.block expr);
+    public void visit(AST.let expr);
+    public void visit(AST.typcase expr);
+    public void visit(AST.new_ expr);
+    public void visit(AST.isvoid expr);
+    public void visit(AST.plus expr);
+    public void visit(AST.sub expr);
+    public void visit(AST.mul expr);
+    public void visit(AST.divide expr);
+    public void visit(AST.comp expr);
+    public void visit(AST.lt expr);
+    public void visit(AST.leq expr);
+    public void visit(AST.eq expr);
+    public void visit(AST.neg expr);
+    public void visit(AST.object expr);
+    public void visit(AST.int_const expr);
+    public void visit(AST.string_const expr);
+    public void visit(AST.bool_const expr);
 
 }

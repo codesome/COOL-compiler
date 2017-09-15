@@ -40,10 +40,8 @@ public class Semantic{
 		}
 		ig.analyze();
 
-		List<Error> igErrors = ig.getErrors();
-
-		if(igErrors.size() > 0) {
-			reportError(igErrors);
+		if(GlobalData.errors.size() > 0) {
+			reportError(GlobalData.errors);
 		} else {
 
 
