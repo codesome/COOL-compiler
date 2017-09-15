@@ -44,7 +44,10 @@ class VisitorImpl implements Visitor {
     }
 
     // TODO
-    public void visit(AST.isvoid expr) {}
+    public void visit(AST.isvoid expr) {
+        expr.e1.accept(this);
+        expr.type = GlobalData.BOOL_TYPE;
+    }
 
     public void visit(AST.plus expr) {
         expr.e1.accept(this);
@@ -82,8 +85,13 @@ class VisitorImpl implements Visitor {
         expr.type = GlobalData.INT_TYPE;
     }
 
-    // TODO
-    public void visit(AST.comp expr) {}
+    public void visit(AST.comp expr) {
+        expr.e1.accept(this);
+        if(!GlobalData.INT_TYPE.equals(e1.type)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Cannot do compliment of non int type"));
+        }
+        expr.type = GlobalData.INT_TYPE;
+    }
 
     public void visit(AST.lt expr) {
         expr.e1.accept(this);

@@ -5,28 +5,18 @@ import java.util.ArrayList;
 
 public class GlobalData {
 
-    public static final String INT_TYPE = "INT";
-    public static final String BOOL_TYPE = "BOOL";
-    public static final String STRING_TYPE = "STRING";
+    public static final String INT_TYPE = "Int";
+    public static final String BOOL_TYPE = "Bool";
+    public static final String STRING_TYPE = "String";
 
     // Initialised in Semantic.java
     public static String filename;
-
     public static List<Error> errors;
-
-    // TODO: current context variables and methods
-    // TODO: Scope data
-
-    public static ScopeTable<String> variableScopeTable;
+    public static ScopeTable<String> scopeTable;
 
     static {
-    	variableScopeTable = new ScopeTable<>();
+    	scopeTable = new ScopeTable<>();
     	errors = new ArrayList<>();
-    } 
+    }
 
-}
-
-class NameType {
-	public String name;
-	public String type;
 }

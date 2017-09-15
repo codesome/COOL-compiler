@@ -63,7 +63,7 @@ public class InheritanceGraph {
 			GlobalData.errors.add(new Error(GlobalData.filename, 0,"'Main' class is missing."));
 		}
 
-		List<Stack<Node>> cycles = hasCyclePass();
+		List<Stack<Node>> cycles = getCyclesInGraph();
 		if(!cycles.isEmpty()) {
 			for(Stack<Node> cycle: cycles) {
 				StringBuilder errorString = new StringBuilder();
@@ -115,7 +115,7 @@ public class InheritanceGraph {
 		}
 	}
 
-	private boolean isCyclicUtil(int v, List<Boolean> visited, List<Boolean> recStack, Stack<Node> cycle) {
+	private boolean getCyclesInGraphUtil(int v, List<Boolean> visited, List<Boolean> recStack, Stack<Node> cycle) {
 		Node currentNode = graph.get(v);
 	    cycle.push(currentNode);
 	    if(visited.get(v) == false) {
@@ -124,7 +124,7 @@ public class InheritanceGraph {
 	        if(currentNode.parentExists()) {
 	        	int parentIndex = currentNode.getParent().getIndex();
 	        	if(parentIndex != Node.NO_PARENT) {
-		            if ( (!visited.get(parentIndex) && isCyclicUtil(parentIndex, visited, recStack, cycle)) 
+		            if ( (!visited.get(parentIndex) && getCyclesInGraphUtil(parentIndex, visited, recStack, cycle)) 
 		            	  || recStack.get(parentIndex) ) {
 		                return true;
 		            }
@@ -136,7 +136,7 @@ public class InheritanceGraph {
 	    return false;
 	}
 
-	public List<Stack<Node>> hasCyclePass() {
+	public List<Stack<Node>> getCyclesInGraph() {
 
 	    int V = graph.size();
 	    List<Boolean> visited = new ArrayList<>();
@@ -149,7 +149,7 @@ public class InheritanceGraph {
 	 	
 	 	List<Stack<Node>> cycles = new ArrayList<>();
 	    for(int i = 0; i < V; i++)
-	        if (isCyclicUtil(i, visited, recStack, cycle)) {
+	        if (getCyclesInGraphUtil(i, visited, recStack, cycle)) {
 	        	cycles.add(cycle);
 	        	cycle = new Stack<>();
 	        }
