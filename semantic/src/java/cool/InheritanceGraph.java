@@ -2,6 +2,8 @@ package cool;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -34,7 +36,11 @@ public class InheritanceGraph {
 	public void addClass(AST.class_ astClass) {
 		if(classNameToIndexMap.containsKey(astClass.name)) {
 			GlobalData.errors.add(new Error(GlobalData.filename, astClass.getLineNo(),new StringBuilder().append("class \"")
-				.append(astClass.name).append("\" has been redeclared").toString()));
+				.append(astClass.name).append("\" has been redefined").toString()));
+			return;
+		} else if(isRestrictedClass(astClass.name)) {
+			GlobalData.errors.add(new Error(GlobalData.filename, astClass.getLineNo(),new StringBuilder().append("Cannot redefine base class \"")
+				.append(astClass.name).append("\"").toString()));
 			return;
 		}
 		classNameToIndexMap.put(astClass.name, graph.size());
@@ -76,14 +82,26 @@ public class InheritanceGraph {
 		}
 	}
 
+	private boolean isRestrictedClass(String name) {
+		return "IO".equals(name) || "Int".equals(name) || "String".equals(name) || "Bool".equals(name);
+	}
+
+	private boolean isRestrictedInheritanceClass(String name) {
+		return "Int".equals(name) || "String".equals(name) || "Bool".equals(name);
+	}
+
 	private void parentUpdatePass() {
 		for(Node cl: graph) {
 			if(cl.getAstClass().parent!=null) {
-				if(classNameToIndexMap.containsKey(cl.getAstClass().parent)) {
+				if(isRestrictedInheritanceClass(cl.getAstClass().parent)) {
+					GlobalData.errors.add(new Error(GlobalData.filename, cl.getAstClass().getLineNo(), 
+								new StringBuilder().append("Cannot inherit base class \"").append(cl.getAstClass().parent)
+								.append("\"").toString()));
+				} else if(classNameToIndexMap.containsKey(cl.getAstClass().parent)) {
 					int parentIndex = classNameToIndexMap.get(cl.getAstClass().parent);
 					cl.setParent(graph.get(parentIndex));
 					graph.get(parentIndex).addChild(cl);
-				} else {
+				} else if(!"IO".equals(cl.getAstClass().parent)) {
 					GlobalData.errors.add(new Error(GlobalData.filename, cl.getAstClass().getLineNo(), 
 								new StringBuilder().append("Inherited class \"").append(cl.getAstClass().parent)
 								.append("\" for \"").append(cl.getAstClass().name).append("\" has not been declared").toString()));
