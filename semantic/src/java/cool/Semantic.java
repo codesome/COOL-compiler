@@ -35,6 +35,7 @@ public class Semantic{
 		ig = new InheritanceGraph();
 
 		for(AST.class_ cl: classes) {
+			GlobalData.filename = cl.filename;
 			ig.addClass(cl);
 		}
 		ig.analyze();
