@@ -13,6 +13,7 @@ public class GlobalData {
     public static String filename;
     public static List<Error> errors;
     public static ScopeTable<String> scopeTable;
+    public static InheritanceGraph ig;
 
     static {
     	scopeTable = new ScopeTable<>();

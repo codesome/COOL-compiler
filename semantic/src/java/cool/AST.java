@@ -1,5 +1,7 @@
 package cool;
+
 import java.util.List;
+
 public class AST{
 
     public static class ASTNode {
@@ -38,7 +40,7 @@ public class AST{
         String getString(String space){
             return "";
         };
-        abstract public void accept(Visitor visitor);
+        abstract public void accept(ExpressionVisitor visitor);
     }
     public static class no_expr extends expression {
         public no_expr(int l){
@@ -47,7 +49,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_no_expr\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -60,7 +62,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_bool\n"+space+sp+(value?"1":"0")+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -73,7 +75,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_string\n"+space+sp+"\""+escapeSpecialCharacters(value)+"\""+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -87,7 +89,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_int\n"+space+sp+value+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -101,7 +103,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_object\n"+space+sp+name+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -114,7 +116,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_comp\n"+e1.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -127,7 +129,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_neg\n"+e1.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -142,7 +144,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_eq\n"+e1.getString(space+sp)+"\n"+e2.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -157,7 +159,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_leq\n"+e1.getString(space+sp)+"\n"+e2.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -173,7 +175,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_lt\n"+e1.getString(space+sp)+"\n"+e2.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -188,7 +190,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_divide\n"+e1.getString(space+sp)+"\n"+e2.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -203,7 +205,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_mul\n"+e1.getString(space+sp)+"\n"+e2.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -218,7 +220,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_sub\n"+e1.getString(space+sp)+"\n"+e2.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -233,7 +235,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_plus\n"+e1.getString(space+sp)+"\n"+e2.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -246,7 +248,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_isvoid\n"+e1.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -259,7 +261,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_new\n"+space+sp+typeid+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -279,7 +281,7 @@ public class AST{
             str += space+": "+type;
             return str;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -298,7 +300,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_let\n"+space+sp+name+"\n"+space+sp+typeid+"\n"+value.getString(space+sp)+"\n"+body.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -316,7 +318,7 @@ public class AST{
             str+=space+": "+type;
             return str;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -331,7 +333,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_loop\n"+predicate.getString(space+sp)+"\n"+body.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -348,7 +350,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_cond\n"+predicate.getString(space+sp)+"\n"+ifbody.getString(space+sp)+"\n"+elsebody.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -371,7 +373,7 @@ public class AST{
             str+=space+sp+")\n"+space+": "+type;
             return str;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -396,7 +398,7 @@ public class AST{
             str+=space+sp+")\n"+space+": "+type;
             return str;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -411,7 +413,7 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_assign\n"+space+sp+name+"\n"+e1.getString(space+sp)+"\n"+space+": "+type;
         }
-        public void accept(Visitor visitor) {
+        public void accept(ExpressionVisitor visitor) {
         	visitor.visit(this);
         }
     }
@@ -428,6 +430,9 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_branch\n"+space+sp+name+"\n"+space+sp+type+"\n"+value.getString(space+sp);
         }
+        public void accept(Visitor visitor) {
+            visitor.visit(this);
+        }
     }
     public static class formal extends ASTNode {
         public String name;
@@ -440,6 +445,9 @@ public class AST{
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_formal\n"+space+sp+name+"\n"+space+sp+typeid;
         }
+        public void accept(Visitor visitor) {
+            visitor.visit(this);
+        }
     }
     public static class feature extends ASTNode {
         public feature(){
@@ -447,7 +455,9 @@ public class AST{
         String getString(String space){
             return "";
         }
-
+        public void accept(Visitor visitor) {
+            visitor.visit(this);
+        }
     }
     public static class method extends feature {
         public String name;
@@ -469,6 +479,9 @@ public class AST{
             str += space+sp+typeid+"\n"+body.getString(space+sp);
             return str;
         }
+        public void accept(Visitor visitor) {
+            visitor.visit(this);
+        }
     }
     public static class attr extends feature {
         public String name;
@@ -482,6 +495,9 @@ public class AST{
         }
         String getString(String space){
             return space+"#"+lineNo+"\n"+space+"_attr\n"+space+sp+name+"\n"+space+sp+typeid+"\n"+value.getString(space+sp);
+        }
+        public void accept(Visitor visitor) {
+            visitor.visit(this);
         }
     }
     public static class class_ extends ASTNode {
@@ -505,6 +521,9 @@ public class AST{
             str += space+sp+")";
             return str;
         }
+        public void accept(Visitor visitor) {
+            visitor.visit(this);
+        }
     }
     public static class program extends ASTNode {
         public List<class_> classes;
@@ -520,6 +539,9 @@ public class AST{
             }
             
             return str;
+        }
+        public void accept(Visitor visitor) {
+            visitor.visit(this);
         }
     }
 }

@@ -16,8 +16,6 @@ public class Semantic{
 	Don't change code above this line
 */
 
-	List<AST.class_> classes;
-	InheritanceGraph ig;
 
 	public void reportError(Error error) {
 		reportError(error.getFilename(), error.getLineNo(), error.getError());
@@ -30,15 +28,14 @@ public class Semantic{
 	}
 
 	public Semantic(AST.program program){
-		//Write Semantic analyzer code here
-		classes = program.classes;
-		ig = new InheritanceGraph();
 
-		for(AST.class_ cl: classes) {
+		GlobalData.ig = new InheritanceGraph();
+
+		for(AST.class_ cl: program.classes) {
 			GlobalData.filename = cl.filename;
-			ig.addClass(cl);
+			GlobalData.ig.addClass(cl);
 		}
-		ig.analyze();
+		GlobalData.ig.analyze();
 
 		if(GlobalData.errors.size() > 0) {
 			reportError(GlobalData.errors);
