@@ -1,5 +1,7 @@
 package cool;
 
+import java.util.List;
+
 public class Semantic{
 	private boolean errorFlag = false;
 	public void reportError(String filename, int lineNo, String error){

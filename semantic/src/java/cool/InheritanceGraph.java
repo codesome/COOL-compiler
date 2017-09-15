@@ -90,12 +90,13 @@ public class InheritanceGraph {
 					graph.get(parentIndex).addChild(cl);
 				} else {
 					errors.add(new Error(cl.getAstClass().filename, cl.getAstClass().getLineNo(), 
-								new StringBuilder().append("Parent class \"").append(cl.getAstClass().parent)
+								new StringBuilder().append("Inherited class \"").append(cl.getAstClass().parent)
 								.append("\" for \"").append(cl.getAstClass().name).append("\" has not been declared").toString()));
 				}
 			} else {
 				if(!InheritanceGraph.ROOT_CLASS_NAME.equals(cl.getAstClass().name)) {
 					cl.setParent(InheritanceGraph.ROOT_AST_NODE);
+					InheritanceGraph.ROOT_AST_NODE.addChild(cl);
 				}
 			}
 		}
