@@ -191,9 +191,13 @@ public class InheritanceGraph {
     }
     
     public boolean isConforming(String type1, String type2) {
-        // TODO check if string corresponding to type exists
+        // TODO check if string corresponding to type exists?
         if(type1.equals(type2)) {
             return true;
+        }
+        if(classNameToIndexMap.get(type1) == null ||  classNameToIndexMap.get(type2) == null) {
+            //TODO Some kind of error reporting?
+            return false;
         }
         Node type1Node = graph.get(classNameToIndexMap.get(type1));
         Node type2Node = graph.get(classNameToIndexMap.get(type2));
@@ -207,8 +211,13 @@ public class InheritanceGraph {
     }
     
     public String getJoinOf(String type1, String type2) {
+        //TODO check if the string corresponding to the type exists?
         if(type1.equals(type2)) {
             return type1;
+        }
+        if(classNameToIndexMap.get(type1) == null ||  classNameToIndexMap.get(type2) == null) {
+            //TODO Some kind of error reporting?
+            return "Object";
         }
         Node type1Node = graph.get(classNameToIndexMap.get(type1));
         Node type2Node = graph.get(classNameToIndexMap.get(type2));
@@ -217,15 +226,15 @@ public class InheritanceGraph {
     }
     
     public Node getLCA(Node node1, Node node2) {
-        // TODO check if index valid 
-        // TODO check that null is not referenced
+        // TODO check if index valid - if type exists, then no need
+        // TODO check that null is not referenced - if type exists, then no need
         Node lca;
         List<Boolean> visited = new ArrayList<>(graph.size());
         visited.addAll(Collections.nCopies(graph.size(),Boolean.FALSE));
-        while(!node1.equals(InheritanceGraph.ROOT_AST_NODE)) {
+        do {        
             visited.set(node1.getIndex(),true);
             node1 = node1.getParent();
-        }
+        }while(!node1.equals(InheritanceGraph.ROOT_AST_NODE));
         do {
             if(visited.get(node2.getIndex())) {
                 lca = node2;
