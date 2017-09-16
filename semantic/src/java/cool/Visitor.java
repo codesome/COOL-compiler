@@ -11,11 +11,11 @@ package cool;
 interface Visitor {
 
     // Non-Expression visitors
-    public void visit(AST.program expr);
-    public void visit(AST.class_ expr);
-    public void visit(AST.attr expr);
-    public void visit(AST.method expr);
-    public void visit(AST.formal expr);
+    public void visit(AST.program prog);
+    public void visit(AST.class_ cl);
+    public void visit(AST.attr at);
+    public void visit(AST.method mthd);
+    public void visit(AST.formal fm);
 
     // Expression visitors
     public void visit(AST.no_expr expr);
@@ -27,7 +27,7 @@ interface Visitor {
     public void visit(AST.block expr);
     public void visit(AST.let expr);
     public void visit(AST.typcase expr);
-    public void visit(AST.branch expr);
+    public void visit(AST.branch br); // This is not an expression, but used inside an expression
     public void visit(AST.new_ expr);
     public void visit(AST.isvoid expr);
     public void visit(AST.plus expr);

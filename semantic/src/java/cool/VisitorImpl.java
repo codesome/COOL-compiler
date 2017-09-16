@@ -135,9 +135,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
             at.value.accept(this);
 
             // checking type of variable and assignment
-            if(!at.typeid.equals(at.value.type)) {
+            if(!GlobalData.inheritanceGraph.isConforming(at.typeid, at.value.type)) {
                 StringBuilder errorMessage = new StringBuilder();
-                errorMessage.append("Assignment doesn't match the type of attribute ")
+                errorMessage.append("Expression doesn't conform to the declared type of attribute ")
                 .append(at.name).append(":").append(at.typeid);
                 GlobalData.errors.add(new Error(GlobalData.filename, at.getLineNo(), errorMessage.toString()));
             }

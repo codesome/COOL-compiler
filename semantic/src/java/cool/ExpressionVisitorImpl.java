@@ -38,7 +38,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.predicate.accept(this);
         expr.ifbody.accept(this);
         expr.elsebody.accept(this);
-        if(!expr.predicate.type.equals(GlobalData.BOOL_TYPE)) {
+        if(!GlobalData.BOOL_TYPE.equals(expr.predicate.type)) {
             GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Predicate of condition must be of Bool type"));
         }
         expr.type = GlobalData.inheritanceGraph.getJoinOf(expr.ifbody.type, expr.elsebody.type);
@@ -53,43 +53,62 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.type = "Object";
     }
 
-    // TODO FIXME
     public void visit(AST.block expr) {
+        for(AST.expression e: expr.l1) {
+            e.accept(this);
+        }
         int lastexpr = expr.l1.size()-1;
-        expr.l1.get(lastexpr).accept(this);
         expr.type = expr.l1.get(lastexpr).type;
     }
 
-    // TODO FIXME
-    // TODO enter and exit scope
-    // TODO check for no_expr
     public void visit(AST.let expr) {
-        expr.value.accept(this);
-        if(!GlobalData.inheritanceGraph.isConforming(expr.typeid, expr.value.type)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "The type of of the expression does not conform to the declared type of the identifier"));
+        GlobalData.scopeTable.enterScope();
+
+        if(!GlobalData.inheritanceGraph.hasClass(expr.typeid)){
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: " + expr.typeid));
+            expr.typeid = "Object";
         }
+        GlobalData.scopeTable.insert(expr.name, expr.typeid);
+        
+        if(!(expr.value instanceof AST.no_expr)) { // assignment exists
+            // visiting expression
+            expr.value.accept(this);
+
+            // checking type of variable and assignment
+            if(!GlobalData.inheritanceGraph.isConforming(expr.typeid, expr.value.type)) {
+                StringBuilder errorMessage = new StringBuilder();
+                errorMessage.append("Expression doesn't conform to the declared type of attribute ")
+                .append(expr.name).append(":").append(expr.typeid);
+                GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), errorMessage.toString()));
+            }
+        }
+
         expr.body.accept(this);
         expr.type = expr.body.type;
+
+        GlobalData.scopeTable.exitScope();
     }
 
-    // TODO FIXME
     public void visit(AST.typcase expr) {
         expr.predicate.accept(this);
-        expr.type = expr.branches.get(0).type; // branches have at least one element always
-        for(AST.branch b : expr.branches) {
-            b.accept(this);
-            expr.type = GlobalData.inheritanceGraph.getJoinOf(expr.type, b.type);
+        expr.branches.get(0).accept(this); // branches have at least one element always
+        expr.type = expr.branches.get(0).value.type;
+        int size = expr.branches.size();
+        for(int i=1; i<size; i++) {
+            expr.branches.get(i).accept(this);
+            expr.type = GlobalData.inheritanceGraph.getJoinOf(expr.type, expr.branches.get(i).value.type);
         }
     }
 
-    public void visit(AST.branch expr) {
-        if(!GlobalData.inheritanceGraph.hasClass(expr.type)){
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: " + expr.type));
-            expr.type = "Object";
+    // This is not an expression, but used inside an expression
+    public void visit(AST.branch br) {
+        if(!GlobalData.inheritanceGraph.hasClass(br.type)){
+            GlobalData.errors.add(new Error(GlobalData.filename, br.getLineNo(), "Undefined type: " + br.type));
+            br.type = "Object";
         }
         GlobalData.scopeTable.enterScope();
-        GlobalData.scopeTable.insert(expr.name, expr.type);
-        expr.value.accept(this);
+        GlobalData.scopeTable.insert(br.name, br.type);
+        br.value.accept(this);
         GlobalData.scopeTable.exitScope();
     }
 
