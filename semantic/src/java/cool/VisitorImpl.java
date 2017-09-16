@@ -10,6 +10,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     private void programVisitorDepthFirstHelper(InheritanceGraph.Node node) {
         // enter scope
         GlobalData.scopeTable.enterScope();
+        GlobalData.methodDefinitionScopeTable.enterScope();
 
         // visit the node
         node.getAstClass().accept(this);
@@ -20,6 +21,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
 
         // exit scope
+        GlobalData.methodDefinitionScopeTable.exitScope();
         GlobalData.scopeTable.exitScope();
     }
 
@@ -63,12 +65,10 @@ class VisitorImpl extends ExpressionVisitorImpl {
     public void visit(AST.class_ cl) {
         GlobalData.currentClass = cl.name;
 
-        HashSet<String> methodsOfClass = new HashSet<>();
-        
         // adding variables to the scope
         // TODO: check if declared already
         for(AST.feature f: cl.features) {
-            if(f instanceof AST.attr) {
+            if(f instanceof AST.attr) { // Its a variable
                 AST.attr a = (AST.attr) f;
                 if(GlobalData.scopeTable.lookUpGlobal(a.name) == null) {
                     // not defined earlier, all clear
@@ -82,22 +82,36 @@ class VisitorImpl extends ExpressionVisitorImpl {
                         errorMessage.append("' has been already defined in inherited tree.");
                     } else {
                         // defined in current class
-                        errorMessage.append("' has multiple definitions in the class '").append(cl.name).append("'");
+                        errorMessage.append("' has multiple definitions in the class '")
+                            .append(cl.name).append("'");
                     }
                     GlobalData.errors.add(new Error(GlobalData.filename, a.getLineNo(), errorMessage.toString()));
                     // TODO: should we add redeclaration in scope for further analysis? Or return?
                 }
-            } else {
+            } else { // Its a method
                 AST.method m = (AST.method) f;
-                if(methodsOfClass.contains(m.name)) {
+                if(GlobalData.methodDefinitionScopeTable.lookUpLocal(m.name)!=null) {
+                    // Already present in the current class
                     StringBuilder errorMessage = new StringBuilder();
                     errorMessage.append("Method '").append(m.name);
                     errorMessage.append("' has multiple definitions in the class '").append(cl.name).append("'");
                     GlobalData.errors.add(new Error(GlobalData.filename, m.getLineNo(), errorMessage.toString()));
                 } else {
-                    // TODO: Check if defined in inherit tree. Should have same signature.
+                    // className = null, because we will check mangled name with parent classes
+                    String mangledName = GlobalData.getMangledNameWithFormals(null, m.name, m.typeid, m.formals);
+                    
+                    String scopeMangledName;
+                    if((scopeMangledName=GlobalData.methodDefinitionScopeTable.lookUpGlobal(m.name))!=null
+                        && !scopeMangledName.equals(mangledName)) {
+                        // it has been defined in parent class
+                        // and the method signatures does not match
+                        StringBuilder errorMessage = new StringBuilder();
+                        errorMessage.append("Redefined method '").append(m.name).append("' in class '")
+                        .append(cl.name).append("' doesn't follow method signature of inherited class.");
+                        GlobalData.errors.add(new Error(GlobalData.filename, m.getLineNo(), errorMessage.toString()));
+                    }
 
-                    methodsOfClass.add(m.name);
+                    GlobalData.methodDefinitionScopeTable.insert(m.name, mangledName);
                 }
             }
         }
@@ -143,13 +157,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
             .append(mthd.name).append("'' doesn't match with return type of its body.");
             GlobalData.errors.add(new Error(GlobalData.filename, mthd.getLineNo(), errorMessage.toString()));
         }
-    }
-    
-    public void visit(AST.feature fr) {
-        if(fr instanceof AST.attr)
-            this.visit((AST.attr)fr);
-        else
-            this.visit((AST.method)fr);
     }
 
     public void visit(AST.formal fm) {

@@ -21,6 +21,10 @@ public class GlobalData {
     // mapped with their type
     public static ScopeTable<String> scopeTable;
 
+    // Constains all functions defined in inhetiance tree
+    // mapped with their mangled name: function_name -> mangled_function_name
+    public static ScopeTable<String> methodDefinitionScopeTable;
+
     // Contains graph after parsing all the classes and its parents
     // The base classes are also updated in this.
     public static InheritanceGraph inheritanceGraph;
@@ -36,6 +40,7 @@ public class GlobalData {
     static {
         currentClass = "";
         scopeTable = new ScopeTable<>();
+        methodDefinitionScopeTable = new ScopeTable<>();
         errors = new ArrayList<>();
         mangledNameMap = new HashMap<>();
     }

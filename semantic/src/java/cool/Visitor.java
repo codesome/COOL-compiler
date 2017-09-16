@@ -15,9 +15,7 @@ interface Visitor {
     public void visit(AST.class_ expr);
     public void visit(AST.attr expr);
     public void visit(AST.method expr);
-    public void visit(AST.feature expr);
     public void visit(AST.formal expr);
-    public void visit(AST.branch expr);
 
     // Expression visitors
     public void visit(AST.no_expr expr);
@@ -29,6 +27,7 @@ interface Visitor {
     public void visit(AST.block expr);
     public void visit(AST.let expr);
     public void visit(AST.typcase expr);
+    public void visit(AST.branch expr);
     public void visit(AST.new_ expr);
     public void visit(AST.isvoid expr);
     public void visit(AST.plus expr);

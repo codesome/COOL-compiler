@@ -449,14 +449,11 @@ public class AST{
             visitor.visit(this);
         }
     }
-    public static class feature extends ASTNode {
+    abstract public static class feature extends ASTNode {
         public feature(){
         }
         String getString(String space){
             return "";
-        }
-        public void accept(Visitor visitor) {
-            visitor.visit(this);
         }
     }
     public static class method extends feature {
