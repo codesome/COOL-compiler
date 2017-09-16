@@ -35,6 +35,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     // TODO
     public void visit(AST.typcase expr) {}
+    public void visit(AST.branch expr) {}
 
     // TODO
     public void visit(AST.new_ expr) {
@@ -155,5 +156,5 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public void visit(AST.bool_const expr) {
         expr.type = GlobalData.BOOL_TYPE;
     }
-	
+    
 }

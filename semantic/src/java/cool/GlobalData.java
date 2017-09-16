@@ -35,8 +35,8 @@ public class GlobalData {
 
     static {
         currentClass = "";
-    	scopeTable = new ScopeTable<>();
-    	errors = new ArrayList<>();
+        scopeTable = new ScopeTable<>();
+        errors = new ArrayList<>();
         mangledNameMap = new HashMap<>();
     }
 
