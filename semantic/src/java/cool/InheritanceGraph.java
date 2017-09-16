@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Stack;
 import java.lang.StringBuilder;
+import java.util.Collections;
 
 // TODO: Add features of Object class
 // TODO: Add IO in graph and its features
@@ -190,12 +191,67 @@ public class InheritanceGraph {
     }
     
     public boolean isConforming(String type1, String type2) {
-        return true;
+        // TODO check if string corresponding to type exists
+        if(type1.equals(type2)) {
+            return true;
+        }
+        Node type1Node = graph.get(classNameToIndexMap.get(type1));
+        Node type2Node = graph.get(classNameToIndexMap.get(type2));
+        while(type2Node.parentExists()) {
+            type2Node = type2Node.getParent();
+            if(type1Node.equals(type2Node)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     public String getJoinOf(String type1, String type2) {
-        return "Object";
+        if(type1.equals(type2)) {
+            return type1;
+        }
+        Node type1Node = graph.get(classNameToIndexMap.get(type1));
+        Node type2Node = graph.get(classNameToIndexMap.get(type2));
+        Node lca = getLCA(type1Node, type2Node);
+        return lca.getAstClass().name;
     }
+    
+    public Node getLCA(Node node1, Node node2) {
+        // TODO check if index valid 
+        // TODO check that null is not referenced
+        Node lca;
+        List<Boolean> visited = new ArrayList<>(graph.size());
+        visited.addAll(Collections.nCopies(graph.size(),Boolean.FALSE));
+        while(!node1.equals(InheritanceGraph.ROOT_AST_NODE)) {
+            visited.set(node1.getIndex(),true);
+            node1 = node1.getParent();
+        }
+        do {
+            if(visited.get(node2.getIndex())) {
+                lca = node2;
+                break;
+            }
+            node2 = node2.getParent();
+        }while(true);
+        return lca;
+    }
+    
+  /*  private void setLevel(Node node, int level) {
+        node.setLevel(level);
+        if(node.getChildren() != null) { // does this ever happen?
+            for(Node child : node.getChildren()) {
+                setLevel(child, level+1);
+            }   
+        }    
+    }
+    
+    private void traverse(Node node, Node head, int previousSection) {
+        setLevel(InheritanceGraph.ROOT_AST_NODE,0);
+        int currentSection = Math.floor(Math.sqrt(node.getLevel()) + 1); // TODO check!
+        if(currentSection == 1) {
+            node.P = 
+        }
+    } */
 
     public static class Node {
 
@@ -206,6 +262,8 @@ public class InheritanceGraph {
         private Node parent;
         private List<Node> children;
         private boolean isInitiated;
+  //      private int level;
+  //      private Node P;
 
         public Node(AST.class_ astClass, int index) {
             this.isInitiated = false;
@@ -219,6 +277,8 @@ public class InheritanceGraph {
             this.children = new ArrayList<>();
             this.parent = null;
             this.isInitiated = true;
+    //        this.level = -1;
+    //        this.P = null;
         }
 
         public void addChild(Node child) {
@@ -248,6 +308,25 @@ public class InheritanceGraph {
         public List<Node> getChildren() {
             return children;
         }
-
+        
+        public boolean equals(Node node) {
+            return this.index == node.getIndex();
+        }
+        
+   /*     public int getLevel() {
+            return level;
+        }
+        
+        public void setLevel(int levelToSet) {
+            this.level = levelToSet;
+        }
+        
+        public Node getP() {
+            return this.P;
+        }
+        
+        public Node setP(Node PToSet) {
+            this.P = PToSet;
+        } */
     }
 }
