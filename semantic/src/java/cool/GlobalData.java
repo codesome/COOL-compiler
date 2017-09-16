@@ -17,7 +17,7 @@ public class GlobalData {
     public static String filename;
     public static List<Error> errors;
 
-    // Constains all the variables in the scope
+    // Contains all the variables in the scope
     // mapped with their type
     public static ScopeTable<String> scopeTable;
 

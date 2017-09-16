@@ -9,9 +9,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
         return !GlobalData.INT_TYPE.equals(e1.type) || !GlobalData.INT_TYPE.equals(e2.type);
     }
 
-    // TODO
     public void visit(AST.no_expr expr) {
-        expr.type = null; // TODO check!
+        expr.type = "_no_type";
     }
 
     // TODO
@@ -35,7 +34,6 @@ abstract class ExpressionVisitorImpl implements Visitor {
         // Name mangling?
     }
 
-    // TODO
     public void visit(AST.cond expr) {
         expr.predicate.accept(this);
         expr.ifbody.accept(this);
@@ -44,27 +42,27 @@ abstract class ExpressionVisitorImpl implements Visitor {
             GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Predicate of condition must be of Bool type"));
         }
         expr.type = GlobalData.inheritanceGraph.getJoinOf(expr.ifbody.type, expr.elsebody.type);
-        
     }
 
-    // TODO
     public void visit(AST.loop expr) {
         expr.predicate.accept(this);
         expr.body.accept(this);
-        if(!expr.predicate.type.equals(GlobalData.BOOL_TYPE)) {
+        if(!GlobalData.BOOL_TYPE.equals(expr.predicate.type)) {
             GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Predicate of while must be of Bool type"));
         }
         expr.type = "Object";
     }
 
-    // TODO
+    // TODO FIXME
     public void visit(AST.block expr) {
         int lastexpr = expr.l1.size()-1;
         expr.l1.get(lastexpr).accept(this);
         expr.type = expr.l1.get(lastexpr).type;
     }
 
-    // TODO
+    // TODO FIXME
+    // TODO enter and exit scope
+    // TODO check for no_expr
     public void visit(AST.let expr) {
         expr.value.accept(this);
         if(!GlobalData.inheritanceGraph.isConforming(expr.typeid, expr.value.type)) {
@@ -74,7 +72,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.type = expr.body.type;
     }
 
-    // TODO
+    // TODO FIXME
     public void visit(AST.typcase expr) {
         expr.predicate.accept(this);
         expr.type = expr.branches.get(0).type; // branches have at least one element always
@@ -83,21 +81,27 @@ abstract class ExpressionVisitorImpl implements Visitor {
             expr.type = GlobalData.inheritanceGraph.getJoinOf(expr.type, b.type);
         }
     }
+
     public void visit(AST.branch expr) {
-        // TODO add id to scope table, set type of id?
+        if(!GlobalData.inheritanceGraph.hasClass(expr.type)){
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: " + expr.type));
+            expr.type = "Object";
+        }
+        GlobalData.scopeTable.enterScope();
+        GlobalData.scopeTable.insert(expr.name, expr.type);
         expr.value.accept(this);
-        expr.type = expr.value.type;
+        GlobalData.scopeTable.exitScope();
     }
 
-    // TODO
     public void visit(AST.new_ expr) {
-
-        // TODO: check if the typeid is valid
-
-        expr.type = expr.typeid;
+        if(GlobalData.inheritanceGraph.hasClass(expr.typeid)) {
+            expr.type = expr.typeid;
+        } else {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: " + expr.typeid));
+            expr.type = "Object";
+        }
     }
 
-    // TODO
     public void visit(AST.isvoid expr) {
         expr.e1.accept(this);
         expr.type = GlobalData.BOOL_TYPE;
@@ -194,7 +198,13 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
 
     public void visit(AST.object expr) {
-        // TODO: get from scope/context data
+        String type = GlobalData.scopeTable.lookUpGlobal(expr.name);
+        if(type==null) {
+            expr.type = "Object";
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Attribute '"+expr.name+"' is not defined"));
+        } else {
+            expr.type = type;
+        }
     }
 
     public void visit(AST.int_const expr) {
