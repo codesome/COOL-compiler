@@ -57,6 +57,10 @@ public class InheritanceGraph {
 		return hasMain;
 	}
 
+	public Node getRootNode() {
+		return ROOT_AST_NODE;
+	}
+
 	public void analyze() {
 		parentUpdatePass();
 
@@ -159,54 +163,57 @@ public class InheritanceGraph {
 	    return cycles;
 	}
 
-}
+	public static class Node {
 
-class Node {
+		public static final int NO_PARENT = -1;
 
-	public static final int NO_PARENT = -1;
+		private AST.class_ astClass;
+		private int index;
+		private Node parent;
+		private List<Node> children;
+		private boolean isInitiated;
 
-	private AST.class_ astClass;
-	private int index;
-	private Node parent;
-	private List<Node> children;
-	private boolean isInitiated;
+		public Node(AST.class_ astClass, int index) {
+			this.isInitiated = false;
+			init(astClass, index);
+		}
 
-	public Node(AST.class_ astClass, int index) {
-		this.isInitiated = false;
-		init(astClass, index);
+		private void init(AST.class_ astClass, int index) {
+			if(isInitiated) return;
+			this.astClass = astClass;
+			this.index = index;
+			this.children = new ArrayList<>();
+			this.parent = null;
+			this.isInitiated = true;
+		}
+
+		public void addChild(Node child) {
+			children.add(child);
+		}
+
+		public AST.class_ getAstClass() {
+			return astClass;
+		}
+
+		public int getIndex() {
+			return index;
+		}
+
+		public boolean parentExists() {
+			return parent!=null;
+		}
+
+		public Node getParent() {
+			return parent;
+		}
+
+		public void setParent(Node parent) {
+			this.parent = parent;
+		}
+
+		public List<Node> getChildren() {
+			return children;
+		}
+
 	}
-
-	private void init(AST.class_ astClass, int index) {
-		if(isInitiated) return;
-		this.astClass = astClass;
-		this.index = index;
-		this.children = new ArrayList<>();
-		this.parent = null;
-		this.isInitiated = true;
-	}
-
-	public boolean parentExists() {
-		return parent!=null;
-	}
-
-	public void addChild(Node child) {
-		children.add(child);
-	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	public AST.class_ getAstClass() {
-		return astClass;
-	}
-
-	public Node getParent() {
-		return parent;
-	}
-
-	public void setParent(Node parent) {
-		this.parent = parent;
-	}
-
 }
