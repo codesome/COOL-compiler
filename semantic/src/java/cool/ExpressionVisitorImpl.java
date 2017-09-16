@@ -10,32 +10,83 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
 
     // TODO
-    public void visit(AST.no_expr expr) {}
+    public void visit(AST.no_expr expr) {
+        expr.type = null; // TODO check!
+    }
 
     // TODO
-    public void visit(AST.assign expr) {}
+    public void visit(AST.assign expr) {
+        // get type of n - say, idtype
+        expr.e1.accept(this);
+        if(!isConforming(idtype, expr.e1.type)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "The type of of the expression does not conform to the declared type of the identifier"));
+        }
+        expr.type = expr.e1.type;
+    }
 
     // TODO
-    public void visit(AST.static_dispatch expr) {}
+    public void visit(AST.static_dispatch expr) {
+        // Name mangling?
+    }
 
     // TODO
-    public void visit(AST.dispatch expr) {}
+    public void visit(AST.dispatch expr) {
+        // Name mangling?
+    }
 
     // TODO
-    public void visit(AST.cond expr) {}
+    public void visit(AST.cond expr) {
+        expr.predicate.accept(this);
+        expr.ifbody.accept(this);
+        expr.elsebody.accept(this);
+        if(!expr.predicate.type.equals(GlobalData.BOOL_TYPE)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Predicate of condition must be of Bool type"));
+        }
+        expr.type = getJoinOf(expr.ifbody.type, expr.elsebody.type);
+        
+    }
 
     // TODO
-    public void visit(AST.loop expr) {}
+    public void visit(AST.loop expr) {
+        expr.predicate.accept(this);
+        expr.body.accept(this);
+        if(!expr.predicate.type.equals(GlobalData.BOOL_TYPE)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Predicate of while must be of Bool type"));
+        }
+        expr.type = "Object";
+    }
 
     // TODO
-    public void visit(AST.block expr) {}
+    public void visit(AST.block expr) {
+        lastexpr = expr.l1.size()-1;
+        expr.l1.get(lastexpr).accept(this);
+        expr.type = expr.l1.get(lastexpr).type;
+    }
 
     // TODO
-    public void visit(AST.let expr) {}
+    public void visit(AST.let expr) {
+        expr.value.accept(this);
+        if(!isConforming(expr.typeid, expr.value.type)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "The type of of the expression does not conform to the declared type of the identifier"));
+        }
+        expr.body.accept(this);
+        expr.type = expr.body.type;
+    }
 
     // TODO
-    public void visit(AST.typcase expr) {}
-    public void visit(AST.branch expr) {}
+    public void visit(AST.typcase expr) {
+        expr.predicate.accept(this);
+        expr.type = expr.branches.get(0); // branches have at least one element always
+        for(branch b : branches) {
+            expr.b.accept(this);
+            expr.type = getJoinOf(expr.type, expr.b.type);
+        }
+    }
+    public void visit(AST.branch expr) {
+        // TODO add id to scope table, set type of id?
+        expr.value.accept(this);
+        expr.type = expr.value.type;
+    }
 
     // TODO
     public void visit(AST.new_ expr) {
