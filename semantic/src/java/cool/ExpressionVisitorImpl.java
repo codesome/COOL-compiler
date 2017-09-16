@@ -17,8 +17,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
     // TODO
     public void visit(AST.assign expr) {
         // get type of n - say, idtype
+        String idtype = "Some type";
         expr.e1.accept(this);
-        if(!isConforming(idtype, expr.e1.type)) {
+        if(!GlobalData.inheritanceGraph.isConforming(idtype, expr.e1.type)) {
             GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "The type of of the expression does not conform to the declared type of the identifier"));
         }
         expr.type = expr.e1.type;
@@ -42,7 +43,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(!expr.predicate.type.equals(GlobalData.BOOL_TYPE)) {
             GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Predicate of condition must be of Bool type"));
         }
-        expr.type = getJoinOf(expr.ifbody.type, expr.elsebody.type);
+        expr.type = GlobalData.inheritanceGraph.getJoinOf(expr.ifbody.type, expr.elsebody.type);
         
     }
 
@@ -58,7 +59,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     // TODO
     public void visit(AST.block expr) {
-        lastexpr = expr.l1.size()-1;
+        int lastexpr = expr.l1.size()-1;
         expr.l1.get(lastexpr).accept(this);
         expr.type = expr.l1.get(lastexpr).type;
     }
@@ -66,7 +67,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     // TODO
     public void visit(AST.let expr) {
         expr.value.accept(this);
-        if(!isConforming(expr.typeid, expr.value.type)) {
+        if(!GlobalData.inheritanceGraph.isConforming(expr.typeid, expr.value.type)) {
             GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "The type of of the expression does not conform to the declared type of the identifier"));
         }
         expr.body.accept(this);
@@ -76,10 +77,10 @@ abstract class ExpressionVisitorImpl implements Visitor {
     // TODO
     public void visit(AST.typcase expr) {
         expr.predicate.accept(this);
-        expr.type = expr.branches.get(0); // branches have at least one element always
-        for(branch b : branches) {
-            expr.b.accept(this);
-            expr.type = getJoinOf(expr.type, expr.b.type);
+        expr.type = expr.branches.get(0).type; // branches have at least one element always
+        for(AST.branch b : expr.branches) {
+            b.accept(this);
+            expr.type = GlobalData.inheritanceGraph.getJoinOf(expr.type, b.type);
         }
     }
     public void visit(AST.branch expr) {

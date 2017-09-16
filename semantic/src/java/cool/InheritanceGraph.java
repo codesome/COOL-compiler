@@ -188,6 +188,14 @@ public class InheritanceGraph {
      
         return cycles;
     }
+    
+    public boolean isConforming(String type1, String type2) {
+        return true;
+    }
+    
+    public String getJoinOf(String type1, String type2) {
+        return "Object";
+    }
 
     public static class Node {
 
