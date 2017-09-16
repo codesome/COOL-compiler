@@ -29,13 +29,13 @@ public class Semantic{
 
 	public Semantic(AST.program program){
 
-		GlobalData.ig = new InheritanceGraph();
+		GlobalData.inheritanceGraph = new InheritanceGraph();
 
 		for(AST.class_ cl: program.classes) {
 			GlobalData.filename = cl.filename;
-			GlobalData.ig.addClass(cl);
+			GlobalData.inheritanceGraph.addClass(cl);
 		}
-		GlobalData.ig.analyze();
+		GlobalData.inheritanceGraph.analyze();
 
 		if(GlobalData.errors.size() > 0) {
 			reportError(GlobalData.errors);

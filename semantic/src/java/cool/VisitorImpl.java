@@ -1,6 +1,6 @@
 package cool;
 
-class VisitorImpl implements Visitor {
+class VisitorImpl extends ExpressionVisitorImpl {
 
     public void visit(AST.program expr) {}
     public void visit(AST.class_ expr) {}

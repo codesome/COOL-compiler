@@ -2,9 +2,10 @@ package cool;
 
 import java.util.List;
 
-class ExpressionVisitorImpl implements ExpressionVisitor {
+abstract class ExpressionVisitorImpl implements Visitor {
 
     private boolean nonIntegerExpression(AST.expression e1, AST.expression e2) {
+        // both should be int
         return !GlobalData.INT_TYPE.equals(e1.type) || !GlobalData.INT_TYPE.equals(e2.type);
     }
 
@@ -114,17 +115,19 @@ class ExpressionVisitorImpl implements ExpressionVisitor {
     public void visit(AST.eq expr) {
         expr.e1.accept(this);
         expr.e2.accept(this);
+        // if its equal, doesnt matter if its primary or
+        // non primary type. Hence check only if not equal
         if(!expr.e1.type.equals(expr.e2.type)) {
+            // e1 is primary
             boolean e1p = GlobalData.INT_TYPE.equals(expr.e1.type) || GlobalData.BOOL_TYPE.equals(expr.e1.type) 
                 || GlobalData.STRING_TYPE.equals(expr.e1.type);
+            // e2 is primary
             boolean e2p = GlobalData.INT_TYPE.equals(expr.e2.type) 
                 || GlobalData.BOOL_TYPE.equals(expr.e2.type) || GlobalData.STRING_TYPE.equals(expr.e2.type);  
-            if(e1p || e2p) {
-                if(e1p && e2p) {
-                    GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Equality of different primitive types"));
-                } else {
-                    GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Equality of primitive types with non primitive type"));
-                }
+            if(e1p && e2p) {
+                GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Equality of different primitive types"));
+            } else if(e1p || e2p) {
+                GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Equality of primitive types with non primitive type"));
             }
         }
         expr.type = GlobalData.BOOL_TYPE;

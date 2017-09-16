@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Stack;
 import java.lang.StringBuilder;
 
+// TODO: Add features of Object class
+// TODO: Add IO in graph and its features
 public class InheritanceGraph {
 
 	private static final String ROOT_CLASS_NAME = "Object";
