@@ -1,12 +1,145 @@
 package cool;
 
+import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.lang.StringBuilder;
+
 class VisitorImpl extends ExpressionVisitorImpl {
 
-    public void visit(AST.program expr) {}
-    public void visit(AST.class_ expr) {}
-    public void visit(AST.attr expr) {}
-    public void visit(AST.method expr) {}
-    public void visit(AST.feature expr) {}
+	private void programVisitorDepthFirstHelper(InheritanceGraph.Node node) {
+		// enter scope
+		GlobalData.scopeTable.enterScope();
+
+		// visit the node
+		node.getAstClass().accept(this);
+
+		// iterate through all the child nodes
+		for(InheritanceGraph.Node child: node.getChildren()) {
+			programVisitorDepthFirstHelper(child);
+		}
+
+		// exit scope
+		GlobalData.scopeTable.exitScope();
+	}
+
+	// TODO: add all mangled name in the global data
+
+	private void updateMangledNames(AST.program prog) {
+		for(AST.class_ cl: prog.classes) {
+			for(AST.feature f: cl.features) {
+				if(f instanceof AST.method) {
+					AST.method m = (AST.method) f;
+					GlobalData.mangledNameMap.put(GlobalData.getMangledNameWithFormals(cl.name, m.name, m.typeid, m.formals), m.typeid);
+				}
+			}
+		}		
+	}
+
+    public void visit(AST.program prog) {
+
+    	// preparing inheritance graph
+    	GlobalData.inheritanceGraph = new InheritanceGraph();
+
+		for(AST.class_ cl: prog.classes) {
+			GlobalData.filename = cl.filename;
+			GlobalData.inheritanceGraph.addClass(cl);
+		}
+		GlobalData.inheritanceGraph.analyze();
+
+		if(GlobalData.errors.size() > 0) {
+			// errors in inheritance graph
+			return;
+		}
+
+		updateMangledNames(prog);
+
+		InheritanceGraph.Node rootNode = GlobalData.inheritanceGraph.getRootNode();
+		programVisitorDepthFirstHelper(rootNode);
+
+    }
+
+
+    public void visit(AST.class_ cl) {
+    	GlobalData.currentClass = cl.name;
+
+    	HashSet<String> methodsOfClass = new HashSet<>();
+    	
+    	// adding variables to the scope
+    	// TODO: check if declared already
+    	for(AST.feature f: cl.features) {
+			if(f instanceof AST.attr) {
+				AST.attr a = (AST.attr) f;
+				if(GlobalData.scopeTable.lookUpGlobal(a.name) == null) {
+					// not defined earlier, all clear
+					GlobalData.scopeTable.insert(a.name, a.typeid);
+				} else {
+					// already defined
+	    			StringBuilder errorMessage = new StringBuilder();
+	    			errorMessage.append("Attribute \'").append(a.name);
+					if(GlobalData.scopeTable.lookUpLocal(a.name) == null) {
+						// defined in parent classes
+		    			errorMessage.append("\' has been already defined in inherited tree.");
+					} else {
+						// defined in current class
+		    			errorMessage.append("\' has multiple definitions in the class \'").append(cl.name).append("\'");
+					}
+	            	GlobalData.errors.add(new Error(GlobalData.filename, a.getLineNo(), errorMessage.toString()));
+	            	// TODO: should we add redeclaration in scope for further analysis? Or return?
+				}
+			} else {
+				// TODO: check if method is redefined in same class + inherit tree
+				AST.method m = (AST.method) f;
+				if(methodsOfClass.contains(m.name)) {
+	    			StringBuilder errorMessage = new StringBuilder();
+	    			errorMessage.append("Method \'").append(m.name);
+	    			errorMessage.append("\' has multiple definitions in the class \'").append(cl.name).append("\'");
+	            	GlobalData.errors.add(new Error(GlobalData.filename, m.getLineNo(), errorMessage.toString()));
+				} else {
+					// TODO: check in inherit tree
+					methodsOfClass.add(m.name);
+				}
+			}
+		}
+
+		// visiting all features
+		for(AST.feature f: cl.features) {
+			f.accept(this);
+		}
+
+    }
+
+    public void visit(AST.attr at) {
+    	if(!GlobalData.inheritanceGraph.hasClass(at.typeid)) {
+    		// using undefined type
+			StringBuilder errorMessage = new StringBuilder();
+			errorMessage.append("Type \'").append(at.typeid).append("\' has not been defined");
+            GlobalData.errors.add(new Error(GlobalData.filename, at.getLineNo(), errorMessage.toString()));
+    	} else if(!(at.value instanceof AST.no_expr)) { // assignment exists
+    		// visiting expression
+    		at.value.accept(this);
+
+    		// checking type of variable and assignment
+    		if(at.typeid.equals(at.value.type)) {
+    			StringBuilder errorMessage = new StringBuilder();
+    			errorMessage.append("Assignment doesn't match the type of attribute ")
+    			.append(at.name).append(":").append(at.typeid);
+            	GlobalData.errors.add(new Error(GlobalData.filename, at.getLineNo(), errorMessage.toString()));
+    		}
+    	}
+    }
+
+    public void visit(AST.method expr) {
+    	// TODO: check if method is delcared in inherit tree. If yes, signature except type should match
+    }
+    
+    public void visit(AST.feature fr) {
+    	if(fr instanceof AST.attr)
+            this.visit((AST.attr)fr);
+        else
+            this.visit((AST.method)fr);
+    }
+
     public void visit(AST.formal expr) {}
     public void visit(AST.branch expr) {}
 }

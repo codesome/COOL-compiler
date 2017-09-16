@@ -27,22 +27,44 @@ public class InheritanceGraph {
 	public InheritanceGraph() {
 		
 		graph = new ArrayList<>();
-		graph.add(InheritanceGraph.ROOT_AST_NODE);
 		
 		classNameToIndexMap = new HashMap<>();
-		classNameToIndexMap.put(InheritanceGraph.ROOT_CLASS_NAME, InheritanceGraph.ROOT_CLASS_INDEX);
-		
+
 		hasMain = false;
+
+		addBaseClasses();
+	}
+
+	private void addBaseClasses() {
+		classNameToIndexMap.put(InheritanceGraph.ROOT_CLASS_NAME, InheritanceGraph.ROOT_CLASS_INDEX);
+		graph.add(InheritanceGraph.ROOT_AST_NODE);
+		
+		classNameToIndexMap.put("Int", -1);
+		classNameToIndexMap.put("Bool", -1);
+		classNameToIndexMap.put("String", -1);
+
+		// Adding IO
+		// TODO: add IO functions
+		List<AST.feature> ioFeatures = new ArrayList<>();
+		AST.class_ ioAstClass = new AST.class_("IO", null, ROOT_CLASS_NAME, ioFeatures, 0);
+		Node ioNode = new Node(ioAstClass, 0);
+
+		ioNode.setParent(InheritanceGraph.ROOT_AST_NODE);
+		InheritanceGraph.ROOT_AST_NODE.addChild(ioNode);
+		
+		classNameToIndexMap.put("IO", graph.size());
+		graph.add(ioNode);
+
 	}
 
 	public void addClass(AST.class_ astClass) {
 		if(classNameToIndexMap.containsKey(astClass.name)) {
-			GlobalData.errors.add(new Error(GlobalData.filename, astClass.getLineNo(),new StringBuilder().append("class \"")
-				.append(astClass.name).append("\" has been redefined").toString()));
+			GlobalData.errors.add(new Error(GlobalData.filename, astClass.getLineNo(),new StringBuilder().append("class \'")
+				.append(astClass.name).append("\' has been redefined").toString()));
 			return;
 		} else if(isRestrictedClass(astClass.name)) {
-			GlobalData.errors.add(new Error(GlobalData.filename, astClass.getLineNo(),new StringBuilder().append("Cannot redefine base class \"")
-				.append(astClass.name).append("\"").toString()));
+			GlobalData.errors.add(new Error(GlobalData.filename, astClass.getLineNo(),new StringBuilder().append("Cannot redefine base class \'")
+				.append(astClass.name).append("\'").toString()));
 			return;
 		}
 		classNameToIndexMap.put(astClass.name, graph.size());
@@ -59,6 +81,10 @@ public class InheritanceGraph {
 
 	public Node getRootNode() {
 		return ROOT_AST_NODE;
+	}
+
+	public boolean hasClass(String className) {
+		return classNameToIndexMap.containsKey(className);
 	}
 
 	public void analyze() {
@@ -101,16 +127,16 @@ public class InheritanceGraph {
 			if(cl.getAstClass().parent!=null) {
 				if(isRestrictedInheritanceClass(cl.getAstClass().parent)) {
 					GlobalData.errors.add(new Error(GlobalData.filename, cl.getAstClass().getLineNo(), 
-								new StringBuilder().append("Cannot inherit base class \"").append(cl.getAstClass().parent)
-								.append("\"").toString()));
+								new StringBuilder().append("Cannot inherit base class \'").append(cl.getAstClass().parent)
+								.append("\'").toString()));
 				} else if(classNameToIndexMap.containsKey(cl.getAstClass().parent)) {
 					int parentIndex = classNameToIndexMap.get(cl.getAstClass().parent);
 					cl.setParent(graph.get(parentIndex));
 					graph.get(parentIndex).addChild(cl);
-				} else if(!"IO".equals(cl.getAstClass().parent)) {
+				} else {
 					GlobalData.errors.add(new Error(GlobalData.filename, cl.getAstClass().getLineNo(), 
-								new StringBuilder().append("Inherited class \"").append(cl.getAstClass().parent)
-								.append("\" for \"").append(cl.getAstClass().name).append("\" has not been declared").toString()));
+								new StringBuilder().append("Inherited class \'").append(cl.getAstClass().parent)
+								.append("\' for \'").append(cl.getAstClass().name).append("\' has not been declared").toString()));
 				}
 			} else {
 				if(!InheritanceGraph.ROOT_CLASS_NAME.equals(cl.getAstClass().name)) {

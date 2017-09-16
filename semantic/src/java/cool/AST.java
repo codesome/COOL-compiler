@@ -4,11 +4,12 @@ import java.util.List;
 
 public class AST{
 
-    public static class ASTNode {
+    abstract public static class ASTNode {
         int lineNo;
         public int getLineNo() {
             return lineNo;
         }
+        abstract public void accept(Visitor visitor);
     }
 
     public static String sp = "  ";
@@ -40,7 +41,6 @@ public class AST{
         String getString(String space){
             return "";
         };
-        abstract public void accept(Visitor visitor);
     }
     public static class no_expr extends expression {
         public no_expr(int l){

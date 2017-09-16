@@ -28,22 +28,8 @@ public class Semantic{
 	}
 
 	public Semantic(AST.program program){
-
-		GlobalData.inheritanceGraph = new InheritanceGraph();
-
-		for(AST.class_ cl: program.classes) {
-			GlobalData.filename = cl.filename;
-			GlobalData.inheritanceGraph.addClass(cl);
-		}
-		GlobalData.inheritanceGraph.analyze();
-
-		if(GlobalData.errors.size() > 0) {
-			reportError(GlobalData.errors);
-		} else {
-
-
-
-		}
-
+		Visitor visitor = new VisitorImpl();
+		program.accept(visitor);
+		reportError(GlobalData.errors);
 	}
 }

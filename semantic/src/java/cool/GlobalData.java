@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.lang.StringBuilder;
 
 public class GlobalData {
@@ -39,10 +40,19 @@ public class GlobalData {
         mangledNameMap = new HashMap<>();
     }
 
+
     // TODO: update this temporary implementation
-    public static String getMangledName(String type, String function, List<AST.expression> exprs) {
+    private static StringBuilder initMangledName(String className, String type, String function) {
         StringBuilder mangledNameBuilder = new StringBuilder();
-        mangledNameBuilder.append("_N");
+
+        mangledNameBuilder.append("_CN");
+        if(className==null) {
+            mangledNameBuilder.append(0);
+        } else {
+            mangledNameBuilder.append(className.length()).append(className);
+        }
+
+        mangledNameBuilder.append("N");
         if(type==null) {
             mangledNameBuilder.append(0);
         } else {
@@ -55,18 +65,34 @@ public class GlobalData {
         } else {
             mangledNameBuilder.append(function.length()).append(function);
         }
-
+        return mangledNameBuilder;
+    }
+    public static String getMangledNameWithExpressions(String className, String type, String function, List<AST.expression> exprs) {
+        StringBuilder mangledNameBuilder = initMangledName(className, type, function);
+    
         if(exprs!= null) {
-            mangledNameBuilder.append("Ar");
-            mangledNameBuilder.append(exprs.size());
-            mangledNameBuilder.append("_");
+            mangledNameBuilder.append("Ar").append(exprs.size()).append("_");
             int counter = 0;
             for(AST.expression exp : exprs) {
                 counter++;
-                mangledNameBuilder.append(counter);
-                mangledNameBuilder.append("N");
-                mangledNameBuilder.append(exp.type.length());
-                mangledNameBuilder.append(exp.type);
+                mangledNameBuilder.append(counter).append("N")
+                .append(exp.type.length()).append(exp.type);
+            }
+        }
+
+        mangledNameBuilder.append("_");
+        return mangledNameBuilder.toString();
+    }
+    public static String getMangledNameWithFormals(String className, String type, String function, List<AST.formal> formals) {
+        StringBuilder mangledNameBuilder = initMangledName(className, type, function);
+
+        if(formals!= null) {
+            mangledNameBuilder.append("Ar").append(formals.size()).append("_");
+            int counter = 0;
+            for(AST.formal fm : formals) {
+                counter++;
+                mangledNameBuilder.append(counter).append("N")
+                .append(fm.typeid.length()).append(fm.typeid);
             }
         }
 
