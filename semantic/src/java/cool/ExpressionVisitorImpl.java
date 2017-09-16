@@ -13,14 +13,19 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.type = "_no_type";
     }
 
-    // TODO
     public void visit(AST.assign expr) {
-        // get type of n - say, idtype
-        String idtype = "Some type";
+
+        String type = GlobalData.scopeTable.lookUpGlobal(expr.name);
+
         expr.e1.accept(this);
-        if(!GlobalData.inheritanceGraph.isConforming(idtype, expr.e1.type)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "The type of of the expression does not conform to the declared type of the identifier"));
+        if(type==null) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(),
+                "Attribute '"+expr.name+"' is not defined"));
+        } else if(!GlobalData.inheritanceGraph.isConforming(type, expr.e1.type)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(),
+                "The type of the expression does not conform to the declared type of the attribute: " + expr.name));
         }
+            
         expr.type = expr.e1.type;
     }
 
