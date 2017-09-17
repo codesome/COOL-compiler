@@ -13,7 +13,6 @@ public class UnitTests {
         return new AST.class_(name, "MyFile.cool", parentName, null, 0);
     }
 
-    // TODO: add assert statements if needed
     public static void testInheritanceGraph1() {
         GlobalData.errors.clear();
         System.out.println("\ntestInheritanceGraph1:");

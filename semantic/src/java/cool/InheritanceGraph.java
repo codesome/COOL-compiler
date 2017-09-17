@@ -10,8 +10,6 @@ import java.util.Stack;
 import java.lang.StringBuilder;
 import java.util.Collections;
 
-// TODO: Add features of Object class
-// TODO: Add IO in graph and its features
 public class InheritanceGraph {
 
     private static final String ROOT_CLASS_NAME = "Object";
@@ -45,7 +43,6 @@ public class InheritanceGraph {
         classNameToIndexMap.put("String", -1);
 
         // Adding IO
-        // TODO: add IO functions
         List<AST.feature> ioFeatures = new ArrayList<>();
         AST.class_ ioAstClass = new AST.class_("IO", null, ROOT_CLASS_NAME, ioFeatures, 0);
         Node ioNode = new Node(ioAstClass, 0);
@@ -191,13 +188,8 @@ public class InheritanceGraph {
     }
     
     public boolean isConforming(String type1, String type2) {
-        // TODO check if string corresponding to type exists?
         if(type1.equals(type2)) {
             return true;
-        }
-        if(classNameToIndexMap.get(type1) == null ||  classNameToIndexMap.get(type2) == null) {
-            //TODO Some kind of error reporting?
-            return false;
         }
         Node type1Node = graph.get(classNameToIndexMap.get(type1));
         Node type2Node = graph.get(classNameToIndexMap.get(type2));
@@ -211,13 +203,8 @@ public class InheritanceGraph {
     }
     
     public String getJoinOf(String type1, String type2) {
-        //TODO check if the string corresponding to the type exists?
         if(type1.equals(type2)) {
             return type1;
-        }
-        if(classNameToIndexMap.get(type1) == null ||  classNameToIndexMap.get(type2) == null) {
-            //TODO Some kind of error reporting?
-            return "Object";
         }
         Node type1Node = graph.get(classNameToIndexMap.get(type1));
         Node type2Node = graph.get(classNameToIndexMap.get(type2));
@@ -226,8 +213,6 @@ public class InheritanceGraph {
     }
     
     public Node getLCA(Node node1, Node node2) {
-        // TODO check if index valid - if type exists, then no need
-        // TODO check that null is not referenced - if type exists, then no need
         Node lca;
         List<Boolean> visited = new ArrayList<>(graph.size());
         visited.addAll(Collections.nCopies(graph.size(),Boolean.FALSE));
@@ -244,23 +229,6 @@ public class InheritanceGraph {
         }while(true);
         return lca;
     }
-    
-  /*  private void setLevel(Node node, int level) {
-        node.setLevel(level);
-        if(node.getChildren() != null) { // does this ever happen?
-            for(Node child : node.getChildren()) {
-                setLevel(child, level+1);
-            }   
-        }    
-    }
-    
-    private void traverse(Node node, Node head, int previousSection) {
-        setLevel(InheritanceGraph.ROOT_AST_NODE,0);
-        int currentSection = Math.floor(Math.sqrt(node.getLevel()) + 1); // TODO check!
-        if(currentSection == 1) {
-            node.P = 
-        }
-    } */
 
     public static class Node {
 
@@ -271,8 +239,6 @@ public class InheritanceGraph {
         private Node parent;
         private List<Node> children;
         private boolean isInitiated;
-  //      private int level;
-  //      private Node P;
 
         public Node(AST.class_ astClass, int index) {
             this.isInitiated = false;
@@ -286,8 +252,6 @@ public class InheritanceGraph {
             this.children = new ArrayList<>();
             this.parent = null;
             this.isInitiated = true;
-    //        this.level = -1;
-    //        this.P = null;
         }
 
         public void addChild(Node child) {
@@ -321,21 +285,5 @@ public class InheritanceGraph {
         public boolean equals(Node node) {
             return this.index == node.getIndex();
         }
-        
-   /*     public int getLevel() {
-            return level;
-        }
-        
-        public void setLevel(int levelToSet) {
-            this.level = levelToSet;
-        }
-        
-        public Node getP() {
-            return this.P;
-        }
-        
-        public Node setP(Node PToSet) {
-            this.P = PToSet;
-        } */
     }
 }
