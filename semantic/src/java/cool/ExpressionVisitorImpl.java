@@ -61,8 +61,15 @@ abstract class ExpressionVisitorImpl implements Visitor {
         }
         String mangledName = GlobalData.getMangledNameWithExpressions(callerClass, expr.name, expr.actuals);
         String methodType = GlobalData.mangledNameMap.getOrDefault(mangledName, null);
+        while(methodType==null) {
+            callerClass = GlobalData.inheritanceGraph.getParentClassName(callerClass);
+            if(callerClass==null)
+                break;
+            mangledName = GlobalData.getMangledNameWithExpressions(callerClass, expr.name, expr.actuals);
+            methodType = GlobalData.mangledNameMap.getOrDefault(mangledName, null);
+        }
         if(methodType==null) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined method: "+expr.name));
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined method signature: "+expr.name));
             expr.type = "Object";
         } else {
             expr.type = methodType;

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.Arrays;
 import java.lang.StringBuilder;
 import java.util.Collections;
 
@@ -16,8 +17,8 @@ public class InheritanceGraph {
 
     private static final String ROOT_CLASS_NAME = "Object";
     private static final int ROOT_CLASS_INDEX = 0;
-    private static AST.class_ ROOT_AST_CLASS = new AST.class_(InheritanceGraph.ROOT_CLASS_NAME, null, null, null, 0);
-    private static Node ROOT_AST_NODE = new Node(InheritanceGraph.ROOT_AST_CLASS, InheritanceGraph.ROOT_CLASS_INDEX);
+    private static AST.class_ ROOT_AST_CLASS = new AST.class_(ROOT_CLASS_NAME, null, null, new ArrayList<>(), 0);
+    private static Node ROOT_AST_NODE = new Node(ROOT_AST_CLASS, ROOT_CLASS_INDEX);
 
     public static String MAIN_CLASS_NAME = "Main";
 
@@ -37,24 +38,41 @@ public class InheritanceGraph {
     }
 
     private void addBaseClasses() {
-        classNameToIndexMap.put(InheritanceGraph.ROOT_CLASS_NAME, InheritanceGraph.ROOT_CLASS_INDEX);
-        graph.add(InheritanceGraph.ROOT_AST_NODE);
+
+        // Adding Object
+        ROOT_AST_CLASS.features = new ArrayList<>();
+        ROOT_AST_CLASS.features.add(new AST.method("abort", new ArrayList<>(), ROOT_CLASS_NAME, null, 0));
+        ROOT_AST_CLASS.features.add(new AST.method("type_name", new ArrayList<>(), GlobalData.STRING_TYPE, null, 0));
+        ROOT_AST_CLASS.features.add(new AST.method("copy", new ArrayList<>(), ROOT_CLASS_NAME, null, 0));
+
+        classNameToIndexMap.put(ROOT_CLASS_NAME, ROOT_CLASS_INDEX);
+        graph.add(ROOT_AST_NODE);
         
-        classNameToIndexMap.put("Int", -1);
-        classNameToIndexMap.put("Bool", -1);
-        classNameToIndexMap.put("String", -1);
 
         // Adding IO
-        // TODO: add IO functions
         List<AST.feature> ioFeatures = new ArrayList<>();
+
+        List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", GlobalData.STRING_TYPE, 0)));
+        List<AST.formal> intFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", GlobalData.INT_TYPE, 0)));
+
+        ioFeatures.add(new AST.method("out_string", stringFormalList, "IO", null, 0));
+        ioFeatures.add(new AST.method("out_int", intFormalList, "IO", null, 0));
+        ioFeatures.add(new AST.method("in_string", new ArrayList<>(), GlobalData.STRING_TYPE, null, 0));
+        ioFeatures.add(new AST.method("in_int", new ArrayList<>(), GlobalData.INT_TYPE, null, 0));
+
         AST.class_ ioAstClass = new AST.class_("IO", null, ROOT_CLASS_NAME, ioFeatures, 0);
         Node ioNode = new Node(ioAstClass, 0);
 
-        ioNode.setParent(InheritanceGraph.ROOT_AST_NODE);
-        InheritanceGraph.ROOT_AST_NODE.addChild(ioNode);
+        ioNode.setParent(ROOT_AST_NODE);
+        ROOT_AST_NODE.addChild(ioNode);
         
         classNameToIndexMap.put("IO", graph.size());
         graph.add(ioNode);
+
+        // Other base classes
+        classNameToIndexMap.put("Int", -1);
+        classNameToIndexMap.put("Bool", -1);
+        classNameToIndexMap.put("String", -1);
 
     }
 
@@ -70,7 +88,7 @@ public class InheritanceGraph {
         }
         classNameToIndexMap.put(astClass.name, graph.size());
         graph.add(new Node(astClass, graph.size()));
-        if(InheritanceGraph.MAIN_CLASS_NAME.equals(astClass.name)) {
+        if(MAIN_CLASS_NAME.equals(astClass.name)) {
             hasMain = true;
         }
 
@@ -140,9 +158,9 @@ public class InheritanceGraph {
                                 .append("' for '").append(cl.getAstClass().name).append("' has not been declared").toString()));
                 }
             } else {
-                if(!InheritanceGraph.ROOT_CLASS_NAME.equals(cl.getAstClass().name)) {
-                    cl.setParent(InheritanceGraph.ROOT_AST_NODE);
-                    InheritanceGraph.ROOT_AST_NODE.addChild(cl);
+                if(!ROOT_CLASS_NAME.equals(cl.getAstClass().name)) {
+                    cl.setParent(ROOT_AST_NODE);
+                    ROOT_AST_NODE.addChild(cl);
                 }
             }
         }
@@ -234,7 +252,7 @@ public class InheritanceGraph {
         do {        
             visited.set(node1.getIndex(),true);
             node1 = node1.getParent();
-        }while(!node1.equals(InheritanceGraph.ROOT_AST_NODE));
+        }while(!node1.equals(ROOT_AST_NODE));
         do {
             if(visited.get(node2.getIndex())) {
                 lca = node2;
@@ -255,7 +273,7 @@ public class InheritanceGraph {
     }
     
     private void traverse(Node node, Node head, int previousSection) {
-        setLevel(InheritanceGraph.ROOT_AST_NODE,0);
+        setLevel(ROOT_AST_NODE,0);
         int currentSection = Math.floor(Math.sqrt(node.getLevel()) + 1); // TODO check!
         if(currentSection == 1) {
             node.P = 

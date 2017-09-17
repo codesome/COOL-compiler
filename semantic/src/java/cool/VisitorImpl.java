@@ -117,9 +117,10 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
 
         // visiting all features
-        for(AST.feature f: cl.features) {
-            f.accept(this);
-        }
+        if(!"Object".equals(cl.name) && !"IO".equals(cl.name))
+            for(AST.feature f: cl.features) {
+                f.accept(this);
+            }
 
     }
 
@@ -154,7 +155,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         if(!mthd.typeid.equals(mthd.body.type)) {
             StringBuilder errorMessage = new StringBuilder();
             errorMessage.append("Return type of method '")
-            .append(mthd.name).append("'' doesn't match with return type of its body.");
+            .append(mthd.name).append("' doesn't match with return type of its body.");
             GlobalData.errors.add(new Error(GlobalData.filename, mthd.getLineNo(), errorMessage.toString()));
         }
     }
