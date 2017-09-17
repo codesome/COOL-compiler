@@ -1,6 +1,8 @@
-class Main {
-	main():IO {
-		new IO.out_string("Hello world!\n")
-	};
+class Main inherits IO {
+    main() : Int {
+        {
+            out_string("Hello");
+            1;    
+        }
+    };
 };
-

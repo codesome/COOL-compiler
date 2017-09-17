@@ -8,6 +8,7 @@ import java.lang.StringBuilder;
 class VisitorImpl extends ExpressionVisitorImpl {
 
     private void programVisitorDepthFirstHelper(InheritanceGraph.Node node) {
+
         // enter scope
         GlobalData.scopeTable.enterScope();
         GlobalData.methodDefinitionScopeTable.enterScope();
@@ -58,6 +59,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         updateMangledNames();
 
         InheritanceGraph.Node rootNode = GlobalData.inheritanceGraph.getRootNode();
+
         programVisitorDepthFirstHelper(rootNode);
 
     }
@@ -118,7 +120,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
 
         // visiting all features
-        if(!"Object".equals(cl.name) && !"IO".equals(cl.name))
+        if(!"Object".equals(cl.name) && !"IO".equals(cl.name) && !"String".equals(cl.name))
             for(AST.feature f: cl.features) {
                 f.accept(this);
             }
@@ -147,6 +149,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.method mthd) {
+        GlobalData.scopeTable.enterScope();
         // visiting all the formals
         for(AST.formal fm: mthd.formals) {
             fm.accept(this);
@@ -159,6 +162,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
             .append(mthd.name).append("' doesn't match with return type of its body.");
             GlobalData.errors.add(new Error(GlobalData.filename, mthd.getLineNo(), errorMessage.toString()));
         }
+        GlobalData.scopeTable.exitScope();
     }
 
     public void visit(AST.formal fm) {
@@ -168,6 +172,8 @@ class VisitorImpl extends ExpressionVisitorImpl {
             errorMessage.append("Type '").append(fm.typeid).append("' for formal '")
             .append(fm.name).append("' has not been defined");
             GlobalData.errors.add(new Error(GlobalData.filename, fm.getLineNo(), errorMessage.toString()));
+        } else {
+            GlobalData.scopeTable.insert(fm.name, fm.typeid);
         }
     }
 

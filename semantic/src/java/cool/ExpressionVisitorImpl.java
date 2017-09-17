@@ -36,7 +36,10 @@ abstract class ExpressionVisitorImpl implements Visitor {
             e.accept(this);
         }
 
-        if(!GlobalData.inheritanceGraph.isConforming(expr.typeid, callerClass)) {
+        if(!GlobalData.inheritanceGraph.hasClass(expr.typeid)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: "+expr.typeid));
+            expr.typeid = "Object";
+        } else if(!GlobalData.inheritanceGraph.isConforming(expr.typeid, callerClass)) {
             GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), 
                 "Type of caller does not conform to the type '"+expr.typeid+"' in the static dispatch '"+expr.name+"'"));
             expr.type = "Object";
@@ -56,6 +59,10 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public void visit(AST.dispatch expr) {
         expr.caller.accept(this);
         String callerClass = expr.caller.type;
+        if(GlobalData.inheritanceGraph.isNoMethodClass(callerClass)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined method: "+expr.name));
+            return;
+        }
         for(AST.expression e: expr.actuals) {
             e.accept(this);
         }
@@ -206,10 +213,10 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public void visit(AST.comp expr) {
         expr.e1.accept(this);
-        if(!GlobalData.INT_TYPE.equals(expr.e1.type)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Cannot do compliment of non int type"));
+        if(!GlobalData.BOOL_TYPE.equals(expr.e1.type)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Negation of non bool type"));
         }
-        expr.type = GlobalData.INT_TYPE;
+        expr.type = GlobalData.BOOL_TYPE;
     }
 
     public void visit(AST.lt expr) {
@@ -252,10 +259,11 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
 
     public void visit(AST.neg expr) {
-        if(!GlobalData.BOOL_TYPE.equals(expr.type)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Negation of non bool type"));
+        expr.e1.accept(this);
+        if(!GlobalData.INT_TYPE.equals(expr.e1.type)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Cannot do compliment of non int type"));
         }
-        expr.type = GlobalData.BOOL_TYPE;
+        expr.type = GlobalData.INT_TYPE;
     }
 
     public void visit(AST.object expr) {

@@ -47,30 +47,41 @@ public class InheritanceGraph {
         graph.add(ROOT_AST_NODE);
         
 
+        List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", GlobalData.STRING_TYPE, 0)));
+
         // Adding IO
         List<AST.feature> ioFeatures = new ArrayList<>();
-
-        List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", GlobalData.STRING_TYPE, 0)));
-        List<AST.formal> intFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", GlobalData.INT_TYPE, 0)));
+        List<AST.formal> intFormalList1 = new ArrayList<>(Arrays.asList(new AST.formal("x", GlobalData.INT_TYPE, 0)));
 
         ioFeatures.add(new AST.method("out_string", stringFormalList, "IO", null, 0));
-        ioFeatures.add(new AST.method("out_int", intFormalList, "IO", null, 0));
+        ioFeatures.add(new AST.method("out_int", intFormalList1, "IO", null, 0));
         ioFeatures.add(new AST.method("in_string", new ArrayList<>(), GlobalData.STRING_TYPE, null, 0));
         ioFeatures.add(new AST.method("in_int", new ArrayList<>(), GlobalData.INT_TYPE, null, 0));
 
         AST.class_ ioAstClass = new AST.class_("IO", null, ROOT_CLASS_NAME, ioFeatures, 0);
         Node ioNode = new Node(ioAstClass, 0);
 
-        ioNode.setParent(ROOT_AST_NODE);
-        ROOT_AST_NODE.addChild(ioNode);
-        
         classNameToIndexMap.put("IO", graph.size());
         graph.add(ioNode);
 
+        // Adding String
+        List<AST.formal> intFormalList2 = new ArrayList<>(Arrays.asList(new AST.formal("x", GlobalData.INT_TYPE, 0)
+            ,new AST.formal("y", GlobalData.INT_TYPE, 0)));
+        List<AST.feature> stringFeatures = new ArrayList<>();
+
+        stringFeatures.add(new AST.method("length", new ArrayList<>(), GlobalData.INT_TYPE, null, 0));
+        stringFeatures.add(new AST.method("concat", stringFormalList, GlobalData.STRING_TYPE, null, 0));
+        stringFeatures.add(new AST.method("substr", intFormalList2, GlobalData.STRING_TYPE, null, 0));
+
+        AST.class_ stringAstClass = new AST.class_(GlobalData.STRING_TYPE, null, ROOT_CLASS_NAME, stringFeatures, 0);
+        Node stringNode = new Node(stringAstClass, 0);
+
+        classNameToIndexMap.put(GlobalData.STRING_TYPE, graph.size());
+        graph.add(stringNode);
+
         // Other base classes
-        classNameToIndexMap.put("Int", -1);
-        classNameToIndexMap.put("Bool", -1);
-        classNameToIndexMap.put("String", -1);
+        classNameToIndexMap.put(GlobalData.INT_TYPE, -1);
+        classNameToIndexMap.put(GlobalData.BOOL_TYPE, -1);
 
     }
 
@@ -133,6 +144,7 @@ public class InheritanceGraph {
                 GlobalData.errors.add(new Error(GlobalData.filename, lastClass.getLineNo(), errorString.toString()));
             }
         }
+
     }
 
     private boolean isRestrictedClass(String name) {
@@ -141,6 +153,10 @@ public class InheritanceGraph {
 
     private boolean isRestrictedInheritanceClass(String name) {
         return "Int".equals(name) || "String".equals(name) || "Bool".equals(name);
+    }
+
+    public boolean isNoMethodClass(String name) {
+        return "Int".equals(name) || "Bool".equals(name);
     }
 
     private void parentUpdatePass() {
@@ -213,6 +229,8 @@ public class InheritanceGraph {
     public boolean isConforming(String type1, String type2) {
         if(type1.equals(type2)) {
             return true;
+        } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
+            return false;
         }
         Node type1Node = graph.get(classNameToIndexMap.get(type1));
         Node type2Node = graph.get(classNameToIndexMap.get(type2));
@@ -228,6 +246,8 @@ public class InheritanceGraph {
     public String getJoinOf(String type1, String type2) {
         if(type1.equals(type2)) {
             return type1;
+        } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
+            return ROOT_CLASS_NAME;
         }
         Node type1Node = graph.get(classNameToIndexMap.get(type1));
         Node type2Node = graph.get(classNameToIndexMap.get(type2));
