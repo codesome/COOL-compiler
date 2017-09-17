@@ -47,33 +47,36 @@ public class GlobalData {
 
 
     // TODO: update this temporary implementation
-    private static StringBuilder initMangledName(String className, String type, String function) {
-        StringBuilder mangledNameBuilder = new StringBuilder();
-
+    private static void initMangledNameClass(StringBuilder mangledNameBuilder, String className) {
         mangledNameBuilder.append("_CN");
         if(className==null) {
             mangledNameBuilder.append(0);
         } else {
             mangledNameBuilder.append(className.length()).append(className);
         }
+    }
 
+    private static void initMangledNameType(StringBuilder mangledNameBuilder, String type) {
         mangledNameBuilder.append("N");
         if(type==null) {
             mangledNameBuilder.append(0);
         } else {
             mangledNameBuilder.append(type.length()).append(type);
         }
+    }
 
+    private static void initMangledNameFunction(StringBuilder mangledNameBuilder, String function) {
         mangledNameBuilder.append("FN");
         if(function==null) {
             mangledNameBuilder.append(0);
         } else {
             mangledNameBuilder.append(function.length()).append(function);
         }
-        return mangledNameBuilder;
     }
-    public static String getMangledNameWithExpressions(String className, String type, String function, List<AST.expression> exprs) {
-        StringBuilder mangledNameBuilder = initMangledName(className, type, function);
+    public static String getMangledNameWithExpressions(String className, String function, List<AST.expression> exprs) {
+        StringBuilder mangledNameBuilder = new StringBuilder();
+        initMangledNameClass(mangledNameBuilder, className);
+        initMangledNameFunction(mangledNameBuilder, function);
     
         if(exprs!= null) {
             mangledNameBuilder.append("Ar").append(exprs.size()).append("_");
@@ -88,8 +91,29 @@ public class GlobalData {
         mangledNameBuilder.append("_");
         return mangledNameBuilder.toString();
     }
-    public static String getMangledNameWithFormals(String className, String type, String function, List<AST.formal> formals) {
-        StringBuilder mangledNameBuilder = initMangledName(className, type, function);
+    public static String getMangledNameWithType(String className, String type, String function, List<AST.formal> formals) {
+        StringBuilder mangledNameBuilder = new StringBuilder();
+        initMangledNameClass(mangledNameBuilder, className);
+        initMangledNameType(mangledNameBuilder, type);
+        initMangledNameFunction(mangledNameBuilder, function);
+
+        if(formals!= null) {
+            mangledNameBuilder.append("Ar").append(formals.size()).append("_");
+            int counter = 0;
+            for(AST.formal fm : formals) {
+                counter++;
+                mangledNameBuilder.append(counter).append("N")
+                .append(fm.typeid.length()).append(fm.typeid);
+            }
+        }
+
+        mangledNameBuilder.append("_");
+        return mangledNameBuilder.toString();
+    }
+    public static String getMangledNameWithoutType(String className, String function, List<AST.formal> formals) {
+        StringBuilder mangledNameBuilder = new StringBuilder();
+        initMangledNameClass(mangledNameBuilder, className);
+        initMangledNameFunction(mangledNameBuilder, function);
 
         if(formals!= null) {
             mangledNameBuilder.append("Ar").append(formals.size()).append("_");

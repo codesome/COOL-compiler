@@ -23,20 +23,50 @@ abstract class ExpressionVisitorImpl implements Visitor {
                 "Attribute '"+expr.name+"' is not defined"));
         } else if(!GlobalData.inheritanceGraph.isConforming(type, expr.e1.type)) {
             GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(),
-                "The type of the expression does not conform to the declared type of the attribute: " + expr.name));
+                "The type of the expression does not conform to the declared type of the attribute: "+expr.name));
         }
             
         expr.type = expr.e1.type;
     }
 
-    // TODO
     public void visit(AST.static_dispatch expr) {
-        // Name mangling?
+        expr.caller.accept(this);
+        String callerClass = expr.caller.type;
+        for(AST.expression e: expr.actuals) {
+            e.accept(this);
+        }
+
+        if(!GlobalData.inheritanceGraph.isConforming(expr.typeid, callerClass)) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), 
+                "Type of caller does not conform to the type '"+expr.typeid+"' in the static dispatch '"+expr.name+"'"));
+            expr.type = "Object";
+        } else {
+            String mangledName = GlobalData.getMangledNameWithExpressions(expr.typeid, expr.name, expr.actuals);
+            String methodType = GlobalData.mangledNameMap.getOrDefault(mangledName, null);
+            if(methodType==null) {
+                GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), 
+                    "Undefined method '"+expr.name+"' in class '"+expr.typeid+"'"));
+                expr.type = "Object";
+            } else {
+                expr.type = methodType;
+            }
+        }
     }
 
-    // TODO
     public void visit(AST.dispatch expr) {
-        // Name mangling?
+        expr.caller.accept(this);
+        String callerClass = expr.caller.type;
+        for(AST.expression e: expr.actuals) {
+            e.accept(this);
+        }
+        String mangledName = GlobalData.getMangledNameWithExpressions(callerClass, expr.name, expr.actuals);
+        String methodType = GlobalData.mangledNameMap.getOrDefault(mangledName, null);
+        if(methodType==null) {
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined method: "+expr.name));
+            expr.type = "Object";
+        } else {
+            expr.type = methodType;
+        }
     }
 
     public void visit(AST.cond expr) {
@@ -70,7 +100,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         GlobalData.scopeTable.enterScope();
 
         if(!GlobalData.inheritanceGraph.hasClass(expr.typeid)){
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: " + expr.typeid));
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: "+expr.typeid));
             expr.typeid = "Object";
         }
         GlobalData.scopeTable.insert(expr.name, expr.typeid);
@@ -108,7 +138,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     // This is not an expression, but used inside an expression
     public void visit(AST.branch br) {
         if(!GlobalData.inheritanceGraph.hasClass(br.type)){
-            GlobalData.errors.add(new Error(GlobalData.filename, br.getLineNo(), "Undefined type: " + br.type));
+            GlobalData.errors.add(new Error(GlobalData.filename, br.getLineNo(), "Undefined type: "+br.type));
             br.type = "Object";
         }
         GlobalData.scopeTable.enterScope();
@@ -121,7 +151,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(GlobalData.inheritanceGraph.hasClass(expr.typeid)) {
             expr.type = expr.typeid;
         } else {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: " + expr.typeid));
+            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: "+expr.typeid));
             expr.type = "Object";
         }
     }
@@ -222,12 +252,16 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
 
     public void visit(AST.object expr) {
-        String type = GlobalData.scopeTable.lookUpGlobal(expr.name);
-        if(type==null) {
-            expr.type = "Object";
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Attribute '"+expr.name+"' is not defined"));
+        if("self".equals(expr.name)) {
+            expr.type = GlobalData.currentClass;
         } else {
-            expr.type = type;
+            String type = GlobalData.scopeTable.lookUpGlobal(expr.name);
+            if(type==null) {
+                expr.type = "Object";
+                GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Attribute '"+expr.name+"' is not defined"));
+            } else {
+                expr.type = type;
+            }
         }
     }
 

@@ -25,14 +25,14 @@ class VisitorImpl extends ExpressionVisitorImpl {
         GlobalData.scopeTable.exitScope();
     }
 
-    // TODO: add all mangled name in the global data
 
+    // TODO: for a class, decide whether same functions can be repeated
     private void updateMangledNames(AST.program prog) {
         for(AST.class_ cl: prog.classes) {
             for(AST.feature f: cl.features) {
                 if(f instanceof AST.method) {
                     AST.method m = (AST.method) f;
-                    GlobalData.mangledNameMap.put(GlobalData.getMangledNameWithFormals(cl.name, m.name, m.typeid, m.formals), m.typeid);
+                    GlobalData.mangledNameMap.put(GlobalData.getMangledNameWithoutType(cl.name, m.name, m.formals), m.typeid);
                 }
             }
         }        
@@ -98,7 +98,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
                     GlobalData.errors.add(new Error(GlobalData.filename, m.getLineNo(), errorMessage.toString()));
                 } else {
                     // className = null, because we will check mangled name with parent classes
-                    String mangledName = GlobalData.getMangledNameWithFormals(null, m.name, m.typeid, m.formals);
+                    String mangledName = GlobalData.getMangledNameWithType(null, m.name, m.typeid, m.formals);
                     
                     String scopeMangledName;
                     if((scopeMangledName=GlobalData.methodDefinitionScopeTable.lookUpGlobal(m.name))!=null
