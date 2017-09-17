@@ -27,8 +27,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
 
     // TODO: for a class, decide whether same functions can be repeated
-    private void updateMangledNames(AST.program prog) {
-        for(AST.class_ cl: prog.classes) {
+    private void updateMangledNames() {
+        for(InheritanceGraph.Node node: GlobalData.inheritanceGraph.getNodeList()) {
+            AST.class_ cl = node.getAstClass();
             for(AST.feature f: cl.features) {
                 if(f instanceof AST.method) {
                     AST.method m = (AST.method) f;
@@ -54,7 +55,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
             return;
         }
 
-        updateMangledNames(prog);
+        updateMangledNames();
 
         InheritanceGraph.Node rootNode = GlobalData.inheritanceGraph.getRootNode();
         programVisitorDepthFirstHelper(rootNode);

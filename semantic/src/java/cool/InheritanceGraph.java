@@ -104,6 +104,10 @@ public class InheritanceGraph {
         return classNameToIndexMap.containsKey(className);
     }
 
+    public List<Node> getNodeList() {
+        return graph;
+    }
+
     public void analyze() {
         parentUpdatePass();
 
