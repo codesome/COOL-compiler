@@ -229,6 +229,11 @@ public class InheritanceGraph {
         }while(true);
         return lca;
     }
+    
+    public String getParentClassName(String className) {
+        Node classNode = graph.get(classNameToIndexMap.get(className));
+        return classNode.getAstClass().parent;
+    }
 
     public static class Node {
 
