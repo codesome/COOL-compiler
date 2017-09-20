@@ -19,11 +19,11 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
         expr.e1.accept(this);
         if(type==null) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(),
-                "Attribute '"+expr.name+"' is not defined"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(),
+                "Attribute '"+expr.name+"' is not defined");
         } else if(!GlobalData.inheritanceGraph.isConforming(type, expr.e1.type)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(),
-                "The type of the expression does not conform to the declared type of the attribute: "+expr.name));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(),
+                "The type of the expression does not conform to the declared type of the attribute: "+expr.name);
         }
             
         expr.type = expr.e1.type;
@@ -37,18 +37,18 @@ abstract class ExpressionVisitorImpl implements Visitor {
         }
 
         if(!GlobalData.inheritanceGraph.hasClass(expr.typeid)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: "+expr.typeid));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
             expr.typeid = "Object";
         } else if(!GlobalData.inheritanceGraph.isConforming(expr.typeid, callerClass)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), 
-                "Type of caller does not conform to the type '"+expr.typeid+"' in the static dispatch '"+expr.name+"'"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), 
+                "Type of caller does not conform to the type '"+expr.typeid+"' in the static dispatch '"+expr.name+"'");
             expr.type = "Object";
         } else {
             String mangledName = GlobalData.getMangledNameWithExpressions(expr.typeid, expr.name, expr.actuals);
             String methodType = GlobalData.mangledNameMap.getOrDefault(mangledName, null);
             if(methodType==null) {
-                GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), 
-                    "Undefined method '"+expr.name+"' in class '"+expr.typeid+"'"));
+                GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), 
+                    "Undefined method '"+expr.name+"' in class '"+expr.typeid+"'");
                 expr.type = "Object";
             } else {
                 expr.type = methodType;
@@ -60,7 +60,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.caller.accept(this);
         String callerClass = expr.caller.type;
         if(GlobalData.inheritanceGraph.isNoMethodClass(callerClass)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined method: "+expr.name));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Undefined method: "+expr.name);
             return;
         }
         for(AST.expression e: expr.actuals) {
@@ -76,7 +76,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             methodType = GlobalData.mangledNameMap.getOrDefault(mangledName, null);
         }
         if(methodType==null) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined method signature: "+expr.name));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Undefined method signature: "+expr.name);
             expr.type = "Object";
         } else {
             expr.type = methodType;
@@ -88,7 +88,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.ifbody.accept(this);
         expr.elsebody.accept(this);
         if(!GlobalData.BOOL_TYPE.equals(expr.predicate.type)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Predicate of condition must be of Bool type"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Predicate of condition must be of Bool type");
         }
         expr.type = GlobalData.inheritanceGraph.getJoinOf(expr.ifbody.type, expr.elsebody.type);
     }
@@ -97,7 +97,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.predicate.accept(this);
         expr.body.accept(this);
         if(!GlobalData.BOOL_TYPE.equals(expr.predicate.type)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Predicate of while must be of Bool type"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Predicate of while must be of Bool type");
         }
         expr.type = "Object";
     }
@@ -114,7 +114,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         GlobalData.scopeTable.enterScope();
 
         if(!GlobalData.inheritanceGraph.hasClass(expr.typeid)){
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: "+expr.typeid));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
             expr.typeid = "Object";
         }
         GlobalData.scopeTable.insert(expr.name, expr.typeid);
@@ -128,7 +128,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
                 StringBuilder errorMessage = new StringBuilder();
                 errorMessage.append("Expression doesn't conform to the declared type of attribute ")
                 .append(expr.name).append(":").append(expr.typeid);
-                GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), errorMessage.toString()));
+                GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), errorMessage.toString());
             }
         }
 
@@ -152,7 +152,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     // This is not an expression, but used inside an expression
     public void visit(AST.branch br) {
         if(!GlobalData.inheritanceGraph.hasClass(br.type)){
-            GlobalData.errors.add(new Error(GlobalData.filename, br.getLineNo(), "Undefined type: "+br.type));
+            GlobalData.errorReporter.report(GlobalData.filename, br.getLineNo(), "Undefined type: "+br.type);
             br.type = "Object";
         }
         GlobalData.scopeTable.enterScope();
@@ -165,7 +165,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(GlobalData.inheritanceGraph.hasClass(expr.typeid)) {
             expr.type = expr.typeid;
         } else {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Undefined type: "+expr.typeid));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
             expr.type = "Object";
         }
     }
@@ -179,7 +179,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Addition of non int type"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Addition of non int type");
         }
         expr.type = GlobalData.INT_TYPE;
     }
@@ -188,7 +188,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Subtraction of non int type"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Subtraction of non int type");
         }
         expr.type = GlobalData.INT_TYPE;
     }
@@ -197,7 +197,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Multiplication of non int type"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Multiplication of non int type");
         }
         expr.type = GlobalData.INT_TYPE;
     }
@@ -206,7 +206,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Division of non int type"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Division of non int type");
         }
         expr.type = GlobalData.INT_TYPE;
     }
@@ -214,7 +214,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public void visit(AST.comp expr) {
         expr.e1.accept(this);
         if(!GlobalData.BOOL_TYPE.equals(expr.e1.type)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Negation of non bool type"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Negation of non bool type");
         }
         expr.type = GlobalData.BOOL_TYPE;
     }
@@ -223,7 +223,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "< of non int types"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "< of non int types");
         }
         expr.type = GlobalData.BOOL_TYPE;
     }
@@ -232,7 +232,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "<= of non int types"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "<= of non int types");
         }
         expr.type = GlobalData.BOOL_TYPE;
     }
@@ -250,9 +250,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
             boolean e2p = GlobalData.INT_TYPE.equals(expr.e2.type) 
                 || GlobalData.BOOL_TYPE.equals(expr.e2.type) || GlobalData.STRING_TYPE.equals(expr.e2.type);  
             if(e1p && e2p) {
-                GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Equality of different primitive types"));
+                GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Equality of different primitive types");
             } else if(e1p || e2p) {
-                GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Equality of primitive types with non primitive type"));
+                GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Equality of primitive types with non primitive type");
             }
         }
         expr.type = GlobalData.BOOL_TYPE;
@@ -261,7 +261,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public void visit(AST.neg expr) {
         expr.e1.accept(this);
         if(!GlobalData.INT_TYPE.equals(expr.e1.type)) {
-            GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Cannot do compliment of non int type"));
+            GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Cannot do compliment of non int type");
         }
         expr.type = GlobalData.INT_TYPE;
     }
@@ -273,7 +273,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             String type = GlobalData.scopeTable.lookUpGlobal(expr.name);
             if(type==null) {
                 expr.type = "Object";
-                GlobalData.errors.add(new Error(GlobalData.filename, expr.getLineNo(), "Attribute '"+expr.name+"' is not defined"));
+                GlobalData.errorReporter.report(GlobalData.filename, expr.getLineNo(), "Attribute '"+expr.name+"' is not defined");
             } else {
                 expr.type = type;
             }

@@ -15,7 +15,6 @@ public class GlobalData {
 
     // Initialised in Semantic.java
     public static String filename;
-    public static List<Error> errors;
 
     // Contains all the variables in the scope
     // mapped with their type
@@ -37,11 +36,12 @@ public class GlobalData {
     // Should be updated when we start parsing a class
     public static String currentClass;
 
+    public static ErrorReporter errorReporter;
+
     static {
         currentClass = "";
         scopeTable = new ScopeTable<>();
         methodDefinitionScopeTable = new ScopeTable<>();
-        errors = new ArrayList<>();
         mangledNameMap = new HashMap<>();
     }
 

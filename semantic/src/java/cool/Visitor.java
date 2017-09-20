@@ -1,13 +1,5 @@
 package cool;
 
-/*
- * Instructions:
- *     1) Use GlobalData to get data of the scope and context
- *     2) And error found should be appended to the List<Error> errors
- *     3) Annotate the type for expressions insde the visit
- *     4) Don't forget to visit all the nodes originating from the current class before analysing it.
- **/
-
 interface Visitor {
 
     // Non-Expression visitors

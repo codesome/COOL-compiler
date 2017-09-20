@@ -16,20 +16,14 @@ public class Semantic{
 	Don't change code above this line
 */
 
-
-	public void reportError(Error error) {
-		reportError(error.getFilename(), error.getLineNo(), error.getError());
-	}
-
-	public void reportError(List<Error> errors) {
-		for(Error error: errors) {
-			reportError(error);
-		}
-	}
-
 	public Semantic(AST.program program){
+		GlobalData.errorReporter = new ErrorReporter() {
+			@Override
+			public void report(String filename, int lineNo, String error) {
+				reportError(filename, lineNo, error);
+			}
+		};
 		Visitor visitor = new VisitorImpl();
 		program.accept(visitor);
-		reportError(GlobalData.errors);
 	}
 }
