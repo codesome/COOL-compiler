@@ -40,23 +40,23 @@ public class InheritanceGraph {
         // Adding Object
         ROOT_AST_CLASS.features = new ArrayList<>();
         ROOT_AST_CLASS.features.add(new AST.method("abort", new ArrayList<>(), ROOT_CLASS_NAME, null, 0));
-        ROOT_AST_CLASS.features.add(new AST.method("type_name", new ArrayList<>(), GlobalData.STRING_TYPE, null, 0));
+        ROOT_AST_CLASS.features.add(new AST.method("type_name", new ArrayList<>(), Global.STRING_TYPE, null, 0));
         ROOT_AST_CLASS.features.add(new AST.method("copy", new ArrayList<>(), ROOT_CLASS_NAME, null, 0));
 
         classNameToIndexMap.put(ROOT_CLASS_NAME, ROOT_CLASS_INDEX);
         graph.add(ROOT_AST_NODE);
         
 
-        List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", GlobalData.STRING_TYPE, 0)));
+        List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.STRING_TYPE, 0)));
 
         // Adding IO
         List<AST.feature> ioFeatures = new ArrayList<>();
-        List<AST.formal> intFormalList1 = new ArrayList<>(Arrays.asList(new AST.formal("x", GlobalData.INT_TYPE, 0)));
+        List<AST.formal> intFormalList1 = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.INT_TYPE, 0)));
 
         ioFeatures.add(new AST.method("out_string", stringFormalList, "IO", null, 0));
         ioFeatures.add(new AST.method("out_int", intFormalList1, "IO", null, 0));
-        ioFeatures.add(new AST.method("in_string", new ArrayList<>(), GlobalData.STRING_TYPE, null, 0));
-        ioFeatures.add(new AST.method("in_int", new ArrayList<>(), GlobalData.INT_TYPE, null, 0));
+        ioFeatures.add(new AST.method("in_string", new ArrayList<>(), Global.STRING_TYPE, null, 0));
+        ioFeatures.add(new AST.method("in_int", new ArrayList<>(), Global.INT_TYPE, null, 0));
 
         AST.class_ ioAstClass = new AST.class_("IO", null, ROOT_CLASS_NAME, ioFeatures, 0);
         Node ioNode = new Node(ioAstClass, 0);
@@ -65,33 +65,33 @@ public class InheritanceGraph {
         graph.add(ioNode);
 
         // Adding String
-        List<AST.formal> intFormalList2 = new ArrayList<>(Arrays.asList(new AST.formal("x", GlobalData.INT_TYPE, 0)
-            ,new AST.formal("y", GlobalData.INT_TYPE, 0)));
+        List<AST.formal> intFormalList2 = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.INT_TYPE, 0)
+            ,new AST.formal("y", Global.INT_TYPE, 0)));
         List<AST.feature> stringFeatures = new ArrayList<>();
 
-        stringFeatures.add(new AST.method("length", new ArrayList<>(), GlobalData.INT_TYPE, null, 0));
-        stringFeatures.add(new AST.method("concat", stringFormalList, GlobalData.STRING_TYPE, null, 0));
-        stringFeatures.add(new AST.method("substr", intFormalList2, GlobalData.STRING_TYPE, null, 0));
+        stringFeatures.add(new AST.method("length", new ArrayList<>(), Global.INT_TYPE, null, 0));
+        stringFeatures.add(new AST.method("concat", stringFormalList, Global.STRING_TYPE, null, 0));
+        stringFeatures.add(new AST.method("substr", intFormalList2, Global.STRING_TYPE, null, 0));
 
-        AST.class_ stringAstClass = new AST.class_(GlobalData.STRING_TYPE, null, ROOT_CLASS_NAME, stringFeatures, 0);
+        AST.class_ stringAstClass = new AST.class_(Global.STRING_TYPE, null, ROOT_CLASS_NAME, stringFeatures, 0);
         Node stringNode = new Node(stringAstClass, 0);
 
-        classNameToIndexMap.put(GlobalData.STRING_TYPE, graph.size());
+        classNameToIndexMap.put(Global.STRING_TYPE, graph.size());
         graph.add(stringNode);
 
         // Other base classes
-        classNameToIndexMap.put(GlobalData.INT_TYPE, -1);
-        classNameToIndexMap.put(GlobalData.BOOL_TYPE, -1);
+        classNameToIndexMap.put(Global.INT_TYPE, -1);
+        classNameToIndexMap.put(Global.BOOL_TYPE, -1);
 
     }
 
     public void addClass(AST.class_ astClass) {
         if(classNameToIndexMap.containsKey(astClass.name)) {
-            GlobalData.errorReporter.report(GlobalData.filename, astClass.getLineNo(),new StringBuilder().append("class '")
+            Global.errorReporter.report(Global.filename, astClass.getLineNo(),new StringBuilder().append("class '")
                 .append(astClass.name).append("' has been redefined").toString());
             return;
         } else if(isRestrictedClass(astClass.name)) {
-            GlobalData.errorReporter.report(GlobalData.filename, astClass.getLineNo(),new StringBuilder().append("Cannot redefine base class '")
+            Global.errorReporter.report(Global.filename, astClass.getLineNo(),new StringBuilder().append("Cannot redefine base class '")
                 .append(astClass.name).append("'").toString());
             return;
         }
@@ -125,7 +125,7 @@ public class InheritanceGraph {
 
         if(!hasMain()) {
             hasError = true;
-            GlobalData.errorReporter.report(GlobalData.filename, 0,"'Main' class is missing.");
+            Global.errorReporter.report(Global.filename, 0,"'Main' class is missing.");
         }
 
         List<Stack<Node>> cycles = getCyclesInGraph();
@@ -143,7 +143,7 @@ public class InheritanceGraph {
                 String lastClassName = lastClass.name;
                 errorString.append(lastClassName).append(" -> ");
                 errorString.append(cyclePath).append(lastClassName);
-                GlobalData.errorReporter.report(GlobalData.filename, lastClass.getLineNo(), errorString.toString());
+                Global.errorReporter.report(Global.filename, lastClass.getLineNo(), errorString.toString());
             }
         }
 
@@ -167,7 +167,7 @@ public class InheritanceGraph {
         for(Node cl: graph) {
             if(cl.getAstClass().parent!=null) {
                 if(isRestrictedInheritanceClass(cl.getAstClass().parent)) {
-                    GlobalData.errorReporter.report(GlobalData.filename, cl.getAstClass().getLineNo(), 
+                    Global.errorReporter.report(Global.filename, cl.getAstClass().getLineNo(), 
                                 new StringBuilder().append("Cannot inherit base class '").append(cl.getAstClass().parent)
                                 .append("'").toString());
                 } else if(classNameToIndexMap.containsKey(cl.getAstClass().parent)) {
@@ -175,7 +175,7 @@ public class InheritanceGraph {
                     cl.setParent(graph.get(parentIndex));
                     graph.get(parentIndex).addChild(cl);
                 } else {
-                    GlobalData.errorReporter.report(GlobalData.filename, cl.getAstClass().getLineNo(), 
+                    Global.errorReporter.report(Global.filename, cl.getAstClass().getLineNo(), 
                                 new StringBuilder().append("Inherited class '").append(cl.getAstClass().parent)
                                 .append("' for '").append(cl.getAstClass().name).append("' has not been declared").toString());
                 }

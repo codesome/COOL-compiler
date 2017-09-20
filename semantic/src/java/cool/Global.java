@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.lang.StringBuilder;
 
-public class GlobalData {
+public class Global {
 
     public static final String INT_TYPE = "Int";
     public static final String BOOL_TYPE = "Bool";

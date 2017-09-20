@@ -17,7 +17,7 @@ public class Semantic{
 */
 
 	public Semantic(AST.program program){
-		GlobalData.errorReporter = new ErrorReporter() {
+		Global.errorReporter = new ErrorReporter() {
 			@Override
 			public void report(String filename, int lineNo, String error) {
 				reportError(filename, lineNo, error);
