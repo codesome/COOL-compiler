@@ -2,6 +2,7 @@ package cool;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.HashSet;
 import java.lang.StringBuilder;
 
@@ -79,26 +80,24 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 } else {
                     // already defined
                     StringBuilder errorMessage = new StringBuilder();
-                    errorMessage.append("Attribute '").append(a.name);
+                    errorMessage.append("Attribute '").append(a.name).append("'");
                     if(GlobalData.scopeTable.lookUpLocal(a.name) == null) {
                         // defined in parent classes
-                        errorMessage.append("' has been already defined in inherited tree.");
+                        errorMessage.append(" has been already defined in inherited tree.");
                     } else {
                         // defined in current class
-                        errorMessage.append("' has multiple definitions in the class '")
+                        errorMessage.append(" has multiple definitions in the class '")
                             .append(cl.name).append("'");
                     }
                     GlobalData.errors.add(new Error(GlobalData.filename, a.getLineNo(), errorMessage.toString()));
-                    // TODO: should we add redeclaration in scope for further analysis? Or return?
                 }
             } else { // Its a method
                 AST.method m = (AST.method) f;
                 if(GlobalData.methodDefinitionScopeTable.lookUpLocal(m.name)!=null) {
                     // Already present in the current class
-                    StringBuilder errorMessage = new StringBuilder();
-                    errorMessage.append("Method '").append(m.name);
-                    errorMessage.append("' has multiple definitions in the class '").append(cl.name).append("'");
-                    GlobalData.errors.add(new Error(GlobalData.filename, m.getLineNo(), errorMessage.toString()));
+                    GlobalData.errors.add(new Error(GlobalData.filename, m.getLineNo(), 
+                        new StringBuilder().append("Method '").append(m.name).append("' has multiple definitions in the class '")
+                        .append(cl.name).append("'").toString()));
                 } else {
                     // className = null, because we will check mangled name with parent classes
                     String mangledName = GlobalData.getMangledNameWithType(null, m.name, m.typeid, m.formals);
@@ -108,10 +107,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
                         && !scopeMangledName.equals(mangledName)) {
                         // it has been defined in parent class
                         // and the method signatures does not match
-                        StringBuilder errorMessage = new StringBuilder();
-                        errorMessage.append("Redefined method '").append(m.name).append("' in class '")
-                        .append(cl.name).append("' doesn't follow method signature of inherited class.");
-                        GlobalData.errors.add(new Error(GlobalData.filename, m.getLineNo(), errorMessage.toString()));
+                        GlobalData.errors.add(new Error(GlobalData.filename, m.getLineNo(), 
+                            new StringBuilder().append("Redefined method '").append(m.name).append("' in class '")
+                            .append(cl.name).append("' doesn't follow method signature of inherited class.").toString()));
                     }
 
                     GlobalData.methodDefinitionScopeTable.insert(m.name, mangledName);
@@ -130,20 +128,18 @@ class VisitorImpl extends ExpressionVisitorImpl {
     public void visit(AST.attr at) {
         if(!GlobalData.inheritanceGraph.hasClass(at.typeid)) {
             // using undefined type
-            StringBuilder errorMessage = new StringBuilder();
-            errorMessage.append("Type '").append(at.typeid).append("' for attribute '")
-            .append(at.name).append("' has not been defined");
-            GlobalData.errors.add(new Error(GlobalData.filename, at.getLineNo(), errorMessage.toString()));
+            GlobalData.errors.add(new Error(GlobalData.filename, at.getLineNo(), 
+                new StringBuilder().append("Type '").append(at.typeid).append("' for attribute '")
+                .append(at.name).append("' has not been defined").toString()));
         } else if(!(at.value instanceof AST.no_expr)) { // assignment exists
             // visiting expression
             at.value.accept(this);
 
             // checking type of variable and assignment
             if(!GlobalData.inheritanceGraph.isConforming(at.typeid, at.value.type)) {
-                StringBuilder errorMessage = new StringBuilder();
-                errorMessage.append("Expression doesn't conform to the declared type of attribute ")
-                .append(at.name).append(":").append(at.typeid);
-                GlobalData.errors.add(new Error(GlobalData.filename, at.getLineNo(), errorMessage.toString()));
+                GlobalData.errors.add(new Error(GlobalData.filename, at.getLineNo(), 
+                    new StringBuilder().append("Expression doesn't conform to the declared type of attribute '")
+                    .append(at.name).append(":").append(at.typeid).append("'").toString()));
             }
         }
     }
@@ -151,16 +147,23 @@ class VisitorImpl extends ExpressionVisitorImpl {
     public void visit(AST.method mthd) {
         GlobalData.scopeTable.enterScope();
         // visiting all the formals
+        Set<String> formalSet = new HashSet<>();
         for(AST.formal fm: mthd.formals) {
+            if(formalSet.contains(fm.name)) {
+                GlobalData.errors.add(new Error(GlobalData.filename, fm.getLineNo(), 
+                    new StringBuilder().append("Formal '").append(fm.name)
+                    .append("' has be redeclared in the method '").append(mthd.name).append("'").toString()));
+            } else {
+                formalSet.add(fm.name);
+            }
             fm.accept(this);
         }
 
         mthd.body.accept(this);
         if(!mthd.typeid.equals(mthd.body.type)) {
-            StringBuilder errorMessage = new StringBuilder();
-            errorMessage.append("Return type of method '")
-            .append(mthd.name).append("' doesn't match with return type of its body.");
-            GlobalData.errors.add(new Error(GlobalData.filename, mthd.getLineNo(), errorMessage.toString()));
+            GlobalData.errors.add(new Error(GlobalData.filename, mthd.getLineNo(), 
+                new StringBuilder().append("Return type of method '").append(mthd.name)
+                .append("' doesn't match with return type of its body.").toString()));
         }
         GlobalData.scopeTable.exitScope();
     }
@@ -171,7 +174,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
             StringBuilder errorMessage = new StringBuilder();
             errorMessage.append("Type '").append(fm.typeid).append("' for formal '")
             .append(fm.name).append("' has not been defined");
-            GlobalData.errors.add(new Error(GlobalData.filename, fm.getLineNo(), errorMessage.toString()));
+            GlobalData.errors.add(new Error(GlobalData.filename, fm.getLineNo(), 
+                new StringBuilder().append("Type '").append(fm.typeid).append("' for formal '")
+                .append(fm.name).append("' has not been defined").toString()));
         } else {
             GlobalData.scopeTable.insert(fm.name, fm.typeid);
         }
