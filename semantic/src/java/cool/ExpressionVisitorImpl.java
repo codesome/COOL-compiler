@@ -39,6 +39,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(!Global.inheritanceGraph.hasClass(expr.typeid)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
             expr.typeid = "Object";
+            expr.type = "Object";
         } else if(!Global.inheritanceGraph.isConforming(expr.typeid, callerClass)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), 
                 "Type of caller does not conform to the type '"+expr.typeid+"' in the static dispatch '"+expr.name+"'");
