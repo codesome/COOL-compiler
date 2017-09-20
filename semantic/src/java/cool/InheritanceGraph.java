@@ -25,19 +25,125 @@ public class InheritanceGraph {
     private boolean hasMain;
 
     public InheritanceGraph() {
-        
         graph = new ArrayList<>();
-        
         classNameToIndexMap = new HashMap<>();
-
         hasMain = false;
-
         addBaseClasses();
     }
 
-    private void addBaseClasses() {
+    public Node getRootNode() {
+        return ROOT_AST_NODE;
+    }
 
-        // Adding Object
+    public boolean hasMain() {
+        return hasMain;
+    }
+
+    public boolean hasClass(String className) {
+        return classNameToIndexMap.containsKey(className);
+    }
+
+    public List<Node> getNodeList() {
+        return graph;
+    }
+
+    public String getParentClassName(String className) {
+        Node classNode = graph.get(classNameToIndexMap.get(className));
+        return classNode.getAstClass().parent;
+    }
+
+    public void addClass(AST.class_ astClass) {
+        if(classNameToIndexMap.containsKey(astClass.name)) {
+            Global.errorReporter.report(Global.filename, astClass.getLineNo(),
+                new StringBuilder().append("class '").append(astClass.name)
+                    .append("' has been redefined").toString());
+        } else if(isRestrictedClass(astClass.name)) {
+            Global.errorReporter.report(Global.filename, astClass.getLineNo(),
+                new StringBuilder().append("Cannot redefine base class '")
+                    .append(astClass.name).append("'").toString());
+        } else {
+            classNameToIndexMap.put(astClass.name, graph.size());
+            graph.add(new Node(astClass, graph.size()));
+            if(MAIN_CLASS_NAME.equals(astClass.name)) {
+                hasMain = true;
+            }
+        }
+    }
+
+    public boolean isConforming(String type1, String type2) {
+        if(type1.equals(type2)) {
+            return true;
+        } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
+            return false;
+        }
+        Node type1Node = graph.get(classNameToIndexMap.get(type1));
+        Node type2Node = graph.get(classNameToIndexMap.get(type2));
+        while(type2Node.parentExists()) {
+            type2Node = type2Node.getParent();
+            if(type1Node.equals(type2Node)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public String getJoinOf(String type1, String type2) {
+        if(type1.equals(type2)) {
+            return type1;
+        } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
+            return ROOT_CLASS_NAME;
+        }
+        Node type1Node = graph.get(classNameToIndexMap.get(type1));
+        Node type2Node = graph.get(classNameToIndexMap.get(type2));
+        Node lca = getLCA(type1Node, type2Node);
+        return lca.getAstClass().name;
+    }
+
+    public boolean analyze() {
+        boolean hasError = false;
+        updateParents();
+
+        if(!hasMain()) {
+            hasError = true;
+            Global.errorReporter.report(Global.filename, 0,"'Main' class is missing.");
+        }
+
+        List<Stack<Node>> cycles = getCyclesInGraph();
+        if(!cycles.isEmpty()) {
+            hasError = true;
+            StringBuilder errorString = new StringBuilder();
+            StringBuilder cyclePath = new StringBuilder();
+            for(Stack<Node> cycle: cycles) {
+                cyclePath.setLength(0);
+                int size = cycle.size();
+                for(int i=0; i<size-1; i++) {
+                    cyclePath.append(cycle.pop().getAstClass().name).append(" -> ");
+                }
+
+                AST.class_ lastClass = cycle.pop().getAstClass();
+                String lastClassName = lastClass.name;
+                
+                errorString.setLength(0);
+                errorString.append("Classes have cyclic dependency: ");
+                errorString.append(lastClassName).append(" -> ");
+                errorString.append(cyclePath).append(lastClassName);
+                Global.errorReporter.report(Global.filename, lastClass.getLineNo(), errorString.toString());
+            }
+        }
+        return hasError;
+    }
+
+
+    private void addBaseClasses() {
+        addObject();
+        addIO();
+        addString();
+        classNameToIndexMap.put(Global.INT_TYPE, -1);
+        classNameToIndexMap.put(Global.BOOL_TYPE, -1);
+
+    }
+
+    private void addObject() {
         ROOT_AST_CLASS.features = new ArrayList<>();
         ROOT_AST_CLASS.features.add(new AST.method("abort", new ArrayList<>(), ROOT_CLASS_NAME, null, 0));
         ROOT_AST_CLASS.features.add(new AST.method("type_name", new ArrayList<>(), Global.STRING_TYPE, null, 0));
@@ -45,11 +151,11 @@ public class InheritanceGraph {
 
         classNameToIndexMap.put(ROOT_CLASS_NAME, ROOT_CLASS_INDEX);
         graph.add(ROOT_AST_NODE);
-        
+    }
 
+    private void addIO() {
         List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.STRING_TYPE, 0)));
 
-        // Adding IO
         List<AST.feature> ioFeatures = new ArrayList<>();
         List<AST.formal> intFormalList1 = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.INT_TYPE, 0)));
 
@@ -63,8 +169,11 @@ public class InheritanceGraph {
 
         classNameToIndexMap.put("IO", graph.size());
         graph.add(ioNode);
+    }
 
-        // Adding String
+    private void addString() {
+        List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.STRING_TYPE, 0)));
+
         List<AST.formal> intFormalList2 = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.INT_TYPE, 0)
             ,new AST.formal("y", Global.INT_TYPE, 0)));
         List<AST.feature> stringFeatures = new ArrayList<>();
@@ -78,77 +187,7 @@ public class InheritanceGraph {
 
         classNameToIndexMap.put(Global.STRING_TYPE, graph.size());
         graph.add(stringNode);
-
-        // Other base classes
-        classNameToIndexMap.put(Global.INT_TYPE, -1);
-        classNameToIndexMap.put(Global.BOOL_TYPE, -1);
-
-    }
-
-    public void addClass(AST.class_ astClass) {
-        if(classNameToIndexMap.containsKey(astClass.name)) {
-            Global.errorReporter.report(Global.filename, astClass.getLineNo(),new StringBuilder().append("class '")
-                .append(astClass.name).append("' has been redefined").toString());
-            return;
-        } else if(isRestrictedClass(astClass.name)) {
-            Global.errorReporter.report(Global.filename, astClass.getLineNo(),new StringBuilder().append("Cannot redefine base class '")
-                .append(astClass.name).append("'").toString());
-            return;
-        }
-        classNameToIndexMap.put(astClass.name, graph.size());
-        graph.add(new Node(astClass, graph.size()));
-        if(MAIN_CLASS_NAME.equals(astClass.name)) {
-            hasMain = true;
-        }
-
-    }
-
-    public boolean hasMain() {
-        return hasMain;
-    }
-
-    public Node getRootNode() {
-        return ROOT_AST_NODE;
-    }
-
-    public boolean hasClass(String className) {
-        return classNameToIndexMap.containsKey(className);
-    }
-
-    public List<Node> getNodeList() {
-        return graph;
-    }
-
-    public boolean analyze() {
-        boolean hasError = false;
-        parentUpdatePass();
-
-        if(!hasMain()) {
-            hasError = true;
-            Global.errorReporter.report(Global.filename, 0,"'Main' class is missing.");
-        }
-
-        List<Stack<Node>> cycles = getCyclesInGraph();
-        if(!cycles.isEmpty()) {
-            hasError = true;
-            for(Stack<Node> cycle: cycles) {
-                StringBuilder errorString = new StringBuilder();
-                errorString.append("Classes have cyclic dependency: ");
-                int size = cycle.size();
-                StringBuilder cyclePath = new StringBuilder();
-                for(int i=0; i<size-1; i++) {
-                    cyclePath.append(cycle.pop().getAstClass().name).append(" -> ");
-                }
-                AST.class_ lastClass = cycle.pop().getAstClass();
-                String lastClassName = lastClass.name;
-                errorString.append(lastClassName).append(" -> ");
-                errorString.append(cyclePath).append(lastClassName);
-                Global.errorReporter.report(Global.filename, lastClass.getLineNo(), errorString.toString());
-            }
-        }
-
-        return hasError;
-
+        
     }
 
     private boolean isRestrictedClass(String name) {
@@ -163,7 +202,7 @@ public class InheritanceGraph {
         return "Int".equals(name) || "Bool".equals(name);
     }
 
-    private void parentUpdatePass() {
+    private void updateParents() {
         for(Node cl: graph) {
             if(cl.getAstClass().parent!=null) {
                 if(isRestrictedInheritanceClass(cl.getAstClass().parent)) {
@@ -209,7 +248,7 @@ public class InheritanceGraph {
         return false;
     }
 
-    public List<Stack<Node>> getCyclesInGraph() {
+    private List<Stack<Node>> getCyclesInGraph() {
 
         int V = graph.size();
         List<Boolean> visited = new ArrayList<>();
@@ -230,36 +269,7 @@ public class InheritanceGraph {
         return cycles;
     }
     
-    public boolean isConforming(String type1, String type2) {
-        if(type1.equals(type2)) {
-            return true;
-        } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
-            return false;
-        }
-        Node type1Node = graph.get(classNameToIndexMap.get(type1));
-        Node type2Node = graph.get(classNameToIndexMap.get(type2));
-        while(type2Node.parentExists()) {
-            type2Node = type2Node.getParent();
-            if(type1Node.equals(type2Node)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public String getJoinOf(String type1, String type2) {
-        if(type1.equals(type2)) {
-            return type1;
-        } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
-            return ROOT_CLASS_NAME;
-        }
-        Node type1Node = graph.get(classNameToIndexMap.get(type1));
-        Node type2Node = graph.get(classNameToIndexMap.get(type2));
-        Node lca = getLCA(type1Node, type2Node);
-        return lca.getAstClass().name;
-    }
-    
-    public Node getLCA(Node node1, Node node2) {
+    private Node getLCA(Node node1, Node node2) {
         Node lca;
         List<Boolean> visited = new ArrayList<>(graph.size());
         visited.addAll(Collections.nCopies(graph.size(),Boolean.FALSE));
@@ -277,11 +287,6 @@ public class InheritanceGraph {
         return lca;
     }
     
-    public String getParentClassName(String className) {
-        Node classNode = graph.get(classNameToIndexMap.get(className));
-        return classNode.getAstClass().parent;
-    }
-
     public static class Node {
 
         public static final int NO_PARENT = -1;
