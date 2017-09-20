@@ -69,7 +69,7 @@ public class InheritanceGraph {
     }
 
     public boolean isConforming(String type1, String type2) {
-        if(type1.equals(type2)) {
+        if(type1.equals(type2) || ROOT_CLASS_NAME.equals(type1)) {
             return true;
         } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
             return false;

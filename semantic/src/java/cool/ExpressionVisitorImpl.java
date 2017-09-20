@@ -262,7 +262,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public void visit(AST.neg expr) {
         expr.e1.accept(this);
         if(!Global.INT_TYPE.equals(expr.e1.type)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Cannot do compliment of non int type");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Cannot do complement of non int type");
         }
         expr.type = Global.INT_TYPE;
     }
