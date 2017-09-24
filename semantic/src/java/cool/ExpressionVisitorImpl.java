@@ -15,17 +15,20 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public void visit(AST.assign expr) {
 
-        String type = Global.scopeTable.lookUpGlobal(expr.name);
-
         expr.e1.accept(this);
-        if(type==null) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(),
-                "Attribute '"+expr.name+"' is not defined");
-        } else if(!Global.inheritanceGraph.isConforming(type, expr.e1.type)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(),
-                "The type of the expression does not conform to the declared type of the attribute: "+expr.name);
+        if("self".equals(expr.name)) {
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Cannot assign to 'self'");
+        } else {
+            String type = Global.scopeTable.lookUpGlobal(expr.name);
+
+            if(type==null) {
+                Global.errorReporter.report(Global.filename, expr.getLineNo(),
+                    "Attribute '"+expr.name+"' is not defined");
+            } else if(!Global.inheritanceGraph.isConforming(type, expr.e1.type)) {
+                Global.errorReporter.report(Global.filename, expr.getLineNo(),
+                    "The type of the expression does not conform to the declared type of the attribute: "+expr.name);
+            }
         }
-            
         expr.type = expr.e1.type;
     }
 
@@ -114,22 +117,25 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public void visit(AST.let expr) {
         Global.scopeTable.enterScope();
 
-        if(!Global.inheritanceGraph.hasClass(expr.typeid)){
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
-            expr.typeid = Global.Constants.ROOT_TYPE;
-        }
-        Global.scopeTable.insert(expr.name, expr.typeid);
-        
-        if(!(expr.value instanceof AST.no_expr)) { // assignment exists
-            // visiting expression
-            expr.value.accept(this);
+        if("self".equals(expr.name)) {
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "'self' cannot be bound in a 'let' expression");
+        } else {
+            if(!Global.inheritanceGraph.hasClass(expr.typeid)){
+                Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
+                expr.typeid = Global.Constants.ROOT_TYPE;
+            }
+            Global.scopeTable.insert(expr.name, expr.typeid);
+            if(!(expr.value instanceof AST.no_expr)) { // assignment exists
+                // visiting expression
+                expr.value.accept(this);
 
-            // checking type of variable and assignment
-            if(!Global.inheritanceGraph.isConforming(expr.typeid, expr.value.type)) {
-                StringBuilder errorMessage = new StringBuilder();
-                errorMessage.append("Expression doesn't conform to the declared type of attribute ")
-                .append(expr.name).append(":").append(expr.typeid);
-                Global.errorReporter.report(Global.filename, expr.getLineNo(), errorMessage.toString());
+                // checking type of variable and assignment
+                if(!Global.inheritanceGraph.isConforming(expr.typeid, expr.value.type)) {
+                    StringBuilder errorMessage = new StringBuilder();
+                    errorMessage.append("Expression doesn't conform to the declared type of attribute ")
+                    .append(expr.name).append(":").append(expr.typeid);
+                    Global.errorReporter.report(Global.filename, expr.getLineNo(), errorMessage.toString());
+                }
             }
         }
 
@@ -152,12 +158,16 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     // This is not an expression, but used inside an expression
     public void visit(AST.branch br) {
-        if(!Global.inheritanceGraph.hasClass(br.type)){
-            Global.errorReporter.report(Global.filename, br.getLineNo(), "Undefined type: "+br.type);
-            br.type = Global.Constants.ROOT_TYPE;
+        if("self".equals(br.name)) {
+            Global.errorReporter.report(Global.filename, br.getLineNo(), "'self' cannot be bound in a 'case'");
+        } else {
+            if(!Global.inheritanceGraph.hasClass(br.type)){
+                Global.errorReporter.report(Global.filename, br.getLineNo(), "Undefined type: "+br.type);
+                br.type = Global.Constants.ROOT_TYPE;
+            }
         }
         Global.scopeTable.enterScope();
-        Global.scopeTable.insert(br.name, br.type);
+        if(!"self".equals(br.name)) Global.scopeTable.insert(br.name, br.type);
         br.value.accept(this);
         Global.scopeTable.exitScope();
     }

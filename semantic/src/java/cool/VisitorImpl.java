@@ -79,7 +79,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
         if("Main".equals(cl.name)) {
             String mainMangled = Global.methodDefinitionScopeTable.lookUpLocal("main");
-            System.out.println(mainMangled);
             if(mainMangled==null) {
                 Global.errorReporter.report(Global.filename, cl.getLineNo(), "'main' method is missing in 'Main' class");
             } else if(Global.hasArguments(mainMangled)) {
@@ -102,9 +101,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     private void checkAttr(AST.attr a) {
-        if("self".equals(a.name)) {
-            Global.errorReporter.report(Global.filename, a.getLineNo(), "Cannot define attribute with name 'self'");
-        } else if(Global.scopeTable.lookUpGlobal(a.name) == null) {
+        if(Global.scopeTable.lookUpGlobal(a.name) == null) {
             // not defined earlier, all clear
             Global.scopeTable.insert(a.name, a.typeid);
         } else {
@@ -148,7 +145,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.attr at) {
-        if(!Global.inheritanceGraph.hasClass(at.typeid)) {
+        if("self".equals(at.name)) {
+            Global.errorReporter.report(Global.filename, at.getLineNo(), "Cannot define attribute with name 'self'");
+        }else if(!Global.inheritanceGraph.hasClass(at.typeid)) {
             // using undefined type
             Global.errorReporter.report(Global.filename, at.getLineNo(), 
                 new StringBuilder().append("Type '").append(at.typeid).append("' for attribute '")
@@ -174,7 +173,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
         // visiting all the formals
         Set<String> formalSet = new HashSet<>();
         for(AST.formal fm: mthd.formals) {
-            if(formalSet.contains(fm.name)) {
+            if("self".equals(fm.name)) {
+                Global.errorReporter.report(Global.filename, fm.getLineNo(), "Cannot define formal with name 'self'");
+            } if(formalSet.contains(fm.name)) {
                 Global.errorReporter.report(Global.filename, fm.getLineNo(), 
                     new StringBuilder().append("Formal '").append(fm.name)
                     .append("' has be redeclared in the method '").append(mthd.name).append("'").toString());
