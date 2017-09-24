@@ -9,9 +9,14 @@ import java.lang.StringBuilder;
 
 public class Global {
 
-    public static final String INT_TYPE = "Int";
-    public static final String BOOL_TYPE = "Bool";
-    public static final String STRING_TYPE = "String";
+    public static class Constants {
+        public static final String ROOT_TYPE = "Object";
+        public static final String IO_TYPE = "IO";
+        public static final String INT_TYPE = "Int";
+        public static final String BOOL_TYPE = "Bool";
+        public static final String STRING_TYPE = "String";
+    }
+
 
     // Initialised in Semantic.java
     public static String filename;

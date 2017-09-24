@@ -11,9 +11,8 @@ import java.util.Collections;
 
 public class InheritanceGraph {
 
-    private static final String ROOT_CLASS_NAME = "Object";
     private static final int ROOT_CLASS_INDEX = 0;
-    private static AST.class_ ROOT_AST_CLASS = new AST.class_(ROOT_CLASS_NAME, null, null, new ArrayList<>(), 0);
+    private static AST.class_ ROOT_AST_CLASS = new AST.class_(Global.Constants.ROOT_TYPE, null, null, new ArrayList<>(), 0);
     private static Node ROOT_AST_NODE = new Node(ROOT_AST_CLASS, ROOT_CLASS_INDEX);
 
     public static String MAIN_CLASS_NAME = "Main";
@@ -69,7 +68,7 @@ public class InheritanceGraph {
     }
 
     public boolean isConforming(String type1, String type2) {
-        if(type1.equals(type2) || ROOT_CLASS_NAME.equals(type1)) {
+        if(type1.equals(type2) || Global.Constants.ROOT_TYPE.equals(type1)) {
             return true;
         } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
             return false;
@@ -89,7 +88,7 @@ public class InheritanceGraph {
         if(type1.equals(type2)) {
             return type1;
         } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
-            return ROOT_CLASS_NAME;
+            return Global.Constants.ROOT_TYPE;
         }
         Node type1Node = graph.get(classNameToIndexMap.get(type1));
         Node type2Node = graph.get(classNameToIndexMap.get(type2));
@@ -136,68 +135,70 @@ public class InheritanceGraph {
         addObject();
         addIO();
         addString();
-        classNameToIndexMap.put(Global.INT_TYPE, -1);
-        classNameToIndexMap.put(Global.BOOL_TYPE, -1);
+        classNameToIndexMap.put(Global.Constants.INT_TYPE, -1);
+        classNameToIndexMap.put(Global.Constants.BOOL_TYPE, -1);
 
     }
 
     private void addObject() {
         ROOT_AST_CLASS.features = new ArrayList<>();
-        ROOT_AST_CLASS.features.add(new AST.method("abort", new ArrayList<>(), ROOT_CLASS_NAME, null, 0));
-        ROOT_AST_CLASS.features.add(new AST.method("type_name", new ArrayList<>(), Global.STRING_TYPE, null, 0));
-        ROOT_AST_CLASS.features.add(new AST.method("copy", new ArrayList<>(), ROOT_CLASS_NAME, null, 0));
+        ROOT_AST_CLASS.features.add(new AST.method("abort", new ArrayList<>(), Global.Constants.ROOT_TYPE, null, 0));
+        ROOT_AST_CLASS.features.add(new AST.method("type_name", new ArrayList<>(), Global.Constants.STRING_TYPE, null, 0));
+        ROOT_AST_CLASS.features.add(new AST.method("copy", new ArrayList<>(), Global.Constants.ROOT_TYPE, null, 0));
 
-        classNameToIndexMap.put(ROOT_CLASS_NAME, ROOT_CLASS_INDEX);
+        classNameToIndexMap.put(Global.Constants.ROOT_TYPE, ROOT_CLASS_INDEX);
         graph.add(ROOT_AST_NODE);
     }
 
     private void addIO() {
-        List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.STRING_TYPE, 0)));
+        List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.Constants.STRING_TYPE, 0)));
 
         List<AST.feature> ioFeatures = new ArrayList<>();
-        List<AST.formal> intFormalList1 = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.INT_TYPE, 0)));
+        List<AST.formal> intFormalList1 = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.Constants.INT_TYPE, 0)));
 
-        ioFeatures.add(new AST.method("out_string", stringFormalList, "IO", null, 0));
-        ioFeatures.add(new AST.method("out_int", intFormalList1, "IO", null, 0));
-        ioFeatures.add(new AST.method("in_string", new ArrayList<>(), Global.STRING_TYPE, null, 0));
-        ioFeatures.add(new AST.method("in_int", new ArrayList<>(), Global.INT_TYPE, null, 0));
+        ioFeatures.add(new AST.method("out_string", stringFormalList, Global.Constants.IO_TYPE, null, 0));
+        ioFeatures.add(new AST.method("out_int", intFormalList1, Global.Constants.IO_TYPE, null, 0));
+        ioFeatures.add(new AST.method("in_string", new ArrayList<>(), Global.Constants.STRING_TYPE, null, 0));
+        ioFeatures.add(new AST.method("in_int", new ArrayList<>(), Global.Constants.INT_TYPE, null, 0));
 
-        AST.class_ ioAstClass = new AST.class_("IO", null, ROOT_CLASS_NAME, ioFeatures, 0);
+        AST.class_ ioAstClass = new AST.class_(Global.Constants.IO_TYPE, null, Global.Constants.ROOT_TYPE, ioFeatures, 0);
         Node ioNode = new Node(ioAstClass, 0);
 
-        classNameToIndexMap.put("IO", graph.size());
+        classNameToIndexMap.put(Global.Constants.IO_TYPE, graph.size());
         graph.add(ioNode);
     }
 
     private void addString() {
-        List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.STRING_TYPE, 0)));
+        List<AST.formal> stringFormalList = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.Constants.STRING_TYPE, 0)));
 
-        List<AST.formal> intFormalList2 = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.INT_TYPE, 0)
-            ,new AST.formal("y", Global.INT_TYPE, 0)));
+        List<AST.formal> intFormalList2 = new ArrayList<>(Arrays.asList(new AST.formal("x", Global.Constants.INT_TYPE, 0)
+            ,new AST.formal("y", Global.Constants.INT_TYPE, 0)));
         List<AST.feature> stringFeatures = new ArrayList<>();
 
-        stringFeatures.add(new AST.method("length", new ArrayList<>(), Global.INT_TYPE, null, 0));
-        stringFeatures.add(new AST.method("concat", stringFormalList, Global.STRING_TYPE, null, 0));
-        stringFeatures.add(new AST.method("substr", intFormalList2, Global.STRING_TYPE, null, 0));
+        stringFeatures.add(new AST.method("length", new ArrayList<>(), Global.Constants.INT_TYPE, null, 0));
+        stringFeatures.add(new AST.method("concat", stringFormalList, Global.Constants.STRING_TYPE, null, 0));
+        stringFeatures.add(new AST.method("substr", intFormalList2, Global.Constants.STRING_TYPE, null, 0));
 
-        AST.class_ stringAstClass = new AST.class_(Global.STRING_TYPE, null, ROOT_CLASS_NAME, stringFeatures, 0);
+        AST.class_ stringAstClass = new AST.class_(Global.Constants.STRING_TYPE, null, Global.Constants.ROOT_TYPE, stringFeatures, 0);
         Node stringNode = new Node(stringAstClass, 0);
 
-        classNameToIndexMap.put(Global.STRING_TYPE, graph.size());
+        classNameToIndexMap.put(Global.Constants.STRING_TYPE, graph.size());
         graph.add(stringNode);
         
     }
 
     private boolean isRestrictedClass(String name) {
-        return "IO".equals(name) || "Int".equals(name) || "String".equals(name) || "Bool".equals(name);
+        return Global.Constants.IO_TYPE.equals(name) || Global.Constants.INT_TYPE.equals(name) 
+        || Global.Constants.STRING_TYPE.equals(name) || Global.Constants.BOOL_TYPE.equals(name);
     }
 
     private boolean isRestrictedInheritanceClass(String name) {
-        return "Int".equals(name) || "String".equals(name) || "Bool".equals(name);
+        return Global.Constants.INT_TYPE.equals(name) || Global.Constants.STRING_TYPE.equals(name) 
+        || Global.Constants.BOOL_TYPE.equals(name);
     }
 
     public boolean isNoMethodClass(String name) {
-        return "Int".equals(name) || "Bool".equals(name);
+        return Global.Constants.INT_TYPE.equals(name) || Global.Constants.BOOL_TYPE.equals(name);
     }
 
     private void updateParents() {
@@ -217,7 +218,7 @@ public class InheritanceGraph {
                                 .append("' for '").append(cl.getAstClass().name).append("' has not been declared").toString());
                 }
             } else {
-                if(!ROOT_CLASS_NAME.equals(cl.getAstClass().name)) {
+                if(!Global.Constants.ROOT_TYPE.equals(cl.getAstClass().name)) {
                     cl.setParent(ROOT_AST_NODE);
                     ROOT_AST_NODE.addChild(cl);
                 }
