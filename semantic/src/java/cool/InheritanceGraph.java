@@ -269,20 +269,19 @@ public class InheritanceGraph {
     }
     
     private Node getLCA(Node node1, Node node2) {
-        Node lca;
+        Node lca = null;
         List<Boolean> visited = new ArrayList<>(graph.size());
         visited.addAll(Collections.nCopies(graph.size(),Boolean.FALSE));
-        do {        
+        while(node1!=null) {
             visited.set(node1.getIndex(),true);
             node1 = node1.getParent();
-        }while(!node1.equals(ROOT_AST_NODE));
-        do {
+        }
+        while(lca==null && node2!=null) {
             if(visited.get(node2.getIndex())) {
                 lca = node2;
-                break;
             }
             node2 = node2.getParent();
-        }while(true);
+        }
         return lca;
     }
     

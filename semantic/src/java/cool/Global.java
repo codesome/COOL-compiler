@@ -83,7 +83,7 @@ public class Global {
         initMangledNameClass(mangledNameBuilder, className);
         initMangledNameFunction(mangledNameBuilder, function);
     
-        if(exprs!= null) {
+        if(exprs!=null) {
             mangledNameBuilder.append("Ar").append(exprs.size()).append("_");
             int counter = 0;
             for(AST.expression exp : exprs) {
@@ -91,6 +91,12 @@ public class Global {
                 mangledNameBuilder.append(counter).append("N")
                 .append(exp.type.length()).append(exp.type);
             }
+            if(exprs.size()>0)
+                mangledNameBuilder.append("_FT");
+            else
+                mangledNameBuilder.append("_FF");
+        } else {
+            mangledNameBuilder.append("_FF");
         }
 
         mangledNameBuilder.append("_");
@@ -110,6 +116,12 @@ public class Global {
                 mangledNameBuilder.append(counter).append("N")
                 .append(fm.typeid.length()).append(fm.typeid);
             }
+            if(formals.size()>0)
+                mangledNameBuilder.append("_FT");
+            else
+                mangledNameBuilder.append("_FF");
+        } else {
+            mangledNameBuilder.append("_FF");
         }
 
         mangledNameBuilder.append("_");
@@ -128,10 +140,20 @@ public class Global {
                 mangledNameBuilder.append(counter).append("N")
                 .append(fm.typeid.length()).append(fm.typeid);
             }
+            if(formals.size()>0)
+                mangledNameBuilder.append("_FT");
+            else
+                mangledNameBuilder.append("_FF");
+        } else {
+            mangledNameBuilder.append("_FF");
         }
 
         mangledNameBuilder.append("_");
         return mangledNameBuilder.toString();
+    }
+    public static boolean hasArguments(String mangledName) {
+        if(mangledName==null) return false;
+        return "_FT_".equals(mangledName.substring(mangledName.length()-4));
     }
 
 }

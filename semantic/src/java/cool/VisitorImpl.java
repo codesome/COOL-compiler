@@ -28,7 +28,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
 
-    // TODO: for a class, decide whether same functions can be repeated
     private void updateMangledNames() {
         for(InheritanceGraph.Node node: Global.inheritanceGraph.getNodeList()) {
             AST.class_ cl = node.getAstClass();
@@ -68,7 +67,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.currentClass = cl.name;
 
         // adding variables to the scope
-        // TODO: check if declared already
         for(AST.feature f: cl.features) {
             if(f instanceof AST.attr) { // Its a variable
                 AST.attr a = (AST.attr) f;
@@ -76,6 +74,16 @@ class VisitorImpl extends ExpressionVisitorImpl {
             } else { // Its a method
                 AST.method m = (AST.method) f;
                 checkMethod(m);
+            }
+        }
+
+        if("Main".equals(cl.name)) {
+            String mainMangled = Global.methodDefinitionScopeTable.lookUpLocal("main");
+            System.out.println(mainMangled);
+            if(mainMangled==null) {
+                Global.errorReporter.report(Global.filename, cl.getLineNo(), "'main' method is missing in 'Main' class");
+            } else if(Global.hasArguments(mainMangled)) {
+                Global.errorReporter.report(Global.filename, cl.getLineNo(), "'main' method cannot have any arguments");
             }
         }
 
