@@ -20,8 +20,8 @@ class B {
         {
             a.out_string("A");
             a.out_int(1);
-            b <- in_string();
-            c <- in_int();
+            b <- a.in_string();
+            c <- a.in_int();
             0;
         }
     };
