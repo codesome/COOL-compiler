@@ -6,7 +6,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     private boolean nonIntegerExpression(AST.expression e1, AST.expression e2) {
         // both should be int
-        return !Global.INT_TYPE.equals(e1.type) || !Global.INT_TYPE.equals(e2.type);
+        return !Global.Constants.INT_TYPE.equals(e1.type) || !Global.Constants.INT_TYPE.equals(e2.type);
     }
 
     public void visit(AST.no_expr expr) {
@@ -38,19 +38,19 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
         if(!Global.inheritanceGraph.hasClass(expr.typeid)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
-            expr.typeid = "Object";
-            expr.type = "Object";
+            expr.typeid = Global.Constants.ROOT_TYPE;
+            expr.type = Global.Constants.ROOT_TYPE;
         } else if(!Global.inheritanceGraph.isConforming(expr.typeid, callerClass)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), 
                 "Type of caller does not conform to the type '"+expr.typeid+"' in the static dispatch '"+expr.name+"'");
-            expr.type = "Object";
+            expr.type = Global.Constants.ROOT_TYPE;
         } else {
             String mangledName = Global.getMangledNameWithExpressions(expr.typeid, expr.name, expr.actuals);
             String methodType = Global.mangledNameMap.getOrDefault(mangledName, null);
             if(methodType==null) {
                 Global.errorReporter.report(Global.filename, expr.getLineNo(), 
                     "Undefined method '"+expr.name+"' in class '"+expr.typeid+"'");
-                expr.type = "Object";
+                expr.type = Global.Constants.ROOT_TYPE;
             } else {
                 expr.type = methodType;
             }
@@ -78,7 +78,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         }
         if(methodType==null) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined method signature: "+expr.name);
-            expr.type = "Object";
+            expr.type = Global.Constants.ROOT_TYPE;
         } else {
             expr.type = methodType;
         }
@@ -88,7 +88,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.predicate.accept(this);
         expr.ifbody.accept(this);
         expr.elsebody.accept(this);
-        if(!Global.BOOL_TYPE.equals(expr.predicate.type)) {
+        if(!Global.Constants.BOOL_TYPE.equals(expr.predicate.type)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Predicate of condition must be of Bool type");
         }
         expr.type = Global.inheritanceGraph.getJoinOf(expr.ifbody.type, expr.elsebody.type);
@@ -97,10 +97,10 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public void visit(AST.loop expr) {
         expr.predicate.accept(this);
         expr.body.accept(this);
-        if(!Global.BOOL_TYPE.equals(expr.predicate.type)) {
+        if(!Global.Constants.BOOL_TYPE.equals(expr.predicate.type)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Predicate of while must be of Bool type");
         }
-        expr.type = "Object";
+        expr.type = Global.Constants.ROOT_TYPE;
     }
 
     public void visit(AST.block expr) {
@@ -116,7 +116,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
         if(!Global.inheritanceGraph.hasClass(expr.typeid)){
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
-            expr.typeid = "Object";
+            expr.typeid = Global.Constants.ROOT_TYPE;
         }
         Global.scopeTable.insert(expr.name, expr.typeid);
         
@@ -154,7 +154,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public void visit(AST.branch br) {
         if(!Global.inheritanceGraph.hasClass(br.type)){
             Global.errorReporter.report(Global.filename, br.getLineNo(), "Undefined type: "+br.type);
-            br.type = "Object";
+            br.type = Global.Constants.ROOT_TYPE;
         }
         Global.scopeTable.enterScope();
         Global.scopeTable.insert(br.name, br.type);
@@ -167,13 +167,13 @@ abstract class ExpressionVisitorImpl implements Visitor {
             expr.type = expr.typeid;
         } else {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
-            expr.type = "Object";
+            expr.type = Global.Constants.ROOT_TYPE;
         }
     }
 
     public void visit(AST.isvoid expr) {
         expr.e1.accept(this);
-        expr.type = Global.BOOL_TYPE;
+        expr.type = Global.Constants.BOOL_TYPE;
     }
 
     public void visit(AST.plus expr) {
@@ -182,7 +182,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(nonIntegerExpression(expr.e1, expr.e2)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Addition of non int type");
         }
-        expr.type = Global.INT_TYPE;
+        expr.type = Global.Constants.INT_TYPE;
     }
 
     public void visit(AST.sub expr) {
@@ -191,7 +191,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(nonIntegerExpression(expr.e1, expr.e2)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Subtraction of non int type");
         }
-        expr.type = Global.INT_TYPE;
+        expr.type = Global.Constants.INT_TYPE;
     }
 
     public void visit(AST.mul expr) {
@@ -200,7 +200,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(nonIntegerExpression(expr.e1, expr.e2)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Multiplication of non int type");
         }
-        expr.type = Global.INT_TYPE;
+        expr.type = Global.Constants.INT_TYPE;
     }
 
     public void visit(AST.divide expr) {
@@ -209,15 +209,15 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(nonIntegerExpression(expr.e1, expr.e2)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Division of non int type");
         }
-        expr.type = Global.INT_TYPE;
+        expr.type = Global.Constants.INT_TYPE;
     }
 
     public void visit(AST.comp expr) {
         expr.e1.accept(this);
-        if(!Global.BOOL_TYPE.equals(expr.e1.type)) {
+        if(!Global.Constants.BOOL_TYPE.equals(expr.e1.type)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Negation of non bool type");
         }
-        expr.type = Global.BOOL_TYPE;
+        expr.type = Global.Constants.BOOL_TYPE;
     }
 
     public void visit(AST.lt expr) {
@@ -226,7 +226,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(nonIntegerExpression(expr.e1, expr.e2)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "< of non int types");
         }
-        expr.type = Global.BOOL_TYPE;
+        expr.type = Global.Constants.BOOL_TYPE;
     }
 
     public void visit(AST.leq expr) {
@@ -235,7 +235,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(nonIntegerExpression(expr.e1, expr.e2)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "<= of non int types");
         }
-        expr.type = Global.BOOL_TYPE;
+        expr.type = Global.Constants.BOOL_TYPE;
     }
 
     public void visit(AST.eq expr) {
@@ -245,26 +245,26 @@ abstract class ExpressionVisitorImpl implements Visitor {
         // non primary type. Hence check only if not equal
         if(!expr.e1.type.equals(expr.e2.type)) {
             // e1 is primary
-            boolean e1p = Global.INT_TYPE.equals(expr.e1.type) || Global.BOOL_TYPE.equals(expr.e1.type) 
-                || Global.STRING_TYPE.equals(expr.e1.type);
+            boolean e1p = Global.Constants.INT_TYPE.equals(expr.e1.type) || Global.Constants.BOOL_TYPE.equals(expr.e1.type) 
+                || Global.Constants.STRING_TYPE.equals(expr.e1.type);
             // e2 is primary
-            boolean e2p = Global.INT_TYPE.equals(expr.e2.type) 
-                || Global.BOOL_TYPE.equals(expr.e2.type) || Global.STRING_TYPE.equals(expr.e2.type);  
+            boolean e2p = Global.Constants.INT_TYPE.equals(expr.e2.type) 
+                || Global.Constants.BOOL_TYPE.equals(expr.e2.type) || Global.Constants.STRING_TYPE.equals(expr.e2.type);  
             if(e1p && e2p) {
                 Global.errorReporter.report(Global.filename, expr.getLineNo(), "Equality of different primitive types");
             } else if(e1p || e2p) {
                 Global.errorReporter.report(Global.filename, expr.getLineNo(), "Equality of primitive types with non primitive type");
             }
         }
-        expr.type = Global.BOOL_TYPE;
+        expr.type = Global.Constants.BOOL_TYPE;
     }
 
     public void visit(AST.neg expr) {
         expr.e1.accept(this);
-        if(!Global.INT_TYPE.equals(expr.e1.type)) {
+        if(!Global.Constants.INT_TYPE.equals(expr.e1.type)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Cannot do complement of non int type");
         }
-        expr.type = Global.INT_TYPE;
+        expr.type = Global.Constants.INT_TYPE;
     }
 
     public void visit(AST.object expr) {
@@ -273,7 +273,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         } else {
             String type = Global.scopeTable.lookUpGlobal(expr.name);
             if(type==null) {
-                expr.type = "Object";
+                expr.type = Global.Constants.ROOT_TYPE;
                 Global.errorReporter.report(Global.filename, expr.getLineNo(), "Attribute '"+expr.name+"' is not defined");
             } else {
                 expr.type = type;
@@ -282,15 +282,15 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
 
     public void visit(AST.int_const expr) {
-        expr.type = Global.INT_TYPE;
+        expr.type = Global.Constants.INT_TYPE;
     }
 
     public void visit(AST.string_const expr) {
-        expr.type = Global.STRING_TYPE;
+        expr.type = Global.Constants.STRING_TYPE;
     }
 
     public void visit(AST.bool_const expr) {
-        expr.type = Global.BOOL_TYPE;
+        expr.type = Global.Constants.BOOL_TYPE;
     }
     
 }

@@ -79,16 +79,24 @@ class VisitorImpl extends ExpressionVisitorImpl {
             }
         }
 
+        if(Global.Constants.ROOT_TYPE.equals(cl.name) || Global.Constants.IO_TYPE.equals(cl.name) 
+            || Global.Constants.STRING_TYPE.equals(cl.name)) {
+            // No need to check semantics for default functions
+            // They are generate in the code with proper semantics
+            return;
+        }
+        
         // visiting all features
-        if(!"Object".equals(cl.name) && !"IO".equals(cl.name) && !"String".equals(cl.name))
-            for(AST.feature f: cl.features) {
-                f.accept(this);
-            }
+        for(AST.feature f: cl.features) {
+            f.accept(this);
+        }
 
     }
 
     private void checkAttr(AST.attr a) {
-        if(Global.scopeTable.lookUpGlobal(a.name) == null) {
+        if("self".equals(a.name)) {
+            Global.errorReporter.report(Global.filename, a.getLineNo(), "Cannot define attribute with name 'self'");
+        } else if(Global.scopeTable.lookUpGlobal(a.name) == null) {
             // not defined earlier, all clear
             Global.scopeTable.insert(a.name, a.typeid);
         } else {
