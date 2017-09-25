@@ -40,23 +40,29 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public void visit(AST.static_dispatch expr) {
         expr.caller.accept(this);
+
+        // Type associated with expr of expr@TYPE
         String callerClass = expr.caller.type;
         for(AST.expression e: expr.actuals) {
             e.accept(this);
         }
 
         if(!Global.inheritanceGraph.hasClass(expr.typeid)) {
+            // @TYPE is not defined
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type '"+expr.typeid+"'");
             expr.typeid = Global.Constants.ROOT_TYPE;
             expr.type = Global.Constants.ROOT_TYPE;
         } else if(!Global.inheritanceGraph.isConforming(expr.typeid, callerClass)) {
+            // expr type does not conform to @TYPE
             Global.errorReporter.report(Global.filename, expr.getLineNo(), 
                 "Type of caller does not conform to the type '"+expr.typeid+"' in the static dispatch '"+expr.name+"'");
             expr.type = Global.Constants.ROOT_TYPE;
         } else {
+            // Checking for existance of method in mangled name map
             String mangledName = Global.getMangledNameWithExpressions(expr.typeid, expr.name, expr.actuals);
             String methodType = Global.mangledNameMap.getOrDefault(mangledName, null);
             if(methodType==null) {
+                // method not found
                 Global.errorReporter.report(Global.filename, expr.getLineNo(), 
                     "Undefined method '"+expr.name+"' in class '"+expr.typeid+"' (static dispatch)");
                 expr.type = Global.Constants.ROOT_TYPE;
@@ -76,8 +82,10 @@ abstract class ExpressionVisitorImpl implements Visitor {
         for(AST.expression e: expr.actuals) {
             e.accept(this);
         }
+        // Checking for existance of method in mangled name map
         String mangledName = Global.getMangledNameWithExpressions(callerClass, expr.name, expr.actuals);
         String methodType = Global.mangledNameMap.getOrDefault(mangledName, null);
+        // Checking for method in the parents
         while(methodType==null) {
             callerClass = Global.inheritanceGraph.getParentClassName(callerClass);
             if(callerClass==null)
@@ -86,6 +94,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             methodType = Global.mangledNameMap.getOrDefault(mangledName, null);
         }
         if(methodType==null) {
+            // method not found
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined method signature for '"+expr.name+"'");
             expr.type = Global.Constants.ROOT_TYPE;
         } else {
