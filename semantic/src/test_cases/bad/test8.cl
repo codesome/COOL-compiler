@@ -1,4 +1,4 @@
-(* Initialize attribute with incompatible type *)
+(* Initialize attribute with non-conforming type *)
 
 class A {
     a : Int;

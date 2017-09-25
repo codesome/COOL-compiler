@@ -5,5 +5,7 @@
 \BOOKMARK [2][-]{subsection.1.4}{Parsing inheritance graph by maintaining scope data}{section.1}% 5
 \BOOKMARK [2][-]{subsection.1.5}{Handling Scope}{section.1}% 6
 \BOOKMARK [2][-]{subsection.1.6}{Traversing the AST}{section.1}% 7
-\BOOKMARK [1][-]{section.2}{Test Cases}{}% 8
-\BOOKMARK [2][-]{subsection.2.1}{Good Test Cases}{section.2}% 9
+\BOOKMARK [1][-]{section.2}{Structure of the code}{}% 8
+\BOOKMARK [1][-]{section.3}{Test Cases}{}% 9
+\BOOKMARK [2][-]{subsection.3.1}{Good Test Cases}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.2}{Bad Test Cases}{section.3}% 11

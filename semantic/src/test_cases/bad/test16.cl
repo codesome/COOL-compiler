@@ -1,4 +1,4 @@
-(* Rules for dispatch *)
+(* Breaking rules for dispatch *)
 
 class A {
     a : Int;
@@ -23,6 +23,9 @@ class C {
         let c : A in
         {
             c <- f1(1,"A");
+            c <- f3();
+            c <- f1("A");
+            c <- f1("A",1);
             0;
         }
     };
@@ -34,6 +37,9 @@ class D {
     f3() : Int {
         {
             a <- c.f1(1,"A");
+            c <- a.f1();
+            a <- c.f1("A");
+            a <- c.f1("A",1);
             0;
         }
     };
@@ -47,6 +53,9 @@ class E {
         {
             b <- a@A.f4();
             c <- a@B.f4();
+            c <- a@C.f2();
+            c <- a@K.f4();
+            c <- a@A.f4(1);
             0;
         }
     };

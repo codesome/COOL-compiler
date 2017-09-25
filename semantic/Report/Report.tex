@@ -151,10 +151,80 @@ During this process, if any errors are found, they are reported with appropriate
 ~\\
 At the end of this pass, if there were no errors, an annotated AST is ready and is displayed at the end of the program. If there were errors, the list of errors are displayed.
 
+\section{Structure of the code}
+The code is organized into the following files
+\begin{itemize}
+	\item \textbf{AST.java} \\
+	This contains the classes defining each node in the AST. This has been left mostly unchanged. For each node class, an \verb|accept()| method has been added to accept a visitor that traverses the AST.
+	\item \textbf{Global.java} \\
+	This contains methods to perform name mangling, stores a set of constants used throughout the program, and the objects that store the scope tables, the inheritance graph, and the mangled name map.
+	\item \textbf{InheritanceGraph.java} \\
+	This defines the class for the inheritance graph and defines methods to operate on it. It also includes the methods to compute the join and check the conformance of types.
+	\item \textbf{ScopeTable.java} \\
+	This defines the scope table. A method has been added that allows an attribute to be removed from a particular scope.
+	\item \textbf{Semantic.java} \\
+	This is where the semantic analyzer starts the traversal by creating a new visitor and visiting the root of the AST.
+	\item \textbf{Visitor.java} \\
+	This defines an interface for all the \verb|visit()| methods for the visitors of each type of node.
+	\item \textbf{ExpressionVisitorImpl.java} \\
+	This defines the \verb|visit()| methods for all the AST node classes that correspond to an expression.
+	\item \textbf{VisitorImpl.java} \\
+	This defines the \verb|visit()| methods for all the other AST node classes.
+\end{itemize}
+
 \section{Test Cases}
 A set of good and bad test cases have been provided to verify the correctness of this program. The aim of these cases is to cover as many semantic rules as possible, which would provide reasonable confidence that the program is accurate.
 
 \subsection{Good Test Cases}
-These are test cases of semantically correct COOL programs. The aim of these test cases is to verify that compilation is successful for these correct programs, and that 
+These are test cases of semantically correct COOL programs. The aim of these test cases is to verify that compilation is successful for these correct programs, and that the annotated AST output is annotated with the correct types as per the semantic rules of COOL. Separate files have been provided to test each set of rules. The files are as follows:
+\begin{itemize}
+	\item \textbf{test1.cl}: Illustrates inheritance of classes
+	\item \textbf{test2.cl}: Checks that creating a method named \verb|self()| is allowed.
+	\item \textbf{test3.cl}: Checks the rules for creating attributes and the conformance rules when they are initialized.
+	\item \textbf{test4.cl}: Checks the rules for dispatch and static dispatch.
+	\item \textbf{test5.cl}: Checks rules for methods, including conformance of return type, uniqueness of formal parameter names, and correct redefinitions with inheritance.
+	\item \textbf{test6.cl}: Checks type annotations of constants
+	\item \textbf{test7.cl}: Checks type annotations for identifiers.
+	\item \textbf{test8.cl}: Checks rules for assignments, including conformance checks, and type checks for \verb|self|.
+	\item \textbf{test9.cl}: Checks rules for conditionals, including working of joins.
+	\item \textbf{test10.cl}: Checks rules for loops, including checking that the return type is \verb|Object|.
+	\item \textbf{test11.cl}: Checks rules for blocks.
+	\item \textbf{test12.cl}: Checks rules for \verb|let| expressions, including hiding of identifiers when they are redefined, and checking that assignments conform to the declared types.
+	\item \textbf{test13.cl}: Checks rules for the \verb|case| expression, including checks on hiding of redefined identifiers and the return type based on the joins of all the branches.
+	\item \textbf{test14.cl}: Checks annotations for \verb|new| and \verb|isvoid|.
+	\item \textbf{test15.cl}: Checks annotations for arithmetic, comparison, and unary operators.
+	\item \textbf{test16.cl}: Checks that the methods in-build to the \verb|Object|, \verb|IO|, and \verb|String| classes are correctly defined, and that inheritance from \verb|Object| and \verb|IO| takes place successfully.
+\end{itemize}
+These test cases generate correct ASTs as per the semantic rules of COOL. As they cover almost all the rules, it can be reasonably expected that the program works correctly.
+\subsection{Bad Test Cases}
+These are test cases of semantically incorrect COOL programs. The aim of these test cases is to ensure that the error cases that they cover are caught by the program and are reported appropriately. Separate files have been provided, each which violates a set of semantic rules of COOL. The files are as follows:
+\begin{itemize}
+	\item \textbf{test1.cl}: Contains a cycle in the inheritance graph.
+	\item \textbf{test2.cl}: Does not contain any \verb|Main| class.
+	\item \textbf{test3.cl}: Does not contain a \verb|main()| method in the \verb|Main| class.
+	\item \textbf{test4.cl}: Inheritance from a non-existent class.
+	\item \textbf{test5.cl}: Object created of non-existent class.
+	\item \textbf{test6.cl}: Redefining an attribute in an inherited class.
+	\item \textbf{test7.cl}: Redefining a method with a different signature or return type in an inherited class.
+	\item \textbf{test8.cl}: Initializing attribute with a non-conforming type.
+	\item \textbf{test9.cl}: Repeats names of formal parameters of a method.
+	\item \textbf{test10.cl}: Type of method body does not conform to declared return type.
+	\item \textbf{test11.cl}: Use of \verb|self| for attribute names, parameter names, in \verb|let|, and in \verb|case|, and assignment to \verb|self|.
+	\item \textbf{test12.cl}: Use of non-existent identifier.
+	\item \textbf{test13.cl}: Predicate of a conditional or a loop not Bool.
+	\item \textbf{test14.cl}: Type of initialization expression in \verb|let| does not conform to the declared type of the identifier.
+	\item \textbf{test15.cl}: Incorrectly assuming that \verb|case| identifiers do not hide definitions in outer scopes.
+	\item \textbf{test16.cl}: Break static type rules for dispatch.
+	\item \textbf{test17.cl}: Incorrect static types of arithmetic operations.
+	\item \textbf{test18.cl}: Incorrect usage of comparison operators.
+	\item \textbf{test19.cl}: Incorrect usage of unary operators.
+	\item \textbf{test20.cl}: Redefining members of \verb|Object| and \verb|IO|.
+	\item \textbf{test21.cl}: Multiple definitions of attributes and methods in the same scope.
+	\item \textbf{test22.cl}: Multiple definitions of classes.
+	\item \textbf{test23.cl}: Inheritance from \verb|Int|, \verb|String|, and \verb|Bool|.
+	\item \textbf{test24.cl}: Defining parameters for \verb|main()|.
+	\item \textbf{test25.cl}: Defining \verb|main()| in an inherited class of \verb|Main| instead of in \verb|Main|.
+\end{itemize}
+These test cases attempt to break almost every rule in the COOL semantics. For each such instance, appropriate error messages are provided by the program.
 
 \end{document}

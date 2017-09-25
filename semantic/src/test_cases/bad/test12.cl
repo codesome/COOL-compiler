@@ -1,4 +1,4 @@
-(* Use identifier that does not exist, or refer to one in higher scope that makes it illegal *)
+(* Use identifier that does not exist *)
 
 class A {
     a : Int;

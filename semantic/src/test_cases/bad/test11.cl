@@ -1,4 +1,4 @@
-(* Illegal usage of self for attribute names, in let, in case, as formal parameters, assignment to self, function named self *)
+(* Illegal usage of self for attribute names, in let, in case, as formal parameters, assignment to self *)
 
 class A {
     self : Int;

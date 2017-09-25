@@ -1,3 +1,5 @@
+(* Illustrates inheritance *)
+
 class A {
     a : Int;
 };
