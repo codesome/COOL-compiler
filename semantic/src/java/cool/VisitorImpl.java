@@ -94,7 +94,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 Global.errorReporter.report(Global.filename, cl.getLineNo(), "'main' method is missing in 'Main' class");
             } else if(Global.hasArguments(mainMangled)) {
                 // main method contains arguments
-                Global.errorReporter.report(Global.filename, cl.getLineNo(), "'main' method cannot have any arguments");
+                Global.errorReporter.report(Global.filename, cl.getLineNo(), "'main' method cannot have arguments");
             }
         }
         if(Global.Constants.ROOT_TYPE.equals(cl.name) || Global.Constants.IO_TYPE.equals(cl.name) 
@@ -123,7 +123,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
             errorMessage.append("Attribute '").append(a.name).append("'");
             if(Global.scopeTable.lookUpLocal(a.name) == null) {
                 // defined in parent classes
-                errorMessage.append(" has been already defined in inherited tree.");
+                errorMessage.append(" has been already defined in the parent class tree.");
             } else {
                 // defined in current class
                 errorMessage.append(" has multiple definitions in the class '")
@@ -152,7 +152,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 // and the method signatures does not match
                 Global.errorReporter.report(Global.filename, m.getLineNo(), 
                     new StringBuilder().append("Redefined method '").append(m.name).append("' in class '")
-                    .append(Global.currentClass).append("' doesn't follow method signature of inherited class.").toString());
+                    .append(Global.currentClass).append("' doesn't follow the return type and/or argument order of parent class.").toString());
             }
 
             Global.methodDefinitionScopeTable.insert(m.name, mangledName);

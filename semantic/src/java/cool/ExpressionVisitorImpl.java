@@ -32,7 +32,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             } else if(!Global.inheritanceGraph.isConforming(type, expr.e1.type)) {
                 // Assignment does not conform
                 Global.errorReporter.report(Global.filename, expr.getLineNo(),
-                    "The type of the expression does not conform to the declared type of the attribute: "+expr.name);
+                    "The type of the expression does not conform to the type of attribute '"+expr.name+":"+type+"'");
             }
         }
         expr.type = expr.e1.type;
@@ -46,7 +46,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         }
 
         if(!Global.inheritanceGraph.hasClass(expr.typeid)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type '"+expr.typeid+"'");
             expr.typeid = Global.Constants.ROOT_TYPE;
             expr.type = Global.Constants.ROOT_TYPE;
         } else if(!Global.inheritanceGraph.isConforming(expr.typeid, callerClass)) {
@@ -58,7 +58,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             String methodType = Global.mangledNameMap.getOrDefault(mangledName, null);
             if(methodType==null) {
                 Global.errorReporter.report(Global.filename, expr.getLineNo(), 
-                    "Undefined method '"+expr.name+"' in class '"+expr.typeid+"'");
+                    "Undefined method '"+expr.name+"' in class '"+expr.typeid+"' (static dispatch)");
                 expr.type = Global.Constants.ROOT_TYPE;
             } else {
                 expr.type = methodType;
@@ -70,7 +70,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.caller.accept(this);
         String callerClass = expr.caller.type;
         if(Global.inheritanceGraph.isNoMethodClass(callerClass)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined method: "+expr.name);
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined method "+expr.name);
             return;
         }
         for(AST.expression e: expr.actuals) {
@@ -86,7 +86,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             methodType = Global.mangledNameMap.getOrDefault(mangledName, null);
         }
         if(methodType==null) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined method signature: "+expr.name);
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined method signature for '"+expr.name+"'");
             expr.type = Global.Constants.ROOT_TYPE;
         } else {
             expr.type = methodType;
@@ -107,7 +107,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.predicate.accept(this);
         expr.body.accept(this);
         if(!Global.Constants.BOOL_TYPE.equals(expr.predicate.type)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Predicate of while must be of Bool type");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Predicate of loop must be of Bool type");
         }
         expr.type = Global.Constants.ROOT_TYPE;
     }
@@ -131,7 +131,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         } else {
             if(!Global.inheritanceGraph.hasClass(expr.typeid)){
                 // the type does not exits
-                Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
+                Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type '"+expr.typeid+"'");
                 expr.typeid = Global.Constants.ROOT_TYPE;
             }
             Global.scopeTable.insert(expr.name, expr.typeid);
@@ -142,8 +142,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
                 // checking type of variable and assignment
                 if(!Global.inheritanceGraph.isConforming(expr.typeid, expr.value.type)) {
                     StringBuilder errorMessage = new StringBuilder();
-                    errorMessage.append("Expression doesn't conform to the declared type of attribute ")
-                    .append(expr.name).append(":").append(expr.typeid);
+                    errorMessage.append("Expression doesn't conform to the declared type of attribute '")
+                    .append(expr.name).append(":").append(expr.typeid).append("'");
                     Global.errorReporter.report(Global.filename, expr.getLineNo(), errorMessage.toString());
                 }
             }
@@ -180,7 +180,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             Global.errorReporter.report(Global.filename, br.getLineNo(), "'self' cannot be bound in a 'case'");
         } else {
             if(!Global.inheritanceGraph.hasClass(br.type)){
-                Global.errorReporter.report(Global.filename, br.getLineNo(), "Undefined type: "+br.type);
+                Global.errorReporter.report(Global.filename, br.getLineNo(), "Undefined type '"+br.type+"'");
                 br.type = Global.Constants.ROOT_TYPE;
             }
             Global.scopeTable.insert(br.name, br.type);
@@ -194,7 +194,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(Global.inheritanceGraph.hasClass(expr.typeid)) {
             expr.type = expr.typeid;
         } else {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type '"+expr.typeid+"'");
             expr.type = Global.Constants.ROOT_TYPE;
         }
     }
@@ -243,7 +243,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public void visit(AST.comp expr) {
         expr.e1.accept(this);
         if(!Global.Constants.BOOL_TYPE.equals(expr.e1.type)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Negation of non bool type");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Complement of non bool type");
         }
         expr.type = Global.Constants.BOOL_TYPE;
     }
@@ -294,7 +294,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public void visit(AST.neg expr) {
         expr.e1.accept(this);
         if(!Global.Constants.INT_TYPE.equals(expr.e1.type)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Cannot do complement of non int type");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Cannot do negation of non int type");
         }
         expr.type = Global.Constants.INT_TYPE;
     }
