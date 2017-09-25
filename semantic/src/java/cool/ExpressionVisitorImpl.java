@@ -3,9 +3,12 @@ package cool;
 import java.util.List;
 
 abstract class ExpressionVisitorImpl implements Visitor {
+    /* NOTE: to know about the individual visit functions
+             Check Visitor.java 
+    */
 
+    // returns 'true' is either of the expressions in non int
     private boolean nonIntegerExpression(AST.expression e1, AST.expression e2) {
-        // both should be int
         return !Global.Constants.INT_TYPE.equals(e1.type) || !Global.Constants.INT_TYPE.equals(e2.type);
     }
 
@@ -15,16 +18,19 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public void visit(AST.assign expr) {
 
-        expr.e1.accept(this);
+        expr.e1.accept(this); // assignment expression
+
         if("self".equals(expr.name)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "Cannot assign to 'self'");
         } else {
             String type = Global.scopeTable.lookUpGlobal(expr.name);
 
             if(type==null) {
+                // Variable not found in the scope
                 Global.errorReporter.report(Global.filename, expr.getLineNo(),
                     "Attribute '"+expr.name+"' is not defined");
             } else if(!Global.inheritanceGraph.isConforming(type, expr.e1.type)) {
+                // Assignment does not conform
                 Global.errorReporter.report(Global.filename, expr.getLineNo(),
                     "The type of the expression does not conform to the declared type of the attribute: "+expr.name);
             }
@@ -110,17 +116,21 @@ abstract class ExpressionVisitorImpl implements Visitor {
         for(AST.expression e: expr.l1) {
             e.accept(this);
         }
+        // type of block is type of last expression
         int lastexpr = expr.l1.size()-1;
         expr.type = expr.l1.get(lastexpr).type;
     }
 
     public void visit(AST.let expr) {
+        // new scope because variables defined here
+        // hide previous definition
         Global.scopeTable.enterScope();
 
         if("self".equals(expr.name)) {
             Global.errorReporter.report(Global.filename, expr.getLineNo(), "'self' cannot be bound in a 'let' expression");
         } else {
             if(!Global.inheritanceGraph.hasClass(expr.typeid)){
+                // the type does not exits
                 Global.errorReporter.report(Global.filename, expr.getLineNo(), "Undefined type: "+expr.typeid);
                 expr.typeid = Global.Constants.ROOT_TYPE;
             }
@@ -146,18 +156,26 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
 
     public void visit(AST.typcase expr) {
+        // type of typecase is the join of type of all branches
         expr.predicate.accept(this);
-        expr.branches.get(0).accept(this); // branches have at least one element always
+
+        // there is atleast 1 branch, hence starting the type with it
+        expr.branches.get(0).accept(this);
         expr.type = expr.branches.get(0).value.type;
         int size = expr.branches.size();
+
+        // accepting and joining types of other branches
         for(int i=1; i<size; i++) {
             expr.branches.get(i).accept(this);
             expr.type = Global.inheritanceGraph.getJoinOf(expr.type, expr.branches.get(i).value.type);
         }
     }
 
-    // This is not an expression, but used inside an expression
+    // This is not an expression, but used inside an expression - typecase
     public void visit(AST.branch br) {
+        // new scope because branch variable hides previous variables
+        Global.scopeTable.enterScope();
+
         if("self".equals(br.name)) {
             Global.errorReporter.report(Global.filename, br.getLineNo(), "'self' cannot be bound in a 'case'");
         } else {
@@ -165,9 +183,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
                 Global.errorReporter.report(Global.filename, br.getLineNo(), "Undefined type: "+br.type);
                 br.type = Global.Constants.ROOT_TYPE;
             }
+            Global.scopeTable.insert(br.name, br.type);
         }
-        Global.scopeTable.enterScope();
-        if(!"self".equals(br.name)) Global.scopeTable.insert(br.name, br.type);
+
         br.value.accept(this);
         Global.scopeTable.exitScope();
     }
@@ -190,7 +208,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Addition of non int type");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Addition cannot be done on non int types");
         }
         expr.type = Global.Constants.INT_TYPE;
     }
@@ -199,7 +217,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Subtraction of non int type");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Subtraction cannot be done on non int types");
         }
         expr.type = Global.Constants.INT_TYPE;
     }
@@ -208,7 +226,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Multiplication of non int type");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Multiplication cannot be done on non int types");
         }
         expr.type = Global.Constants.INT_TYPE;
     }
@@ -217,7 +235,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Division of non int type");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "Division cannot be done on non int types");
         }
         expr.type = Global.Constants.INT_TYPE;
     }
@@ -234,7 +252,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "< of non int types");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "'<' cannot be done on non int typess");
         }
         expr.type = Global.Constants.BOOL_TYPE;
     }
@@ -243,7 +261,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "<= of non int types");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "'<=' cannot be done on non int typess");
         }
         expr.type = Global.Constants.BOOL_TYPE;
     }
@@ -254,15 +272,19 @@ abstract class ExpressionVisitorImpl implements Visitor {
         // if its equal, doesnt matter if its primary or
         // non primary type. Hence check only if not equal
         if(!expr.e1.type.equals(expr.e2.type)) {
-            // e1 is primary
+            // both have different types
+
+            // e1 is primary base type
             boolean e1p = Global.Constants.INT_TYPE.equals(expr.e1.type) || Global.Constants.BOOL_TYPE.equals(expr.e1.type) 
                 || Global.Constants.STRING_TYPE.equals(expr.e1.type);
-            // e2 is primary
+            // e2 is primary base type
             boolean e2p = Global.Constants.INT_TYPE.equals(expr.e2.type) 
                 || Global.Constants.BOOL_TYPE.equals(expr.e2.type) || Global.Constants.STRING_TYPE.equals(expr.e2.type);  
             if(e1p && e2p) {
+                // comparing 2 different primary types
                 Global.errorReporter.report(Global.filename, expr.getLineNo(), "Equality of different primitive types");
             } else if(e1p || e2p) {
+                // comparing primary type with non primary type
                 Global.errorReporter.report(Global.filename, expr.getLineNo(), "Equality of primitive types with non primitive type");
             }
         }

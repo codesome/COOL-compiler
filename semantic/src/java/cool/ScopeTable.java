@@ -10,6 +10,9 @@ public class ScopeTable<T> {
 	void insert(String s, T t){
 		maps.get(scope).put(s,t);
 	}
+	void remove(String s){
+		maps.get(scope).remove(s);
+	}
 	void enterScope(){
 		scope++;
 		maps.add(new HashMap<String, T>());
