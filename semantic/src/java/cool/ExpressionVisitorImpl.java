@@ -261,7 +261,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "'<' cannot be done on non int typess");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "'<' cannot be done on non int types");
         }
         expr.type = Global.Constants.BOOL_TYPE;
     }
@@ -270,7 +270,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         expr.e1.accept(this);
         expr.e2.accept(this);
         if(nonIntegerExpression(expr.e1, expr.e2)) {
-            Global.errorReporter.report(Global.filename, expr.getLineNo(), "'<=' cannot be done on non int typess");
+            Global.errorReporter.report(Global.filename, expr.getLineNo(), "'<=' cannot be done on non int types");
         }
         expr.type = Global.Constants.BOOL_TYPE;
     }

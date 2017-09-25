@@ -1,19 +1,17 @@
-(* Cyclic inheritance *)
-
-class A inherits C {
-    a : Int;
-};
-
-class B inherits A {
-    b : Int;
-};
-
-class C inherits B {
-    c : Int;
-};
-
 class Main {
-    main() : Int {
-        0
-    };
 };
+class Class1 inherits Class2 {
+};
+class Class2 inherits Class3 {
+};
+class Class3 inherits Class1 {
+};
+class Classx inherits Classy {
+};
+class Classy inherits Classz {
+};
+class Classz inherits Classx {
+};
+class Classx {
+};
+

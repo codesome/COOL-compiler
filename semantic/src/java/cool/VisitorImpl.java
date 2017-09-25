@@ -136,12 +136,22 @@ class VisitorImpl extends ExpressionVisitorImpl {
     // Used to check a method of a class
     //  * checks for redefinition and correct redefinition from parent
     private void checkMethod(AST.method m) {
+
         if(Global.methodDefinitionScopeTable.lookUpLocal(m.name)!=null) {
             // Already present in the current class
             Global.errorReporter.report(Global.filename, m.getLineNo(), 
                 new StringBuilder().append("Method '").append(m.name).append("' has multiple definitions in the class '")
                 .append(Global.currentClass).append("'").toString());
         } else {
+
+            if(!Global.inheritanceGraph.hasClass(m.typeid)) {
+                // using undefined type
+                Global.errorReporter.report(Global.filename, m.getLineNo(), 
+                    new StringBuilder().append("Return type '").append(m.typeid).append("' for method '")
+                    .append(m.name).append("' has not been defined").toString());
+                m.typeid = Global.Constants.ROOT_TYPE;
+            }
+
             // className = null, because we will check mangled name with parent classes
             String mangledName = Global.getMangledNameWithType(m.name, m.typeid, m.formals);
             
@@ -215,8 +225,8 @@ class VisitorImpl extends ExpressionVisitorImpl {
         // checking conformance of type of method return type and method body
         if(!Global.inheritanceGraph.isConforming(mthd.typeid, mthd.body.type)) {
             Global.errorReporter.report(Global.filename, mthd.getLineNo(), 
-                new StringBuilder().append("Return type of method '").append(mthd.name)
-                .append("' doesn't match with return type of its body.").toString());
+                new StringBuilder().append("Return type of its body doesn't conform with return type of method '").append(mthd.name)
+                .append("'").toString());
         }
 
         // exiting function scope
