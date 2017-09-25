@@ -167,9 +167,11 @@ The code is organized into the following files
 	\item \textbf{Visitor.java} \\
 	This defines an interface for all the \verb|visit()| methods for the visitors of each type of node.
 	\item \textbf{ExpressionVisitorImpl.java} \\
-	This defines the \verb|visit()| methods for all the AST node classes that correspond to an expression.
+	This defines the \verb|visit()| methods for all the AST node classes that correspond to an expression. This is an abstract class.
 	\item \textbf{VisitorImpl.java} \\
-	This defines the \verb|visit()| methods for all the other AST node classes.
+	This defines the \verb|visit()| methods for all the other AST node classes. This extends \verb|ExpressionVisitorImpl|, and hence has access to all the \verb|visit()| methods defined there.
+	\item \textbf{ErrorReporter.java} \\
+	This defines an interface to report errors, so that errors can be reported from all files without having to pass the \verb|Semantic| class object around explicitly.
 \end{itemize}
 
 \section{Test Cases}
