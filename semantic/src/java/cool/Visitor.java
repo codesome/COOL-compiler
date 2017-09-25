@@ -31,7 +31,6 @@ interface Visitor {
     public void visit(AST.static_dispatch expr);
 
     // Visits 'expr.ID([expr [[, expr]]∗])' expression
-    // NOTE: 'ID(expr ...)' is converted to 'expr.ID(expr ...)' by parser
     public void visit(AST.dispatch expr);
 
     // Visits 'if expr then expr else expr fi' expression
