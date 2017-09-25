@@ -177,8 +177,8 @@ The code is organized into the following files
 \section{Test Cases}
 A set of good and bad test cases have been provided to verify the correctness of this program. The aim of these cases is to cover as many semantic rules as possible, which would provide reasonable confidence that the program is accurate.
 
-\subsection{Good Test Cases}
-These are test cases of semantically correct COOL programs. The aim of these test cases is to verify that compilation is successful for these correct programs, and that the annotated AST output is annotated with the correct types as per the semantic rules of COOL. Separate files have been provided to test each set of rules. The files are as follows:
+\subsection{Semantically Correct Test Cases}
+These are test cases of semantically correct COOL programs. The aim of these test cases is to verify that compilation is successful for these correct programs, and that the annotated AST output is annotated with the correct types as per the semantic rules of COOL. Separate files have been provided to test each set of rules. The files, in \verb|good/|, are as follows:
 \begin{itemize}
 	\item \textbf{test1.cl}: Illustrates inheritance of classes
 	\item \textbf{test2.cl}: Checks that creating a method named \verb|self()| is allowed.
@@ -198,8 +198,8 @@ These are test cases of semantically correct COOL programs. The aim of these tes
 	\item \textbf{test16.cl}: Checks that the methods in-build to the \verb|Object|, \verb|IO|, and \verb|String| classes are correctly defined, and that inheritance from \verb|Object| and \verb|IO| takes place successfully.
 \end{itemize}
 These test cases generate correct ASTs as per the semantic rules of COOL. As they cover almost all the rules, it can be reasonably expected that the program works correctly.
-\subsection{Bad Test Cases}
-These are test cases of semantically incorrect COOL programs. The aim of these test cases is to ensure that the error cases that they cover are caught by the program and are reported appropriately. Separate files have been provided, each which violates a set of semantic rules of COOL. The files are as follows:
+\subsection{Semantically Incorrect Test Cases}
+These are test cases of semantically incorrect COOL programs. The aim of these test cases is to ensure that the error cases that they cover are caught by the program and are reported appropriately. Separate files have been provided, each which violates a set of semantic rules of COOL. The files, in \verb|bad/| are as follows:
 \begin{itemize}
 	\item \textbf{test1.cl}: Contains a cycle in the inheritance graph.
 	\item \textbf{test2.cl}: Does not contain any \verb|Main| class.
