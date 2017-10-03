@@ -8,7 +8,7 @@ fi
 ASN_NO=3
 ROLL_NO=$(tr '[:lower:]' '[:upper:]' <<< "$1")
 
-FILES="README.md src/java/cool/AST.java src/test_cases/* src/java/cool/Semantic.java src/java/cool/ErrorReporter.java src/java/cool/ExpressionVisitorImpl.java\
+FILES="README.pdf src/java/cool/AST.java src/test_cases/* src/java/cool/Semantic.java src/java/cool/ErrorReporter.java src/java/cool/ExpressionVisitorImpl.java\
  src/java/cool/Global.java src/java/cool/InheritanceGraph.java src/java/cool/ScopeTable.java src/java/cool/Visitor.java src/java/cool/VisitorImpl.java"
 
 FILE_NAME="Asn$ASN_NO$ROLL_NO.tar.gz"
