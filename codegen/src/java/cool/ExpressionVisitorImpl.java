@@ -16,7 +16,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             retVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
         }
         IRPrinter.createStoreInst(retVal, expr.name, expr.type);
-        return null;
+        return retVal;
     }
 
     public String visit(AST.static_dispatch expr) {
@@ -36,7 +36,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String ifElse = expr.elsebody.accept(this);
         IRPrinter.createBreakInst(ifEndLabel);
         IRPrinter.createLabel(ifEndLabel);
-        return null;
+        String returnValue = IRPrinter.createPHINode(expr.type, ifBody, ifThenLabel, ifElse, ifElseLabel);
+        return returnValue;
     }
 
     public String visit(AST.loop expr) { // incomplete
@@ -51,7 +52,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String whileBody = expr.body.accept(this);
         IRPrinter.createBreakInst(whileCondLabel);
         IRPrinter.createLabel(whileEndLabel);
-        return null;
+        String objectClass = Utils.getStructName("Object");
+        String voidReturn = IRPrinter.createLoadInst(IRPrinter.UNDEF, objectClass);
+        return voidReturn;
     }
 
     public String visit(AST.typcase expr) {
@@ -85,45 +88,53 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.plus expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst("add", op1, op2, expr.type, false, true); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.ADD, op1, op2, expr.type, false, true); // TODO - set flags correctly
     }
 
     public String visit(AST.sub expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst("sub", op1, op2, expr.type, false, true); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.SUB, op1, op2, expr.type, false, true); // TODO - set flags correctly
     }
     
     public String visit(AST.mul expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst("mul", op1, op2, expr.type, false, true); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.MUL, op1, op2, expr.type, false, true); // TODO - set flags correctly
     }
     
     public String visit(AST.divide expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst("div", op1, op2, expr.type, false, true); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.DIV, op1, op2, expr.type, false, true); // TODO - set flags correctly
     }
     
     public String visit(AST.comp expr) {
-        return null;    
+        String op = expr.e1.accept(this);
+        return IRPrinter.createBinaryInst(IRPrinter.XOR, op, "true", expr.type, false, false);
     }
     
     public String visit(AST.lt expr) {
-        return null;    
+        String op1 = expr.e1.accept(this);
+        String op2 = expr.e2.accept(this);
+        return IRPrinter.createBinaryInst(IRPrinter.SLT, op1, op2, expr.type, false, false);   
     }
     
     public String visit(AST.leq expr) {
-        return null;    
+        String op1 = expr.e1.accept(this);
+        String op2 = expr.e2.accept(this);
+        return IRPrinter.createBinaryInst(IRPrinter.SLE, op1, op2, expr.type, false, false);    
     }
     
     public String visit(AST.eq expr) {
-        return null;    
+        String op1 = expr.e1.accept(this);
+        String op2 = expr.e2.accept(this);
+        return IRPrinter.createBinaryInst(IRPrinter.EQ, op1, op2, expr.type, false, false);    
     }
     
     public String visit(AST.neg expr) {
-        return null;    
+        String op = expr.e1.accept(this);
+        return IRPrinter.createBinaryInst(IRPrinter.SUB, "0", op, expr.type, false, true); // TODO - set flags correctly    
     }
     
     public String visit(AST.object expr) {
@@ -131,7 +142,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
     
     public String visit(AST.int_const expr) {
-        return null;    
+        String loadReg = IRPrinter.createLoadInst(""+expr.value, expr.type);
+        return loadReg;    
     }
     
     public String visit(AST.string_const expr) {
@@ -139,7 +151,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
     
     public String visit(AST.bool_const expr) {
-        return null;    
+        String loadReg = IRPrinter.createLoadInst(""+expr.value, expr.type);
+        return loadReg;    
     }
 
 }

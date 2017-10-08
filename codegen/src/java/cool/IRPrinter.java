@@ -6,6 +6,19 @@ class IRPrinter {
 
     public static final String BITCAST = "bitcast";
     public static final String TRUNC = "trunc";
+    public static final String ADD = "add";
+    public static final String SUB = "sub";
+    public static final String MUL = "mul";
+    public static final String DIV = "div";
+    public static final String ZEXT = "zext";
+    public static final String SLT = "icmp slt";
+    public static final String SGE = "icmp sge";
+    public static final String SGT = "icmp sgt";
+    public static final String SLE = "icmp sle";
+    public static final String EQ = "icmp eq";
+    public static final String XOR = "xor";
+    public static final String UNDEF = "undef";
+
 
     private static int getAlign(String type) {
         if(type.length() == 0) {
@@ -100,8 +113,7 @@ class IRPrinter {
         return label;
     }
 
-     public static String getLabel(String label) {
-        StringBuilder builder = new StringBuilder();
+    public static String getLabel(String label) {
         if(!Global.labelToCountMap.containsKey(label)) {
             int value = Global.labelToCountMap.get(label);
             label = label + "." + value;
@@ -111,6 +123,21 @@ class IRPrinter {
             Global.labelToCountMap.put(label,1); // TODO : check this
         }
         return label;
+    }
+
+    public static String createPHINode(String type, String v1, String label1, String v2, String label2) {
+        StringBuilder builder = new StringBuilder(INDENT);
+        type = Utils.convertTypeWithPtr(type);
+        String storeRegister = "%"+Global.registerCounter;
+        Global.registerCounter++;
+        builder.append(storeRegister);
+        builder.append(" = phi ").append(type);
+        builder.append(" [ ").append(v1).append(", %");
+        builder.append(label1).append(" ] , [ ");
+        builder.append(v2).append(", %");
+        builder.append(label2).append(" ]");
+        Global.out.println(builder.toString());
+        return storeRegister;
     }
 
 }
