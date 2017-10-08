@@ -22,80 +22,80 @@ interface Visitor {
     // Expression visitors
 
     // Used for no_expression
-    public void visit(AST.no_expr expr);
+    public String visit(AST.no_expr expr);
 
     // Visits 'ID <- expr' expression
-    public void visit(AST.assign expr);
+    public String visit(AST.assign expr);
 
     // Visits 'expr@TYPE.ID([expr [[, expr]]∗])' expression
-    public void visit(AST.static_dispatch expr);
+    public String visit(AST.static_dispatch expr);
 
     // Visits 'expr.ID([expr [[, expr]]∗])' expression
-    public void visit(AST.dispatch expr);
+    public String visit(AST.dispatch expr);
 
     // Visits 'if expr then expr else expr fi' expression
-    public void visit(AST.cond expr);
+    public String visit(AST.cond expr);
 
     // Visits 'while expr loop expr pool' expression
-    public void visit(AST.loop expr);
+    public String visit(AST.loop expr);
 
     // Visits '{ [expr;]+ }' expression
-    public void visit(AST.block expr);
+    public String visit(AST.block expr);
 
     // Visits 'let ID : TYPE [<-expr] in expr' expression
     // NOTE: muliple ID declaration is converted to nested let by parser
-    public void visit(AST.let expr);
+    public String visit(AST.let expr);
 
     // Visits 'case expr of [ID : TYPE => expr;]+ esac' expression
-    public void visit(AST.typcase expr);
+    public String visit(AST.typcase expr);
 
     // Visits 'ID : TYPE => expr;'
     // This is not an expression, but used inside case
-    public void visit(AST.branch br);
+    public String visit(AST.branch br);
 
     // Visits 'new TYPE' expression
-    public void visit(AST.new_ expr);
+    public String visit(AST.new_ expr);
 
-    // Visits 'isvoid expr' expression
-    public void visit(AST.isvoid expr);
+    // Visits 'isString expr' expression
+    public String visit(AST.isvoid expr);
 
     // Visits 'expr + expr' expression
-    public void visit(AST.plus expr);
+    public String visit(AST.plus expr);
 
     // Visits 'expr - expr' expression
-    public void visit(AST.sub expr);
+    public String visit(AST.sub expr);
     
     // Visits 'expr * expr' expression
-    public void visit(AST.mul expr);
+    public String visit(AST.mul expr);
     
     // Visits 'expr / expr' expression
-    public void visit(AST.divide expr);
+    public String visit(AST.divide expr);
     
     // Visits 'not expr' expression
-    public void visit(AST.comp expr);
+    public String visit(AST.comp expr);
     
     // Visits 'expr < expr' expression
-    public void visit(AST.lt expr);
+    public String visit(AST.lt expr);
     
     // Visits 'expr <= expr' expression
-    public void visit(AST.leq expr);
+    public String visit(AST.leq expr);
     
     // Visits 'expr = expr' expression
-    public void visit(AST.eq expr);
+    public String visit(AST.eq expr);
     
     // Visits '~expr' expression
-    public void visit(AST.neg expr);
+    public String visit(AST.neg expr);
     
     // Visits 'ID' expression
-    public void visit(AST.object expr);
+    public String visit(AST.object expr);
     
     // Visits integer expression
-    public void visit(AST.int_const expr);
+    public String visit(AST.int_const expr);
     
     // Visits string expression
-    public void visit(AST.string_const expr);
+    public String visit(AST.string_const expr);
     
     // Visits bool expression
-    public void visit(AST.bool_const expr);
+    public String visit(AST.bool_const expr);
 
 }

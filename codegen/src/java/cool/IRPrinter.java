@@ -18,7 +18,7 @@ class IRPrinter {
         return 4;
     }
 
-    private static convertTypeWithPtr(String type) {
+    private static String convertTypeWithPtr(String type) {
         if("Int".equals(type)) {
             return "i32";
         }
@@ -26,11 +26,11 @@ class IRPrinter {
             return "i8";
         }
         else {
-            return Global.getStructName(type).append("*")toString();
+            return Global.getStructName(type) + "*";
         }
     }
 
-    private static convertType(String type) {
+    private static String convertType(String type) {
         if("Int".equals(type)) {
             return "i32";
         }
@@ -45,12 +45,12 @@ class IRPrinter {
     public static String createLoadInst(String mem, String type, int align) {
         StringBuilder builder = new StringBuilder(INDENT);
         type = convertTypeWithPtr(type);
-        String storeRegister = "%"+Global.registerCount;
-        Global.registerCount++;
+        String storeRegister = "%"+Global.registerCounter;
+        Global.registerCounter++;
         builder.append(storeRegister);
         builder.append(" = load ").append(type);
         builder.append(", ").append(type+"*");
-        builder.append(reg).append(", align ");
+        builder.append(mem).append(", align ");
         builder.append(align);
         Global.out.println(builder.toString());
         return storeRegister;
@@ -68,11 +68,11 @@ class IRPrinter {
     }
 
     public static String createBinaryInst(String opType, String op1, String op2, 
-                                            String type, bool nuw, bool nsw) {
+                                            String type, boolean nuw, boolean nsw) {
         StringBuilder builder = new StringBuilder(INDENT);
         type = convertTypeWithPtr(type);
-        String storeRegister = "%"+Global.registerCount;
-        Global.registerCount++;
+        String storeRegister = "%"+Global.registerCounter;
+        Global.registerCounter++;
         builder.append(storeRegister);
         builder.append(" = ").append(opType).append(" ");
         if(nuw)
@@ -81,7 +81,7 @@ class IRPrinter {
             builder.append("nsw");
         builder.append(type);
         builder.append(" ").append(op1).append(", ");
-        builder.addppend(op2);
+        builder.append(op2);
         Global.out.println(builder.toString());
         return storeRegister;
     }
@@ -90,8 +90,8 @@ class IRPrinter {
         StringBuilder builder = new StringBuilder(INDENT);
         exprFromType = convertTypeWithPtr(exprFromType);
         exprToType = convertTypeWithPtr(exprToType);
-        String storeRegister = "%"+Global.registerCount;
-        Global.registerCount++;
+        String storeRegister = "%"+Global.registerCounter;
+        Global.registerCounter++;
         builder.append(storeRegister);
         builder.append(" = ").append(convertType);
         builder.append(" ").append(exprFromType);
