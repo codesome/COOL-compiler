@@ -140,4 +140,26 @@ class IRPrinter {
         return storeRegister;
     }
 
+    public static String createReturnInst(String type, String val) {
+        StringBuilder builder = new StringBuilder(INDENT);
+        type = Utils.convertTypeWithPtr(type);
+        builder.append("ret ").append(type);
+        builder.append(" ").append(val);
+        Global.out.println(builder.toString());
+        return val;
+    }
+
+    public static String createCallInst(String type, String callee, String args) {
+        StringBuilder builder = new StringBuilder(INDENT);
+        type = Utils.convertTypeWithPtr(type);
+        String storeRegisterForCall = "%"+Global.registerCounter;
+        Global.registerCounter++;
+        builder.append(storeRegisterForCall);
+        builder.append(" = call ").append(type);
+        builder.append(" ").append(callee);
+        builder.append("(").append(args).append(")");
+        Global.out.println(builder.toString());
+        return storeRegisterForCall;
+    }
+
 }

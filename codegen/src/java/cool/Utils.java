@@ -43,6 +43,8 @@ public class Utils {
             return "i8";
         } else if(Global.Constants.STRING_TYPE.equals(type)) {
             return "i8*";
+        } else if(Global.Constants.PTR_TYPE.equals(type)) {
+            return "i8*";
         } else {
             return Utils.getStructName(type) + "*";
         }

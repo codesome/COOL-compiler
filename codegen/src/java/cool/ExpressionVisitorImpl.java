@@ -15,12 +15,26 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(expr.e1.type != expr.type) {
             retVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
         }
+        if(Global.Constants.STRING_TYPE.equals(expr.e1.type)) {
+            // TODO
+            return null;
+        }
         IRPrinter.createStoreInst(retVal, expr.name, expr.type);
         return retVal;
     }
 
     public String visit(AST.static_dispatch expr) {
-        return null;
+        String caller = expr.caller.accept(this);
+        StringBuilder builder = new StringBuilder();
+        for(argument : expr.actuals) {
+            builder.append(Utils.convertTypeWithPtr(argument.type));
+            builder.append(", ")
+            builder.append(argument.accept(this));
+        }
+        // TODO type or typeid?
+        String returnValue = IRPrinter.createCallInst(expr.type, Utils.getMangledName(Global.currentClass, 
+                            expr.name), builder.toString());
+        return returnValue;
     }
 
     public String visit(AST.cond expr) { // incomplete
@@ -57,32 +71,26 @@ abstract class ExpressionVisitorImpl implements Visitor {
         return voidReturn;
     }
 
-    public String visit(AST.typcase expr) {
-        return null;
-    }
-
-    public String visit(AST.let expr) {
-        return null;
-    }
-
-    public String visit(AST.branch expr) {
-        return null;
-    }   
-
-    public String visit(AST.dispatch expr) {
-        return null;
-    }
-
     public String visit(AST.block expr) {
-        return null;
+        String returnValue;
+        for(exprInBlock : expr.l1) {
+            returnValue = exprInBlock.accept(this);
+        }
+        return returnValue;
     }   
 
     public String visit(AST.new_ expr) {
-        return null;
+        // TODO - expr.type or expr.typeid?
+        String storeRegisterForCall = IRPrinter.createCallInst(Global.Constants.PTR_TYPE, 
+                                    Utils.getMangledName(expr.type, expr.type), ""); // INCOMPLETE
+        String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, Global.Constants.PTR_TYPE, 
+                                        expr.type, IRPrinter.BITCAST);
     }
 
     public String visit(AST.isvoid expr) {
-        return null;
+        String op = expr.e1.accept(this);
+        // TODO - is this correct?
+        return IRPrinter.createBinaryInst(IRPrinter.EQ, op, IRPrinter.UNDEF, expr.type, false, false);
     }
 
     public String visit(AST.plus expr) {
@@ -138,7 +146,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
     
     public String visit(AST.object expr) {
-        return null;    
+        // INCOMPLETE, TODO - need to check scope, etc. here, and may need GEP
+        return IRPrinter.createLoadInst(expr.name, expr.type);    
     }
     
     public String visit(AST.int_const expr) {
@@ -153,6 +162,24 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.bool_const expr) {
         String loadReg = IRPrinter.createLoadInst(""+expr.value, expr.type);
         return loadReg;    
+    }
+
+    // Functions below this are meant to be empty, will not be used
+
+    public String visit(AST.typcase expr) {
+        return null;
+    }
+
+    public String visit(AST.let expr) {
+        return null;
+    }
+
+    public String visit(AST.branch expr) {
+        return null;
+    }   
+
+    public String visit(AST.dispatch expr) {
+        return null;
     }
 
 }
