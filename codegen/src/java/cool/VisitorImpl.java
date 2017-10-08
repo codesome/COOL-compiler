@@ -9,20 +9,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
              Check Visitor.java 
     */
 
-    private String createClassAttrGEP(String className, String classRegister, String at) {
-        String gepRegister = "%"+Global.registerCounter;
-        Global.registerCounter++;
-        String structName = Utils.getStructName(className);
-        StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
-        builder.append(gepRegister)
-        .append(" = getelementptr inbounds ").append(structName).append(", ")
-        .append(structName).append("* ").append(classRegister).append(",")
-        .append(Global.classToVariableToIndexListMap.get(className).get(at));
-        
-        Global.out.println(builder.toString());
-        return gepRegister;
-    }
-
     private void printStringConstants() {
         StringBuilder structBuilder = new StringBuilder();
         if(!Global.stringConstantToRegisterMap.containsKey("")) {
@@ -76,7 +62,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 if(f instanceof AST.attr) {
                     index++;
                     AST.attr a = (AST.attr) f;
-                    builder.append(", ").append(Utils.convertType(a));
+                    builder.append(", ").append(Utils.getStructName(a.typeid));
                     variableToIndexListMap.put(a.name, " i32 0, i32 "+index);
                 }
             }
@@ -131,17 +117,17 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     private void generateStringConstructBody() {
-        String gepRegister = createClassAttrGEP(Global.Constants.STRING_TYPE, "%this", "val");
+        String gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.STRING_TYPE, "%this", "val");
         IRPrinter.createStoreInst(IRPrinter.createStringGEP(""), gepRegister, "i8*");
     }
 
     private void generateIntConstructBody() {
-        String gepRegister = createClassAttrGEP(Global.Constants.INT_TYPE, "%this", "val");
+        String gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.INT_TYPE, "%this", "val");
         IRPrinter.createStoreInst("0", gepRegister, "i32");
     }
 
     private void generateBoolConstructBody() {
-        String gepRegister = createClassAttrGEP(Global.Constants.BOOL_TYPE, "%this", "val");
+        String gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.BOOL_TYPE, "%this", "val");
         IRPrinter.createStoreInst("0", gepRegister, "i8");
     }
 
@@ -153,7 +139,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("define void @" + Utils.getMangledName(Global.Constants.STRING_TYPE, "set") 
             + "(" + Utils.getStructName(Global.Constants.STRING_TYPE) + "* %this, i8* %s) {");
         Global.out.println("entry:");
-        String gepRegister = createClassAttrGEP(Global.Constants.STRING_TYPE, "%this", "val");
+        String gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.STRING_TYPE, "%this", "val");
         IRPrinter.createStoreInst("%s", gepRegister, "i8*");
         Global.out.println(IRPrinter.INDENT+"ret void");
         Global.out.println("}");
@@ -164,7 +150,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("define void @" + Utils.getMangledName(Global.Constants.INT_TYPE, "set") 
             + "(" + Utils.getStructName(Global.Constants.INT_TYPE) + "* %this, i32 %s) {");
         Global.out.println("entry:");
-        gepRegister = createClassAttrGEP(Global.Constants.INT_TYPE, "%this", "val");
+        gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.INT_TYPE, "%this", "val");
         IRPrinter.createStoreInst("%s", gepRegister, "i32");
         Global.out.println(IRPrinter.INDENT+"ret void");
         Global.out.println("}");
@@ -175,7 +161,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("define void @" + Utils.getMangledName(Global.Constants.BOOL_TYPE, "set") 
             + "(" + Utils.getStructName(Global.Constants.BOOL_TYPE) + "* %this, i8 %s) {");
         Global.out.println("entry:");
-        gepRegister = createClassAttrGEP(Global.Constants.BOOL_TYPE, "%this", "val");
+        gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.BOOL_TYPE, "%this", "val");
         IRPrinter.createStoreInst("%s", gepRegister, "i8");
         Global.out.println(IRPrinter.INDENT+"ret void");
         Global.out.println("}");
@@ -244,7 +230,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.attr at) {
-        String gepRegister = createClassAttrGEP(Global.currentClass, "%this", at.name);
+        String gepRegister = IRPrinter.createClassAttrGEP(Global.currentClass, "%this", at.name);
         String valueRegister = at.value.accept(this);
         if(Global.inheritanceGraph.isRestrictedInheritanceClass(at.typeid)) {
             if(valueRegister==null) {

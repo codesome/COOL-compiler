@@ -3,9 +3,9 @@
 @.str.0 = private unnamed_addr constant [17 x i8] c"This is a string\00", align 1
 
 %class.Object = type {}
-%class.A = type { %class.Object, i32, i8 }
+%class.A = type { %class.Object, %class.Int, %class.Object, %class.Bool }
 %class.B = type { %class.A, %class.String, %class.A }
-%class.Main = type { %class.Object, i32, i8 }
+%class.Main = type { %class.Object, %class.Int, %class.Bool, %class.A }
 %class.IO = type { %class.Object }
 %class.Int = type { %class.Object, i32 }
 %class.String = type { %class.Object, i8* }
@@ -24,9 +24,26 @@ entry:
   %0 = bitcast %class.A* %this to %class.Object*
   call void @_CN6ObjectFN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  call void _CN3IntFN3set_(%class.Int* %1, i32 10)
+  call void _CN3IntFN3set_(%class.Int* %1, i32 100)
   %2 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 2
-  call void _CN4BoolFN3set_(%class.Bool* %2, i8 1)
+  br label while.cond
+
+while.cond.1:
+  %3 = load i8, i8* b, align 4
+  br i1 %3, label while.body, label while.end
+
+while.body.1:
+  %4 = load i32, i32* e, align 4
+  %5 = add nswi32 %4, 1
+  %6 = bitcast i32 %5 to i32
+  store i32 %6, i32* e, align 4
+  br label while.cond
+
+while.end.1:
+  %7 = load %class.%class.Object*, %class.%class.Object** undef, align 8
+  store %class.Object* %7, %class.Object** %2, align 8
+  %8 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
+  call void _CN4BoolFN3set_(%class.Bool* %8, i8 1)
   ret void
 }
 
@@ -52,6 +69,10 @@ entry:
   call void @_CN3IntFN3Int_(%class.Int* %1)
   %2 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
   call void @_CN4BoolFN4Bool_(%class.Bool* %2)
+  %3 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 3
+  %4 = call i8* _CN1AFN1A_()
+  %5 = bitcast i8* %4 to %class.A*
+  store %class.A* undef, %class.A** %3, align 8
   ret void
 }
 
