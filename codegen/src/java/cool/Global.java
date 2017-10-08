@@ -2,6 +2,10 @@ package cool;
 
 import java.lang.StringBuilder;
 import java.io.PrintWriter;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 
 public class Global {
 
@@ -19,14 +23,19 @@ public class Global {
     // The base classes are also updated in this.
     public static InheritanceGraph inheritanceGraph;
 
-    // Contains all the variables in the scope
-    // mapped with their type: variable_name -> Type
-    public static ScopeTable<String> scopeTable;
+    public static Set<String> methodParams;
+
+    public static Map<String,Integer> labelToCountMap;
+
+    public static Map<String,String> stringConstantToRegisterMap;
 
     public static PrintWriter out;
 
+    public static int registerCounter;
+
     static {
-        scopeTable = new ScopeTable<>();
+        methodParams = new HashSet<>();
+        labelToCountMap = new HashMap<>();
     }
 
 
