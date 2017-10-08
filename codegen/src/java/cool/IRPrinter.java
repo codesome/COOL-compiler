@@ -67,7 +67,7 @@ class IRPrinter {
         if(nuw)
             builder.append("nuw ");
         if(nsw)
-            builder.append("nsw");
+            builder.append("nsw ");
         builder.append(type);
         builder.append(" ").append(op1).append(", ");
         builder.append(op2);
@@ -107,20 +107,24 @@ class IRPrinter {
 
     public static String createLabel(String label) {
         StringBuilder builder = new StringBuilder("\n");
-        label = getLabel(label);
+        label = getLabel(label,true);
         builder.append(label).append(":");
         Global.out.println(builder.toString());
         return label;
     }
 
-    public static String getLabel(String label) {
+    public static String getLabel(String label, boolean isExisting) {
         String finalLabel = label;
+        if(isExisting) {
+            return finalLabel;
+        }
         if(Global.labelToCountMap.containsKey(label)) {
             int value = Global.labelToCountMap.get(label);
             finalLabel = label + "." + value;
             Global.labelToCountMap.put(label, Global.labelToCountMap.get(label) + 1);
         }
         else {
+            finalLabel = label + "." + 1;
             Global.labelToCountMap.put(label,1); // TODO : check this
         }
         return finalLabel;

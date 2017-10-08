@@ -12,7 +12,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public String visit(AST.assign expr) {
         String retVal = expr.e1.accept(this);
-        if(expr.e1.type != expr.type) {
+        if(!expr.e1.type.equals(expr.type)) {
             retVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
         }
         if(Global.Constants.STRING_TYPE.equals(expr.e1.type)) {
@@ -38,9 +38,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
 
     public String visit(AST.cond expr) { // incomplete
-        String ifThenLabel = IRPrinter.getLabel("if.then");
-        String ifElseLabel = IRPrinter.getLabel("if.else");
-        String ifEndLabel = IRPrinter.getLabel("if.end");
+        String ifThenLabel = IRPrinter.getLabel("if.then",false);
+        String ifElseLabel = IRPrinter.getLabel("if.else",false);
+        String ifEndLabel = IRPrinter.getLabel("if.end",false);
         String cmpInst = expr.predicate.accept(this);
         IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
         IRPrinter.createLabel(ifThenLabel);
@@ -55,9 +55,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
 
     public String visit(AST.loop expr) { // incomplete
-        String whileCondLabel = IRPrinter.getLabel("while.cond");
-        String whileBodyLabel = IRPrinter.getLabel("while.body");
-        String whileEndLabel = IRPrinter.getLabel("while.end");
+        String whileCondLabel = IRPrinter.getLabel("while.cond",false);
+        String whileBodyLabel = IRPrinter.getLabel("while.body",false);
+        String whileEndLabel = IRPrinter.getLabel("while.end",false);
         IRPrinter.createBreakInst(whileCondLabel);
         IRPrinter.createLabel(whileCondLabel);
         String whilePredicate = expr.predicate.accept(this);
@@ -66,8 +66,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String whileBody = expr.body.accept(this);
         IRPrinter.createBreakInst(whileCondLabel);
         IRPrinter.createLabel(whileEndLabel);
-        String objectClass = Utils.getStructName("Object");
-        String voidReturn = IRPrinter.createLoadInst(IRPrinter.UNDEF, objectClass);
+        String voidReturn = IRPrinter.createLoadInst(IRPrinter.UNDEF, "Object");
         return voidReturn;
     }
 
