@@ -193,4 +193,18 @@ class IRPrinter {
         return gepRegister;
     }
 
+    public static String createClassAttrGEP(String className, String classRegister, String at) {
+        String gepRegister = "%"+Global.registerCounter;
+        Global.registerCounter++;
+        String structName = Utils.getStructName(className);
+        StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
+        builder.append(gepRegister)
+        .append(" = getelementptr inbounds ").append(structName).append(", ")
+        .append(structName).append("* ").append(classRegister).append(",")
+        .append(Global.classToVariableToIndexListMap.get(className).get(at));
+        
+        Global.out.println(builder.toString());
+        return gepRegister;
+    }
+
 }
