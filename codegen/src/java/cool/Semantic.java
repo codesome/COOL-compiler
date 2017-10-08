@@ -62,6 +62,10 @@ public class Semantic {
 	 * @param node string_const node
 	 */
 	void typeCheck(AST.string_const node) {
+		if(!Global.stringConstantToRegisterMap.containsKey(node.value)) {
+			Global.stringConstantToRegisterMap.put(node.value, "@.str."+Global.stringRegisterCounter);
+			Global.stringRegisterCounter++;
+		}
 		node.type = "String";
 	}
 	

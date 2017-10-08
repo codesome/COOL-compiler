@@ -27,8 +27,11 @@ public class Global {
 
     public static Map<String,Integer> labelToCountMap;
 
+    public static int stringRegisterCounter;
     public static Map<String,String> stringConstantToRegisterMap;
 
+    public static Map<String,Map<String,String>> classToVariableToIndexListMap;
+    
     public static PrintWriter out;
 
     public static int registerCounter;
@@ -36,17 +39,21 @@ public class Global {
     static {
         methodParams = new HashSet<>();
         labelToCountMap = new HashMap<>();
+        stringConstantToRegisterMap = new HashMap<>();
+        classToVariableToIndexListMap = new HashMap<>();
+        registerCounter = 0;
+        stringRegisterCounter = 0;
     }
 
 
-    // Mangled name logic
-
-    // Used for mangled name with class and without return type
-    // And for arguments as AST.expression
     public static String getMangledName(String className, String functionName) {
         return new StringBuilder().append("_CN").append(className.length())
         .append(className).append("FN").append(functionName.length()).append(functionName)
         .append("_").toString();
+    }
+
+    public static String getStructName(String className) {
+        return "%class." + className;
     }
 
 }
