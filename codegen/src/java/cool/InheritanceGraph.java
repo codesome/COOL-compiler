@@ -22,8 +22,11 @@ public class InheritanceGraph {
     // in graph list
     private Map<String,Integer> classNameToIndexMap;
 
+    private Node rootNode;
+
     /* Constructor */
     public InheritanceGraph() {
+        rootNode = null;
         graph = new ArrayList<>();
         classNameToIndexMap = new HashMap<>();
         // addBaseClasses();
@@ -32,12 +35,15 @@ public class InheritanceGraph {
     /* Method definitions */
 
     public Node getRootNode() {
-        for(Node node: graph) {
-            if(Global.Constants.ROOT_TYPE.equals(node.getAstClass().name)) {
-                return node;
+        if(rootNode==null) {
+            for(Node node: graph) {
+                if(Global.Constants.ROOT_TYPE.equals(node.getAstClass().name)) {
+                    rootNode = node;
+                    break;
+                }
             }
         }
-        return null;
+        return rootNode;
     }
 
     public boolean hasClass(String className) {
@@ -64,7 +70,7 @@ public class InheritanceGraph {
     }
 
     // Restricted base classes for inheritance
-    private boolean isRestrictedInheritanceClass(String name) {
+    public boolean isRestrictedInheritanceClass(String name) {
         return Global.Constants.INT_TYPE.equals(name) || Global.Constants.STRING_TYPE.equals(name) 
         || Global.Constants.BOOL_TYPE.equals(name);
     }

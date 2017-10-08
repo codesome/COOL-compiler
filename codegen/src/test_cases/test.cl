@@ -4,7 +4,7 @@ b : Bool;
 };
 
 class B inherits A {
-c : String;
+c : String <- "This is a string";
 d : A;
 };
 

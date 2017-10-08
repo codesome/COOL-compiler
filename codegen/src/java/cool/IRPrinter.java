@@ -114,15 +114,16 @@ class IRPrinter {
     }
 
     public static String getLabel(String label) {
-        if(!Global.labelToCountMap.containsKey(label)) {
+        String finalLabel = label;
+        if(Global.labelToCountMap.containsKey(label)) {
             int value = Global.labelToCountMap.get(label);
-            label = label + "." + value;
+            finalLabel = label + "." + value;
             Global.labelToCountMap.put(label, Global.labelToCountMap.get(label) + 1);
         }
         else {
             Global.labelToCountMap.put(label,1); // TODO : check this
         }
-        return label;
+        return finalLabel;
     }
 
     public static String createPHINode(String type, String v1, String label1, String v2, String label2) {

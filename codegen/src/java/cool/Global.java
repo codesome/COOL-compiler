@@ -17,6 +17,7 @@ public class Global {
         public static final String BOOL_TYPE = "Bool";
         public static final String STRING_TYPE = "String";
         public static final String MAIN_TYPE = "Main";
+        public static final String IR_INDENT = "  ";
     }
 
     // Contains graph after parsing all the classes and its parents
@@ -35,6 +36,8 @@ public class Global {
     public static PrintWriter out;
 
     public static int registerCounter;
+
+    public static String currentClass;
 
     static {
         methodParams = new HashSet<>();
