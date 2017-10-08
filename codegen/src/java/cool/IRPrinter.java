@@ -18,33 +18,9 @@ class IRPrinter {
         return 4;
     }
 
-    private static String convertTypeWithPtr(String type) {
-        if("Int".equals(type)) {
-            return "i32";
-        }
-        else if("Bool".equals(type)) {
-            return "i8";
-        }
-        else {
-            return Global.getStructName(type) + "*";
-        }
-    }
-
-    private static String convertType(String type) {
-        if("Int".equals(type)) {
-            return "i32";
-        }
-        else if("Bool".equals(type)) {
-            return "i8";
-        }
-        else {
-            return Global.getStructName(type);
-        }
-    }
-
     public static String createLoadInst(String mem, String type, int align) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = convertTypeWithPtr(type);
+        type = Utils.convertTypeWithPtr(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -58,7 +34,7 @@ class IRPrinter {
 
     public static void createStoreInst(String reg, String mem, String type, int align) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = convertTypeWithPtr(type);
+        type = Utils.convertTypeWithPtr(type);
         builder.append("store ").append(type).append(" ");
         builder.append(reg).append(", ");
         builder.append(type+"*").append(" ");
@@ -70,7 +46,7 @@ class IRPrinter {
     public static String createBinaryInst(String opType, String op1, String op2, 
                                             String type, boolean nuw, boolean nsw) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = convertTypeWithPtr(type);
+        type = Utils.convertTypeWithPtr(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -88,8 +64,8 @@ class IRPrinter {
 
     public static String createConvertInst(String reg, String exprFromType, String exprToType, String convertType) {
         StringBuilder builder = new StringBuilder(INDENT);
-        exprFromType = convertTypeWithPtr(exprFromType);
-        exprToType = convertTypeWithPtr(exprToType);
+        exprFromType = Utils.convertTypeWithPtr(exprFromType);
+        exprToType = Utils.convertTypeWithPtr(exprToType);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);

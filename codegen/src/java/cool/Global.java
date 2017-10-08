@@ -46,14 +46,5 @@ public class Global {
     }
 
 
-    public static String getMangledName(String className, String functionName) {
-        return new StringBuilder().append("_CN").append(className.length())
-        .append(className).append("FN").append(functionName.length()).append(functionName)
-        .append("_").toString();
-    }
-
-    public static String getStructName(String className) {
-        return "%class." + className;
-    }
 
 }

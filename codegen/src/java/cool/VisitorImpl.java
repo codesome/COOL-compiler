@@ -9,21 +9,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
              Check Visitor.java 
     */
 
-    private String getType(AST.attr at) {
-        if(Global.Constants.INT_TYPE.equals(at.typeid)) {
-            return "i32";
-        } else if(Global.Constants.BOOL_TYPE.equals(at.typeid)) {
-            return "i8";
-        } else if(Global.Constants.STRING_TYPE.equals(at.typeid)) {
-            return "i8*";
-        } else {
-            return Global.getStructName(at.typeid);
-        }
-    }
-
     private void createStructs() {
         InheritanceGraph.Node rootNode = Global.inheritanceGraph.getRootNode();
-        Global.out.println(Global.getStructName(Global.Constants.ROOT_TYPE) + " = type {}");
+        Global.out.println(Utils.getStructName(Global.Constants.ROOT_TYPE) + " = type {}");
         Global.classToVariableToIndexListMap.put(Global.Constants.ROOT_TYPE, new HashMap<>());
 
         for(InheritanceGraph.Node child: rootNode.getChildren()) {
@@ -34,8 +22,8 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     private void createStructsDFS(InheritanceGraph.Node node) {
         AST.class_ cl = node.getAstClass();
-        StringBuilder builder = new StringBuilder(Global.getStructName(cl.name));
-        builder.append(" = type { ").append(Global.getStructName(node.getParent().getAstClass().name));
+        StringBuilder builder = new StringBuilder(Utils.getStructName(cl.name));
+        builder.append(" = type { ").append(Utils.getStructName(node.getParent().getAstClass().name));
         
         Map<String, String> variableToIndexListMap = new HashMap<>();
         Map<String, String> parentMap = Global.classToVariableToIndexListMap.get(node.getParent().getAstClass().name);
@@ -48,7 +36,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
             if(f instanceof AST.attr) {
                 index++;
                 AST.attr a = (AST.attr) f;
-                builder.append(", ").append(getType(a));
+                builder.append(", ").append(Utils.convertType(a));
                 variableToIndexListMap.put(a.name, " i32 0, i32 "+index);
             }
         }
