@@ -18,7 +18,7 @@ class IRPrinter {
         return 4;
     }
 
-    public static String createLoadInst(String mem, String type, int align) {
+    public static String createLoadInst(String mem, String type) {
         StringBuilder builder = new StringBuilder(INDENT);
         type = Utils.convertTypeWithPtr(type);
         String storeRegister = "%"+Global.registerCounter;
@@ -27,19 +27,19 @@ class IRPrinter {
         builder.append(" = load ").append(type);
         builder.append(", ").append(type+"*");
         builder.append(mem).append(", align ");
-        builder.append(align);
+        builder.append(getAlign(type));
         Global.out.println(builder.toString());
         return storeRegister;
     }
 
-    public static void createStoreInst(String reg, String mem, String type, int align) {
+    public static void createStoreInst(String reg, String mem, String type) {
         StringBuilder builder = new StringBuilder(INDENT);
         type = Utils.convertTypeWithPtr(type);
         builder.append("store ").append(type).append(" ");
         builder.append(reg).append(", ");
         builder.append(type+"*").append(" ");
         builder.append(mem).append(", align ");
-        builder.append(align);
+        builder.append(getAlign(type));
         Global.out.println(builder.toString());
     }
 
@@ -103,9 +103,9 @@ class IRPrinter {
      public static String getLabel(String label) {
         StringBuilder builder = new StringBuilder();
         if(!Global.labelToCountMap.containsKey(label)) {
-            int key = Global.labelToCountMap.get(label);
-            label = label + "." + key;
-            Global.labelToCountMap.put(key, Global.labelToCountMap.get(key) + 1);
+            int value = Global.labelToCountMap.get(label);
+            label = label + "." + value;
+            Global.labelToCountMap.put(label, Global.labelToCountMap.get(label) + 1);
         }
         else {
             Global.labelToCountMap.put(label,1); // TODO : check this

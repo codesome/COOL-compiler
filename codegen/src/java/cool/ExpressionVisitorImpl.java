@@ -7,120 +7,139 @@ abstract class ExpressionVisitorImpl implements Visitor {
     */
 
     public String visit(AST.no_expr expr) {
-
+        return null;
     }
 
     public String visit(AST.assign expr) {
-        String retVal = visit(expr.e1);
+        String retVal = expr.e1.accept(this);
         if(expr.e1.type != expr.type) {
-            retVal = createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
+            retVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
         }
         IRPrinter.createStoreInst(retVal, expr.name, expr.type);
+        return null;
     }
 
     public String visit(AST.static_dispatch expr) {
-        
+        return null;
     }
 
     public String visit(AST.cond expr) { // incomplete
         String ifThenLabel = IRPrinter.getLabel("if.then");
         String ifElseLabel = IRPrinter.getLabel("if.else");
         String ifEndLabel = IRPrinter.getLabel("if.end");
-        String cmpInst = visit(expr.predicate);
+        String cmpInst = expr.predicate.accept(this);
         IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
         IRPrinter.createLabel(ifThenLabel);
-        String ifBody = visit(expr.ifbody);
+        String ifBody = expr.ifbody.accept(this);
         IRPrinter.createBreakInst(ifEndLabel);
         IRPrinter.createLabel(ifElseLabel);
-        String ifElse = visit(expr.elsebody);
+        String ifElse = expr.elsebody.accept(this);
         IRPrinter.createBreakInst(ifEndLabel);
         IRPrinter.createLabel(ifEndLabel);
+        return null;
     }
 
     public String visit(AST.loop expr) { // incomplete
-        String whileCond = IRPrinter.getLabel("while.cond");
-        String whileBody = IRPrinter.getLabel("while.body");
-        String whileEnd = IRPrinter.getLabel("while.end");
-        IRPrinter.createBreakInst(whileCond);
-        IRPrinter.createLabel(whileCond);
-        String whilePredicate = visit(expr.predicate);
-        IRPrinter.createCondBreak(whilePredicate,whileBody,whileEnd);
-        IRPrinter.createLabel(whileBody);
-        String whileBody = visit(expr.body);
-        IRPrinter.createBreakInst(whileCond);
-        IRPrinter.createLabel(whileEnd);
+        String whileCondLabel = IRPrinter.getLabel("while.cond");
+        String whileBodyLabel = IRPrinter.getLabel("while.body");
+        String whileEndLabel = IRPrinter.getLabel("while.end");
+        IRPrinter.createBreakInst(whileCondLabel);
+        IRPrinter.createLabel(whileCondLabel);
+        String whilePredicate = expr.predicate.accept(this);
+        IRPrinter.createCondBreak(whilePredicate,whileBodyLabel,whileEndLabel);
+        IRPrinter.createLabel(whileBodyLabel);
+        String whileBody = expr.body.accept(this);
+        IRPrinter.createBreakInst(whileCondLabel);
+        IRPrinter.createLabel(whileEndLabel);
+        return null;
+    }
+
+    public String visit(AST.typcase expr) {
+        return null;
+    }
+
+    public String visit(AST.let expr) {
+        return null;
+    }
+
+    public String visit(AST.branch expr) {
+        return null;
+    }   
+
+    public String visit(AST.dispatch expr) {
+        return null;
     }
 
     public String visit(AST.block expr) {
-        
-    }
+        return null;
+    }   
 
     public String visit(AST.new_ expr) {
-        
+        return null;
     }
 
     public String visit(AST.isvoid expr) {
-        
+        return null;
     }
 
     public String visit(AST.plus expr) {
-        String op1 = visit(expr.e1);
-        String op2 = visit(expr.e2);
-        IRPrinter.createBinaryInst("add", op1, op2, expr.type, false, true); // TODO - set flags correctly
+        String op1 = expr.e1.accept(this);
+        String op2 = expr.e2.accept(this);
+        return IRPrinter.createBinaryInst("add", op1, op2, expr.type, false, true); // TODO - set flags correctly
     }
 
     public String visit(AST.sub expr) {
-        String op1 = visit(expr.e1);
-        String op2 = visit(expr.e2);
-        IRPrinter.createBinaryInst("sub", op1, op2, expr.type, false, true); // TODO - set flags correctly
+        String op1 = expr.e1.accept(this);
+        String op2 = expr.e2.accept(this);
+        return IRPrinter.createBinaryInst("sub", op1, op2, expr.type, false, true); // TODO - set flags correctly
     }
     
     public String visit(AST.mul expr) {
-        String op1 = visit(expr.e1);
-        String op2 = visit(expr.e2);
-        IRPrinter.createBinaryInst("mul", op1, op2, expr.type, false, true); // TODO - set flags correctly
+        String op1 = expr.e1.accept(this);
+        String op2 = expr.e2.accept(this);
+        return IRPrinter.createBinaryInst("mul", op1, op2, expr.type, false, true); // TODO - set flags correctly
     }
     
     public String visit(AST.divide expr) {
-        String op1 = visit(expr.e1);
-        String op2 = visit(expr.e2);
-        IRPrinter.createBinaryInst("div", op1, op2, expr.type, false, true); // TODO - set flags correctly
+        String op1 = expr.e1.accept(this);
+        String op2 = expr.e2.accept(this);
+        return IRPrinter.createBinaryInst("div", op1, op2, expr.type, false, true); // TODO - set flags correctly
     }
     
     public String visit(AST.comp expr) {
-        
+        return null;    
     }
     
     public String visit(AST.lt expr) {
-        
+        return null;    
     }
     
     public String visit(AST.leq expr) {
-        
+        return null;    
     }
     
     public String visit(AST.eq expr) {
-        
+        return null;    
     }
     
     public String visit(AST.neg expr) {
-        
+        return null;    
     }
     
     public String visit(AST.object expr) {
-        
+        return null;    
     }
     
     public String visit(AST.int_const expr) {
-        
+        return null;    
     }
     
     public String visit(AST.string_const expr) {
-        
+        return null;    
     }
     
     public String visit(AST.bool_const expr) {
-        
+        return null;    
     }
 
 }
