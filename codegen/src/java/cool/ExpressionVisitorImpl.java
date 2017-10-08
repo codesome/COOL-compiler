@@ -26,9 +26,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.static_dispatch expr) {
         String caller = expr.caller.accept(this);
         StringBuilder builder = new StringBuilder();
-        for(argument : expr.actuals) {
+        for(AST.expression argument : expr.actuals) {
             builder.append(Utils.convertTypeWithPtr(argument.type));
-            builder.append(", ")
+            builder.append(", ");
             builder.append(argument.accept(this));
         }
         // TODO type or typeid?
@@ -73,7 +73,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public String visit(AST.block expr) {
         String returnValue;
-        for(exprInBlock : expr.l1) {
+        for(AST.expression exprInBlock : expr.l1) {
             returnValue = exprInBlock.accept(this);
         }
         return returnValue;
