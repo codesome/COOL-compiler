@@ -24,9 +24,9 @@ entry:
   %0 = bitcast %class.A* %this to %class.Object*
   call void @_CN6ObjectFN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  call void @_CN3IntFN3Int_(%class.Int* %1)
+  call void _CN3IntFN3set_(%class.Int* %1, i32 10)
   %2 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 2
-  call void @_CN4BoolFN4Bool_(%class.Bool* %2)
+  call void _CN4BoolFN3set_(%class.Bool* %2, i8 1)
   ret void
 }
 
@@ -36,9 +36,10 @@ entry:
   %0 = bitcast %class.B* %this to %class.A*
   call void @_CN1AFN1A_(%class.A* %0)
   %1 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 1
-  call void @_CN6StringFN6String_(%class.String* %1)
-  %2 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 2
-  store %class.A* undef, %class.A** %2, align 8
+  %2 = getelementptr inbounds [17 x i8], [17 x i8]* @.str.0, i32 0, i32 0
+  call void _CN6StringFN3set_(%class.String* %1, i8* %2)
+  %3 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 2
+  store %class.A* undef, %class.A** %3, align 8
   ret void
 }
 

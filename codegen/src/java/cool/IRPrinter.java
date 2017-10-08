@@ -38,7 +38,7 @@ class IRPrinter {
         Global.registerCounter++;
         builder.append(storeRegister);
         builder.append(" = load ").append(type);
-        builder.append(", ").append(type+"*");
+        builder.append(", ").append(type+"* ");
         builder.append(mem).append(", align ");
         builder.append(getAlign(type));
         Global.out.println(builder.toString());
@@ -139,6 +139,54 @@ class IRPrinter {
         builder.append(label2).append(" ]");
         Global.out.println(builder.toString());
         return storeRegister;
+    }
+
+    public static String createReturnInst(String type, String val) {
+        StringBuilder builder = new StringBuilder(INDENT);
+        type = Utils.convertTypeWithPtr(type);
+        builder.append("ret ").append(type);
+        builder.append(" ").append(val);
+        Global.out.println(builder.toString());
+        return val;
+    }
+
+    public static void createVoidCallInst(String type, String callee, String args) {
+        StringBuilder builder = new StringBuilder(INDENT);
+        type = Utils.convertTypeWithPtr(type);
+        builder.append("call void ").append(callee);
+        builder.append("(").append(args).append(")");
+        Global.out.println(builder.toString());
+    }
+
+    public static String createCallInst(String type, String callee, String args) {
+        StringBuilder builder = new StringBuilder(INDENT);
+        type = Utils.convertTypeWithPtr(type);
+        String storeRegisterForCall = "%"+Global.registerCounter;
+        Global.registerCounter++;
+        builder.append(storeRegisterForCall);
+        builder.append(" = call ").append(type);
+        builder.append(" ").append(callee);
+        builder.append("(").append(args).append(")");
+        Global.out.println(builder.toString());
+        return storeRegisterForCall;
+    }
+
+
+    public static String createStringGEP(String str) {
+        if(!Global.stringConstantToRegisterMap.containsKey(str))
+            return null;
+        String gepRegister = "%"+Global.registerCounter;
+        Global.registerCounter++;
+
+        StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
+
+        builder.append(gepRegister)
+        .append(" = getelementptr inbounds [").append(str.length()+1).append(" x i8], [")
+        .append(str.length()+1).append(" x i8]* ").append(Global.stringConstantToRegisterMap.get(str))
+        .append(", i32 0, i32 0");
+        Global.out.println(builder.toString());
+
+        return gepRegister;
     }
 
 }

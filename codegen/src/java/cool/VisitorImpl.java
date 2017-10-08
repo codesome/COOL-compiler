@@ -23,23 +23,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
         return gepRegister;
     }
 
-    private String createStringGEP(String str) {
-        if(!Global.stringConstantToRegisterMap.containsKey(str))
-            return null;
-        String gepRegister = "%"+Global.registerCounter;
-        Global.registerCounter++;
-
-        StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
-
-        builder.append(gepRegister)
-        .append(" = getelementptr inbounds [").append(str.length()+1).append(" x i8], [")
-        .append(str.length()+1).append(" x i8]* ").append(Global.stringConstantToRegisterMap.get(str))
-        .append(", i32 0, i32 0");
-        Global.out.println(builder.toString());
-
-        return gepRegister;
-    }
-
     private void printStringConstants() {
         StringBuilder structBuilder = new StringBuilder();
         if(!Global.stringConstantToRegisterMap.containsKey("")) {
@@ -149,7 +132,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     private void generateStringConstructBody() {
         String gepRegister = createClassAttrGEP(Global.Constants.STRING_TYPE, "%this", "val");
-        IRPrinter.createStoreInst(createStringGEP(""), gepRegister, "i8*");
+        IRPrinter.createStoreInst(IRPrinter.createStringGEP(""), gepRegister, "i8*");
     }
 
     private void generateIntConstructBody() {
@@ -226,7 +209,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         } else if(Global.Constants.BOOL_TYPE.equals(type)) {
             return "0";
         } else if(Global.Constants.STRING_TYPE.equals(type)) {
-            return createStringGEP("");
+            return IRPrinter.createStringGEP("");
         } else {
             return "undef";
         }
@@ -248,6 +231,18 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
     }
 
+    private String getRegisterForPrimitiveType(String type) {
+        if(Global.Constants.INT_TYPE.equals(type)) {
+            return "i32";
+        } else if(Global.Constants.BOOL_TYPE.equals(type)) {
+            return "i8";
+        } else if(Global.Constants.STRING_TYPE.equals(type)) {
+            return "i8*";
+        } else {
+            return null;
+        }
+    }
+
     public void visit(AST.attr at) {
         String gepRegister = createClassAttrGEP(Global.currentClass, "%this", at.name);
         String valueRegister = at.value.accept(this);
@@ -256,12 +251,17 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 createCallForConstructor(at.typeid, gepRegister);
             } else {
                 // call function
-                IRPrinter.createStoreInst(valueRegister, gepRegister, at.typeid);
+                StringBuilder argsBuilder = new StringBuilder();
+                argsBuilder.append(Utils.getStructName(at.typeid)).append("* ").append(gepRegister)
+                .append(", ").append(getRegisterForPrimitiveType(at.value.type)).append(" ").append(valueRegister);
+                
+                IRPrinter.createVoidCallInst("void", Utils.getMangledName(at.typeid, "set"), argsBuilder.toString());
             }
         } else {
             if(valueRegister==null) {
                 IRPrinter.createStoreInst(getDefaultValue(at.typeid), gepRegister, at.typeid);
             } else {
+                // TODO bitcast if not same
                 IRPrinter.createStoreInst(valueRegister, gepRegister, at.typeid);
             }
         }

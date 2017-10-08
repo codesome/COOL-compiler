@@ -1,6 +1,6 @@
 class A {
-a : Int;
-b : Bool;
+a : Int <- 10;
+b : Bool <- true;
 };
 
 class B inherits A {
