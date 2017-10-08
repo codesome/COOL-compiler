@@ -2,7 +2,7 @@
 @.str.0 = private unnamed_addr constant [1 x i8] c"\00", align 1
 
 %class.Object = type {}
-%class.Main = type { %class.Object, i8, i32, %class.Object }
+%class.Main = type { %class.Object, %class.Bool, %class.Int, %class.Object }
 %class.IO = type { %class.Object }
 %class.Int = type { %class.Object, i32 }
 %class.String = type { %class.Object, i8* }
@@ -29,17 +29,18 @@ entry:
 
 while.cond.1:
   %4 = load i8, i8* b, align 4
-  br i1 %4, label while.body.1, label while.end.1
+  %5 = trunc i8 %4 to i1
+  br i1 %5, label while.body.1, label while.end.1
 
 while.body.1:
-  %5 = load i32, i32* c, align 4
-  %6 = add nsw i32 %5, 1
-  store i32 %6, i32* c, align 4
+  %6 = load i32, i32* c, align 4
+  %7 = add nsw i32 %6, 1
+  store i32 %7, i32* c, align 4
   br label while.cond.1
 
 while.end.1:
-  %7 = load %class.Object*, %class.Object** undef, align 8
-  store %class.Object* %7, %class.Object** %3, align 8
+  %8 = load %class.Object*, %class.Object** undef, align 8
+  store %class.Object* %8, %class.Object** %3, align 8
   ret void
 }
 

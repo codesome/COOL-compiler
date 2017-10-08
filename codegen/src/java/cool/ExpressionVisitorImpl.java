@@ -42,7 +42,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String ifElseLabel = IRPrinter.getLabel("if.else",false);
         String ifEndLabel = IRPrinter.getLabel("if.end",false);
         String cmpInst = expr.predicate.accept(this);
-        IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
+        String truncVar = IRPrinter.createConvertInst(cmpInst,"i8","i1",IRPrinter.TRUNC);
+        IRPrinter.createCondBreak(truncVar, ifThenLabel, ifElseLabel);
         IRPrinter.createLabel(ifThenLabel);
         String ifBody = expr.ifbody.accept(this);
         IRPrinter.createBreakInst(ifEndLabel);
@@ -61,7 +62,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
         IRPrinter.createBreakInst(whileCondLabel);
         IRPrinter.createLabel(whileCondLabel);
         String whilePredicate = expr.predicate.accept(this);
-        IRPrinter.createCondBreak(whilePredicate,whileBodyLabel,whileEndLabel);
+        String truncVar = IRPrinter.createConvertInst(whilePredicate,"i8","i1",IRPrinter.TRUNC);
+        IRPrinter.createCondBreak(truncVar,whileBodyLabel,whileEndLabel);
         IRPrinter.createLabel(whileBodyLabel);
         String whileBody = expr.body.accept(this);
         IRPrinter.createBreakInst(whileCondLabel);
