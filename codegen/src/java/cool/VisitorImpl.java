@@ -296,7 +296,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.method mthd) {
-
+        Global.methodParams.clear();
         Global.out.println("\n; Class: "+Global.currentClass+", Method: "+mthd.name);
         Global.out.print("define " + Utils.getStructName(mthd.typeid) + " @" + 
             Utils.getMangledName(Global.currentClass, mthd.name) + "(");
@@ -319,6 +319,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.formal fm) {
+        Global.methodParams.add(fm.name);
         Global.out.print(Utils.getStructName(fm.typeid) + " %" + fm.name);
     }
 
