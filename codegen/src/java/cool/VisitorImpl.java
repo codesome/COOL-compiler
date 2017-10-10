@@ -216,10 +216,19 @@ class VisitorImpl extends ExpressionVisitorImpl {
         generateConstructors();
         generateDefaultMethods();
 
+        for(AST.class_ cl: prog.classes) {
+            cl.accept(this);
+        }
+
     }
 
     public void visit(AST.class_ cl) {
-        
+        Global.currentClass = cl.name;
+        for(AST.feature f : cl.features) {
+            if(f instanceof AST.method) {
+                ((AST.method) f).accept(this);
+            }
+        }
     }
 
     public String getDefaultValue(String type) {
@@ -287,11 +296,30 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.method mthd) {
-        
+
+        Global.out.println("\n; Class: "+Global.currentClass+", Method: "+mthd.name);
+        Global.out.print("define " + Utils.getStructName(mthd.typeid) + " @" + 
+            Utils.getMangledName(Global.currentClass, mthd.name) + "(");
+
+        boolean first = true;
+        for(AST.formal fm: mthd.formals) {
+            if(first) {
+                first = false;
+            } else {
+                Global.out.print(", ");
+            }
+            fm.accept(this);
+        }
+
+        Global.out.println(") {");
+        IRPrinter.createLabel("entry");
+        mthd.body.accept(this);
+        Global.out.println("}");
+
     }
 
     public void visit(AST.formal fm) {
-        
+        Global.out.print(Utils.getStructName(fm.typeid) + " %" + fm.name);
     }
 
 }
