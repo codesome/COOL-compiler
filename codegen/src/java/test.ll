@@ -12,12 +12,14 @@
 %class.Bool = type { %class.Object, i8 }
 
 
+; Constructor of class 'Object'
 define void @_CN6ObjectFN6Object_(%class.Object* %this) {
 
 entry:
   ret void
 }
 
+; Constructor of class 'A'
 define void @_CN1AFN1A_(%class.A* %this) {
 
 entry:
@@ -26,27 +28,28 @@ entry:
   %1 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
   call void _CN3IntFN3set_(%class.Int* %1, i32 100)
   %2 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 2
-  br label while.cond
+  br label while.cond.1
 
 while.cond.1:
   %3 = load i8, i8* b, align 4
-  br i1 %3, label while.body, label while.end
+  %4 = trunc i8 %3 to i1
+  br i1 %4, label while.body.1, label while.end.1
 
 while.body.1:
-  %4 = load i32, i32* e, align 4
-  %5 = add nswi32 %4, 1
-  %6 = bitcast i32 %5 to i32
+  %5 = load i32, i32* e, align 4
+  %6 = add nsw i32 %5, 1
   store i32 %6, i32* e, align 4
-  br label while.cond
+  br label while.cond.1
 
 while.end.1:
-  %7 = load %class.%class.Object*, %class.%class.Object** undef, align 8
+  %7 = load %class.Object*, %class.Object** undef, align 8
   store %class.Object* %7, %class.Object** %2, align 8
   %8 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
   call void _CN4BoolFN3set_(%class.Bool* %8, i8 1)
   ret void
 }
 
+; Constructor of class 'B'
 define void @_CN1BFN1B_(%class.B* %this) {
 
 entry:
@@ -60,6 +63,7 @@ entry:
   ret void
 }
 
+; Constructor of class 'Main'
 define void @_CN4MainFN4Main_(%class.Main* %this) {
 
 entry:
@@ -76,6 +80,7 @@ entry:
   ret void
 }
 
+; Constructor of class 'IO'
 define void @_CN2IOFN2IO_(%class.IO* %this) {
 
 entry:
@@ -84,6 +89,7 @@ entry:
   ret void
 }
 
+; Constructor of class 'Int'
 define void @_CN3IntFN3Int_(%class.Int* %this) {
 
 entry:
@@ -94,6 +100,7 @@ entry:
   ret void
 }
 
+; Constructor of class 'String'
 define void @_CN6StringFN6String_(%class.String* %this) {
 
 entry:
@@ -105,6 +112,7 @@ entry:
   ret void
 }
 
+; Constructor of class 'Bool'
 define void @_CN4BoolFN4Bool_(%class.Bool* %this) {
 
 entry:
@@ -115,6 +123,7 @@ entry:
   ret void
 }
 
+; Class: String, Method: set
 define void @_CN6StringFN3set_(%class.String* %this, i8* %s) {
 entry:
   %0 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1
@@ -122,6 +131,15 @@ entry:
   ret void
 }
 
+; Class: String, Method: get
+define i8* @_CN6StringFN3get_(%class.String* %this) {
+entry:
+  %0 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1
+  %1 = load i8*, i8** %0, align 8
+  ret i8* %1
+}
+
+; Class: Int, Method: set
 define void @_CN3IntFN3set_(%class.Int* %this, i32 %s) {
 entry:
   %0 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1
@@ -129,9 +147,26 @@ entry:
   ret void
 }
 
+; Class: Int, Method: get
+define i32 @_CN3IntFN3get_(%class.Int* %this) {
+entry:
+  %0 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1
+  %1 = load i32, i32* %0, align 4
+  ret i32 %1
+}
+
+; Class: Bool, Method: set
 define void @_CN4BoolFN3set_(%class.Bool* %this, i8 %s) {
 entry:
   %0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1
   store i8 %s, i8* %0, align 4
   ret void
+}
+
+; Class: Bool, Method: get
+define i8 @_CN4BoolFN3get_(%class.Bool* %this) {
+entry:
+  %0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1
+  %1 = load i8, i8* %0, align 4
+  ret i8 %1
 }
