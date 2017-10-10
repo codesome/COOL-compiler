@@ -170,3 +170,75 @@ entry:
   %1 = load i8, i8* %0, align 4
   ret i8 %1
 }
+
+; Class: A, Method: test
+define %class.Int @_CN1AFN4test_() {
+
+entry:
+}
+
+; Class: Main, Method: main
+define %class.Int @_CN4MainFN4main_() {
+
+entry:
+}
+
+; Class: Object, Method: abort
+define %class.Object @_CN6ObjectFN5abort_() {
+
+entry:
+}
+
+; Class: Object, Method: type_name
+define %class.String @_CN6ObjectFN9type_name_() {
+
+entry:
+}
+
+; Class: Object, Method: copy
+define %class.Object @_CN6ObjectFN4copy_() {
+
+entry:
+}
+
+; Class: IO, Method: out_string
+define %class.IO @_CN2IOFN10out_string_(%class.String %x) {
+
+entry:
+}
+
+; Class: IO, Method: out_int
+define %class.IO @_CN2IOFN7out_int_(%class.Int %x) {
+
+entry:
+}
+
+; Class: IO, Method: in_string
+define %class.String @_CN2IOFN9in_string_() {
+
+entry:
+}
+
+; Class: IO, Method: in_int
+define %class.Int @_CN2IOFN6in_int_() {
+
+entry:
+}
+
+; Class: String, Method: length
+define %class.Int @_CN6StringFN6length_() {
+
+entry:
+}
+
+; Class: String, Method: concat
+define %class.String @_CN6StringFN6concat_(%class.String %s) {
+
+entry:
+}
+
+; Class: String, Method: substr
+define %class.String @_CN6StringFN6substr_(%class.Int %i, %class.Int %l) {
+
+entry:
+}
