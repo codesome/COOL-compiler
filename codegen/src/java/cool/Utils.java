@@ -23,7 +23,7 @@ public class Utils {
     }
 
     public static String convertType(String type) {
-        if("i32".equals(type) || Global.Constants.INT_TYPE.equals(type)) {
+    /*    if("i32".equals(type) || Global.Constants.INT_TYPE.equals(type)) {
             return "i32";
         } else if("i8".equals(type) || Global.Constants.BOOL_TYPE.equals(type)) {
             return "i8";
@@ -31,11 +31,18 @@ public class Utils {
             return "i8*";
         } else {
             return Utils.getStructName(type);
+        } */
+        if("i32".equals(type) || "i8".equals(type) || "i1".equals(type)) {
+            return type;
         }
+        if("i32*".equals(type) || "i8*".equals(type) || "i1*".equals(type)) {
+            return type;
+        }
+        return Utils.getStructName(type);
     }
 
     public static String convertTypeWithPtr(String type) {
-        if("i32".equals(type) || Global.Constants.INT_TYPE.equals(type)) {
+    /*    if("i32".equals(type) || Global.Constants.INT_TYPE.equals(type)) {
             return "i32";
         } else if("i8".equals(type) || Global.Constants.BOOL_TYPE.equals(type)) {
             return "i8";
@@ -47,7 +54,27 @@ public class Utils {
             return "i1";
         } else {
             return Utils.getStructName(type) + "*";
+        } */
+        if("i32".equals(type) || "i8".equals(type) || "i1".equals(type)) {
+            return type;
         }
+        if("i32*".equals(type) || "i8*".equals(type) || "i1*".equals(type)) {
+            return type;
+        }
+        return Utils.getStructName(type) + "*";
+    }
+
+    public static String getBasicType(String type) {
+        if(Global.Constants.STRING_TYPE.equals(type)) {
+            return "i8*";
+        }
+        else if(Global.Constants.INT_TYPE.equals(type)) {
+            return "i32";
+        }
+        else if(Global.Constants.BOOL_TYPE.equals(type)) {
+            return "i8";
+        }
+        return Utils.getStructName(type);
     }
 
 }

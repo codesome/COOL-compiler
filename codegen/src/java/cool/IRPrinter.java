@@ -33,7 +33,7 @@ class IRPrinter {
 
     public static String createLoadInst(String mem, String type) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.convertTypeWithPtr(type);
+        type = Utils.getBasicType(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -47,7 +47,7 @@ class IRPrinter {
 
     public static void createStoreInst(String reg, String mem, String type) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.convertTypeWithPtr(type);
+        type = Utils.getBasicType(type);
         builder.append("store ").append(type).append(" ");
         builder.append(reg).append(", ");
         builder.append(type+"*").append(" ");
@@ -59,7 +59,7 @@ class IRPrinter {
     public static String createBinaryInst(String opType, String op1, String op2, 
                                             String type, boolean nuw, boolean nsw) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.convertTypeWithPtr(type);
+        type = Utils.getBasicType(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -124,7 +124,7 @@ class IRPrinter {
             Global.labelToCountMap.put(label, Global.labelToCountMap.get(label) + 1);
         }
         else {
-            finalLabel = label + "." + 1;
+            finalLabel = label;
             Global.labelToCountMap.put(label,1); // TODO : check this
         }
         return finalLabel;
@@ -132,7 +132,7 @@ class IRPrinter {
 
     public static String createPHINode(String type, String v1, String label1, String v2, String label2) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.convertTypeWithPtr(type);
+        type = Utils.getBasicType(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -147,7 +147,7 @@ class IRPrinter {
 
     public static String createReturnInst(String type, String val) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.convertTypeWithPtr(type);
+        type = Utils.getBasicType(type);
         builder.append("ret ").append(type);
         builder.append(" ").append(val);
         Global.out.println(builder.toString());

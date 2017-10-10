@@ -12,15 +12,33 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public String visit(AST.assign expr) {
         String retVal = expr.e1.accept(this);
+        String castVal = retVal;
+        if(Global.methodParams.contains(expr.name)) {
+            if((Global.Constants.STRING_TYPE.equals(expr.e1.type)
+            || Global.Constants.INT_TYPE.equals(expr.e1.type)
+            || Global.Constants.BOOL_TYPE.equals(expr.e1.type)) && !expr.type.equals(expr.e1.type)) {
+                castVal = IRPrinter.createConvertInst(retVal, Utils.getBasicType(expr.e1.type), 
+                                                    expr.type, IRPrinter.BITCAST);
+            }
+            else if(!expr.e1.type.equals(expr.type)) {
+                castVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
+            }
+            IRPrinter.createStoreInst(castVal, expr.name, expr.type);
+        }
         if(!expr.e1.type.equals(expr.type)) {
-            retVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
+            castVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
         }
-        if(Global.Constants.STRING_TYPE.equals(expr.e1.type)) {
-            // TODO
-            return null;
+        if(Global.Constants.STRING_TYPE.equals(expr.type)
+            || Global.Constants.INT_TYPE.equals(expr.type)
+            || Global.Constants.BOOL_TYPE.equals(expr.type)) {
+            String objectPointer = IRPrinter.createClassAttrGEP(expr.type,"%this",expr.name);
+            String args = objectPointer + ", " + castVal;
+            IRPrinter.createVoidCallInst(expr.type, Utils.getMangledName(expr.name,"set"), args);
         }
-        IRPrinter.createStoreInst(retVal, expr.name, expr.type);
-        return retVal;
+        else {
+            IRPrinter.createStoreInst(castVal, expr.name, expr.type);  
+        }
+        return castVal;
     }
 
     public String visit(AST.static_dispatch expr) {
@@ -149,13 +167,28 @@ abstract class ExpressionVisitorImpl implements Visitor {
     
     public String visit(AST.object expr) {
         // INCOMPLETE, TODO - need to check scope, etc. here, and may need GEP
+        if(Global.methodParams.contains(expr.name)) {
+            return IRPrinter.createLoadInst(expr.name, expr.type);
+        }
+        if(Global.Constants.STRING_TYPE.equals(expr.type)
+            || Global.Constants.INT_TYPE.equals(expr.type)
+            || Global.Constants.BOOL_TYPE.equals(expr.type)) {
+            String objectPointer = IRPrinter.createClassAttrGEP(expr.type,"%this",expr.name);
+            String getVal = IRPrinter.createCallInst(Utils.getBasicType(expr.type),
+                        Utils.getMangledName(expr.type,"get"),objectPointer);
+            return getVal;
+        }
         return IRPrinter.createLoadInst(expr.name, expr.type);    
     }
     
     public String visit(AST.int_const expr) {
         return ""+expr.value;
         // String loadReg = IRPrinter.createLoadInst(""+expr.value, expr.type);
-        // return loadReg;    
+        // return loadReg;
+    /*    String objectPointer = IRPrinter.createClassAttrGEP(expr.type,"%this",expr.name);
+        String getInt = IRPrinter.createCallInst("i32",Utils.getMangledName(expr.type,"get"),objectPointer);
+        return getInt; */
+
     }
     
     public String visit(AST.string_const expr) {
@@ -166,7 +199,10 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(expr.value) return "1";
         else return "0";
         // String loadReg = IRPrinter.createLoadInst(""+expr.value, expr.type);
-        // return loadReg;    
+        // return loadReg;   
+     /*   String objectPointer = IRPrinter.createClassAttrGEP(expr.type,"%this",expr.name);
+        String getBool = IRPrinter.createCallInst("i8",Utils.getMangledName(expr.type,"get"),objectPointer);
+        return getBool; */
     }
 
     // Functions below this are meant to be empty, will not be used
