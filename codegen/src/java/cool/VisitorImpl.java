@@ -199,6 +199,10 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println(IRPrinter.INDENT+"ret i8 "+loadReg);
         Global.out.println("}");
 
+        // malloc declaration - see https://groups.google.com/forum/#!topic/llvm-dev/QElg-R1CqNg
+        Global.out.println("\n; C Malloc declaration");
+        Global.out.println("declare noalias i8* @malloc(i64)");
+
     }
 
     public void visit(AST.program prog) {

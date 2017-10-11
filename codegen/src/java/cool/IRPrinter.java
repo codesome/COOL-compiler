@@ -33,7 +33,7 @@ class IRPrinter {
 
     public static String createLoadInst(String mem, String type) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getBasicType(type);
+        type = Utils.getBasicTypePtr(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -47,7 +47,7 @@ class IRPrinter {
 
     public static void createStoreInst(String reg, String mem, String type) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getBasicType(type);
+        type = Utils.getBasicTypePtr(type);
         builder.append("store ").append(type).append(" ");
         builder.append(reg).append(", ");
         builder.append(type+"*").append(" ");
@@ -59,7 +59,7 @@ class IRPrinter {
     public static String createBinaryInst(String opType, String op1, String op2, 
                                             String type, boolean nuw, boolean nsw) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getBasicType(type);
+        type = Utils.getBasicTypePtr(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -92,7 +92,7 @@ class IRPrinter {
 
     public static void createBreakInst(String label) {
         StringBuilder builder = new StringBuilder(INDENT);
-        builder.append("br label ").append(label);
+        builder.append("br label %").append(label);
         Global.out.println(builder.toString());
     }
 
@@ -100,8 +100,8 @@ class IRPrinter {
         StringBuilder builder = new StringBuilder(INDENT);
         builder.append("br i1 ");
         builder.append(reg).append(", ");
-        builder.append("label ").append(label1);
-        builder.append(", label ").append(label2);
+        builder.append("label %").append(label1);
+        builder.append(", label %").append(label2);
         Global.out.println(builder.toString());
     }
 
@@ -132,7 +132,7 @@ class IRPrinter {
 
     public static String createPHINode(String type, String v1, String label1, String v2, String label2) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getBasicType(type);
+        type = Utils.getBasicTypePtr(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -147,7 +147,7 @@ class IRPrinter {
 
     public static String createReturnInst(String type, String val) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getBasicType(type);
+        type = Utils.getBasicTypePtr(type);
         builder.append("ret ").append(type);
         builder.append(" ").append(val);
         Global.out.println(builder.toString());
@@ -157,7 +157,7 @@ class IRPrinter {
     public static void createVoidCallInst(String type, String callee, String args) {
         StringBuilder builder = new StringBuilder(INDENT);
         type = Utils.convertTypeWithPtr(type);
-        builder.append("call void ").append(callee);
+        builder.append("call void @").append(callee);
         builder.append("(").append(args).append(")");
         Global.out.println(builder.toString());
     }
@@ -169,10 +169,21 @@ class IRPrinter {
         Global.registerCounter++;
         builder.append(storeRegisterForCall);
         builder.append(" = call ").append(type);
-        builder.append(" ").append(callee);
+        builder.append(" @").append(callee);
         builder.append("(").append(args).append(")");
         Global.out.println(builder.toString());
         return storeRegisterForCall;
+    }
+
+    public static String createMallocInst(String bitCount) {
+        StringBuilder builder = new StringBuilder(INDENT);
+        String storeRegister = "%"+Global.registerCounter;
+        Global.registerCounter++;
+        builder.append(storeRegister);
+        builder.append(" = call noalias i8* @malloc(i64 ");
+        builder.append(bitCount).append(")");
+        Global.out.println(builder.toString());
+        return storeRegister;
     }
 
 

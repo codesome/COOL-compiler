@@ -32,7 +32,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
             || Global.Constants.INT_TYPE.equals(expr.type)
             || Global.Constants.BOOL_TYPE.equals(expr.type)) {
             String objectPointer = IRPrinter.createClassAttrGEP(expr.type,"%this",expr.name);
-            String args = objectPointer + ", " + castVal;
+            String args = Utils.convertTypeWithPtr(expr.type) + " " 
+                        + objectPointer + ", " + Utils.getBasicTypePtr(expr.type) + " " + castVal;
             IRPrinter.createVoidCallInst(expr.type, Utils.getMangledName(expr.name,"set"), args);
         }
         else {
@@ -46,8 +47,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder builder = new StringBuilder();
         for(AST.expression argument : expr.actuals) {
             builder.append(Utils.convertTypeWithPtr(argument.type));
-            builder.append(", ");
+            builder.append(" ");
             builder.append(argument.accept(this));
+            builder.append(", ");
         }
         // TODO type or typeid?
         String returnValue = IRPrinter.createCallInst(expr.type, Utils.getMangledName(Global.currentClass, 
@@ -100,11 +102,14 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public String visit(AST.new_ expr) {
         // TODO - expr.type or expr.typeid?
-        String storeRegisterForCall = IRPrinter.createCallInst(Global.Constants.PTR_TYPE, 
-                                    Utils.getMangledName(expr.type, expr.type), ""); // INCOMPLETE
-        String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, Global.Constants.PTR_TYPE, 
+    //    String storeRegisterForCall = IRPrinter.createCallInst(Global.Constants.PTR_TYPE, 
+    //                                Utils.getMangledName(expr.type, expr.type), ""); // INCOMPLETE
+        String storeRegisterForCall = IRPrinter.createMallocInst("32"); // TODO - set the correct size
+        String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
                                         expr.type, IRPrinter.BITCAST);
-        return null; // FIXEME
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type, expr.type), 
+                                Utils.convertTypeWithPtr(expr.type)+ " " + returnValue);
+        return returnValue; // FIXME - fixed?
     }
 
     public String visit(AST.isvoid expr) {
@@ -175,7 +180,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
             || Global.Constants.BOOL_TYPE.equals(expr.type)) {
             String objectPointer = IRPrinter.createClassAttrGEP(expr.type,"%this",expr.name);
             String getVal = IRPrinter.createCallInst(Utils.getBasicType(expr.type),
-                        Utils.getMangledName(expr.type,"get"),objectPointer);
+                        Utils.getMangledName(expr.type,"get"),Utils.convertTypeWithPtr(expr.type) 
+                        + " " + objectPointer);
             return getVal;
         }
         return IRPrinter.createLoadInst(expr.name, expr.type);    

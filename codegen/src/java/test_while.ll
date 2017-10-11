@@ -1,4 +1,3 @@
-; I am a comment in LLVM-IR. Feel free to remove me.
 @.str.0 = private unnamed_addr constant [1 x i8] c"\00", align 1
 
 %class.Object = type {}
@@ -28,47 +27,48 @@ entry:
   %2 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
   call void @_CN3IntFN3Int_(%class.Int* %2)
   %3 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 3
-  br label while.cond
+  br label %while.cond
 
 while.cond:
   %4 = getelementptr inbounds %class.Bool, %class.Bool* %this,null
-  %5 = call i8 _CN4BoolFN3get_(%4)
+  %5 = call i8 @_CN4BoolFN3get_(%class.Bool* %4)
   %6 = trunc i8 %5 to i1
-  br i1 %6, label while.body, label while.end
+  br i1 %6, label %while.body, label %while.end
 
 while.body:
-  br label while.cond.1
+  br label %while.cond.1
 
 while.cond.1:
   %7 = getelementptr inbounds %class.Bool, %class.Bool* %this,null
-  %8 = call i8 _CN4BoolFN3get_(%7)
+  %8 = call i8 @_CN4BoolFN3get_(%class.Bool* %7)
   %9 = trunc i8 %8 to i1
-  br i1 %9, label while.body.1, label while.end.1
+  br i1 %9, label %while.body.1, label %while.end.1
 
 while.body.1:
   %10 = getelementptr inbounds %class.Int, %class.Int* %this,null
-  %11 = call i32 _CN3IntFN3get_(%10)
-  %12 = add nsw i32 %11, 1
+  %11 = call i32 @_CN3IntFN3get_(%class.Int* %10)
+  %12 = add nsw i32* %11, 1
   %13 = getelementptr inbounds %class.Int, %class.Int* %this,null
-  call void _CN1cFN3set_(%13, %12)
-  br label while.cond.1
+  call void @_CN1cFN3set_(%class.Int* %13, i32* %12)
+  br label %while.cond.1
 
 while.end.1:
-  %14 = load %class.Object, %class.Object* undef, align 4
+  %14 = load %class.Object*, %class.Object** undef, align 8
   %15 = getelementptr inbounds %class.Int, %class.Int* %this,null
-  %16 = call i32 _CN3IntFN3get_(%15)
-  %17 = add nsw i32 %16, 1
+  %16 = call i32 @_CN3IntFN3get_(%class.Int* %15)
+  %17 = add nsw i32* %16, 1
   %18 = getelementptr inbounds %class.Int, %class.Int* %this,null
-  call void _CN1cFN3set_(%18, %17)
-  br label while.cond
+  call void @_CN1cFN3set_(%class.Int* %18, i32* %17)
+  br label %while.cond
 
 while.end:
-  %19 = load %class.Object, %class.Object* undef, align 4
-  store %class.Object %19, %class.Object* %3, align 4
+  %19 = load %class.Object*, %class.Object** undef, align 8
+  store %class.Object* %19, %class.Object** %3, align 8
   %20 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 4
-  %21 = call i8* _CN1AFN1A_()
+  %21 = call noalias i8* @malloc(i64 32)
   %22 = bitcast i8* %21 to %class.A*
-  store %class.A undef, %class.A* %20, align 4
+  call void @_CN1AFN1A_(%class.A* %22)
+  store %class.A* %22, %class.A** %20, align 8
   ret void
 }
 
@@ -103,7 +103,7 @@ entry:
   %0 = bitcast %class.Int* %this to %class.Object*
   call void @_CN6ObjectFN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1
-  store %class.i32 0, %class.i32* %1, align 4
+  store %class.i32* 0, %class.i32** %1, align 8
   ret void
 }
 
@@ -115,7 +115,7 @@ entry:
   call void @_CN6ObjectFN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1
   %2 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.0, i32 0, i32 0
-  store %class.i8* %2, %class.i8** %1, align 8
+  store %class.i8** %2, %class.i8*** %1, align 8
   ret void
 }
 
@@ -126,7 +126,7 @@ entry:
   %0 = bitcast %class.Bool* %this to %class.Object*
   call void @_CN6ObjectFN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1
-  store %class.i8 0, %class.i8* %1, align 4
+  store %class.i8* 0, %class.i8** %1, align 8
   ret void
 }
 
@@ -134,7 +134,7 @@ entry:
 define void @_CN6StringFN3set_(%class.String* %this, i8* %s) {
 entry:
   %0 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1
-  store %class.i8* %s, %class.i8** %0, align 8
+  store %class.i8** %s, %class.i8*** %0, align 8
   ret void
 }
 
@@ -142,7 +142,7 @@ entry:
 define i8* @_CN6StringFN3get_(%class.String* %this) {
 entry:
   %0 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1
-  %1 = load %class.i8*, %class.i8** %0, align 8
+  %1 = load %class.i8**, %class.i8*** %0, align 8
   ret i8* %1
 }
 
@@ -150,7 +150,7 @@ entry:
 define void @_CN3IntFN3set_(%class.Int* %this, i32 %s) {
 entry:
   %0 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1
-  store %class.i32 %s, %class.i32* %0, align 4
+  store %class.i32* %s, %class.i32** %0, align 8
   ret void
 }
 
@@ -158,7 +158,7 @@ entry:
 define i32 @_CN3IntFN3get_(%class.Int* %this) {
 entry:
   %0 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1
-  %1 = load %class.i32, %class.i32* %0, align 4
+  %1 = load %class.i32*, %class.i32** %0, align 8
   ret i32 %1
 }
 
@@ -166,7 +166,7 @@ entry:
 define void @_CN4BoolFN3set_(%class.Bool* %this, i8 %s) {
 entry:
   %0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1
-  store %class.i8 %s, %class.i8* %0, align 4
+  store %class.i8* %s, %class.i8** %0, align 8
   ret void
 }
 
@@ -174,6 +174,88 @@ entry:
 define i8 @_CN4BoolFN3get_(%class.Bool* %this) {
 entry:
   %0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1
-  %1 = load %class.i8, %class.i8* %0, align 4
+  %1 = load %class.i8*, %class.i8** %0, align 8
   ret i8 %1
+}
+
+; C Malloc declaration
+declare noalias i8* @malloc(i64)
+
+; Class: Main, Method: main
+define %class.Int @_CN4MainFN4main_() {
+
+entry:
+  %2 = load %class.A*, %class.A** e, align 8
+  %3 = call %class.Int* @_CN4MainFN2f1_(%class.Int* 1, )
+}
+
+; Class: A, Method: f1
+define %class.Int @_CN1AFN2f1_(%class.Int %x) {
+
+entry:
+  %4 = load i32*, i32** x, align 8
+  %5 = add nsw i32* %4, 1
+  store i32* %5, i32** x, align 8
+  %6 = getelementptr inbounds %class.Int, %class.Int* %this,null
+  call void @_CN1xFN3set_(%class.Int* %6, i32* %5)
+}
+
+; Class: Object, Method: abort
+define %class.Object @_CN6ObjectFN5abort_() {
+
+entry:
+}
+
+; Class: Object, Method: type_name
+define %class.String @_CN6ObjectFN9type_name_() {
+
+entry:
+}
+
+; Class: Object, Method: copy
+define %class.Object @_CN6ObjectFN4copy_() {
+
+entry:
+}
+
+; Class: IO, Method: out_string
+define %class.IO @_CN2IOFN10out_string_(%class.String %x) {
+
+entry:
+}
+
+; Class: IO, Method: out_int
+define %class.IO @_CN2IOFN7out_int_(%class.Int %x) {
+
+entry:
+}
+
+; Class: IO, Method: in_string
+define %class.String @_CN2IOFN9in_string_() {
+
+entry:
+}
+
+; Class: IO, Method: in_int
+define %class.Int @_CN2IOFN6in_int_() {
+
+entry:
+}
+
+; Class: String, Method: length
+define %class.Int @_CN6StringFN6length_() {
+
+entry:
+}
+
+; Class: String, Method: concat
+define %class.String @_CN6StringFN6concat_(%class.String %s) {
+
+entry:
+}
+
+; Class: String, Method: substr
+define %class.String @_CN6StringFN6substr_(%class.Int %i, %class.Int %l) {
+
+entry:
 }
