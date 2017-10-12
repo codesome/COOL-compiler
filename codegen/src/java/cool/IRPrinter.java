@@ -59,7 +59,7 @@ class IRPrinter {
     public static String createBinaryInst(String opType, String op1, String op2, 
                                             String type, boolean nuw, boolean nsw) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getBasicTypePtr(type);
+        type = Utils.getBasicType(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);

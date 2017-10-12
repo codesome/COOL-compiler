@@ -183,53 +183,139 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.plus expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.ADD, op1, op2, expr.type, false, true); // TODO - set flags correctly
+        String get1 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e1.type,"get"),
+                    Utils.getStructName(expr.e1.type)+"* "+op1);
+        String get2 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e2.type,"get"),
+                    Utils.getStructName(expr.e2.type)+"* "+op2);
+        String resultBasic =  IRPrinter.createBinaryInst(IRPrinter.ADD, get1, get2, expr.type, false, true); // TODO - set flags correctly
+        String resultMem = IRPrinter.createAlloca(expr.type);
+        StringBuilder argBuilder = new StringBuilder();
+        argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
+        argBuilder.append(", ").append("i32 "+resultBasic);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        return resultMem;
     }
 
     public String visit(AST.sub expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.SUB, op1, op2, expr.type, false, true); // TODO - set flags correctly
+        String get1 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e1.type,"get"),
+                    Utils.getStructName(expr.e1.type)+"* "+op1);
+        String get2 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e2.type,"get"),
+                    Utils.getStructName(expr.e2.type)+"* "+op2);
+        String resultBasic =  IRPrinter.createBinaryInst(IRPrinter.SUB, get1, get2, expr.type, false, true); // TODO - set flags correctly
+        String resultMem = IRPrinter.createAlloca(expr.type);
+        StringBuilder argBuilder = new StringBuilder();
+        argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
+        argBuilder.append(", ").append("i32 "+resultBasic);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        return resultMem;
     }
     
     public String visit(AST.mul expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.MUL, op1, op2, expr.type, false, true); // TODO - set flags correctly
+        String get1 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e1.type,"get"),
+                    Utils.getStructName(expr.e1.type)+"* "+op1);
+        String get2 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e2.type,"get"),
+                    Utils.getStructName(expr.e2.type)+"* "+op2);
+        String resultBasic =  IRPrinter.createBinaryInst(IRPrinter.MUL, get1, get2, expr.type, false, true); // TODO - set flags correctly
+        String resultMem = IRPrinter.createAlloca(expr.type);
+        StringBuilder argBuilder = new StringBuilder();
+        argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
+        argBuilder.append(", ").append("i32 "+resultBasic);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        return resultMem;
     }
     
     public String visit(AST.divide expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.DIV, op1, op2, expr.type, false, true); // TODO - set flags correctly
+        String get1 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e1.type,"get"),
+                    Utils.getStructName(expr.e1.type)+"* "+op1);
+        String get2 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e2.type,"get"),
+                    Utils.getStructName(expr.e2.type)+"* "+op2);
+        String resultBasic =  IRPrinter.createBinaryInst(IRPrinter.DIV, get1, get2, expr.type, false, true); // TODO - set flags correctly
+        String resultMem = IRPrinter.createAlloca(expr.type);
+        StringBuilder argBuilder = new StringBuilder();
+        argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
+        argBuilder.append(", ").append("i32 "+resultBasic);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        return resultMem;
     }
     
     public String visit(AST.comp expr) {
         String op = expr.e1.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.XOR, op, "true", expr.type, false, false);
+        String get = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e1.type,"get"),
+                    Utils.getStructName(expr.e1.type)+"* "+op);
+        String resultBasic = IRPrinter.createBinaryInst(IRPrinter.XOR, get, "true", expr.type, false, false);
+        String resultMem = IRPrinter.createAlloca(expr.type);
+        StringBuilder argBuilder = new StringBuilder();
+        argBuilder.append(Utils.getStructName(expr.type)+"*"+resultMem);
+        argBuilder.append(", ").append("i8 "+resultBasic);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        return resultMem;
     }
     
     public String visit(AST.lt expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.SLT, op1, op2, expr.type, false, false);   
+        String get1 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e1.type,"get"),
+                    Utils.getStructName(expr.e1.type)+"* "+op1);
+        String get2 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e2.type,"get"),
+                    Utils.getStructName(expr.e2.type)+"* "+op2);
+        String resultBasic =  IRPrinter.createBinaryInst(IRPrinter.SLT, get1, get2, expr.type, false, false); // TODO - set flags correctly
+        String resultMem = IRPrinter.createAlloca(expr.type);
+        StringBuilder argBuilder = new StringBuilder();
+        argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
+        argBuilder.append(", ").append("i8 "+resultBasic);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        return resultMem;   
     }
     
     public String visit(AST.leq expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.SLE, op1, op2, expr.type, false, false);    
+        String get1 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e1.type,"get"),
+                    Utils.getStructName(expr.e1.type)+"* "+op1);
+        String get2 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e2.type,"get"),
+                    Utils.getStructName(expr.e2.type)+"* "+op2);
+        String resultBasic =  IRPrinter.createBinaryInst(IRPrinter.SLE, get1, get2, expr.type, false, false); // TODO - set flags correctly
+        String resultMem = IRPrinter.createAlloca(expr.type);
+        StringBuilder argBuilder = new StringBuilder();
+        argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
+        argBuilder.append(", ").append("i8 "+resultBasic);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        return resultMem;   
     }
     
     public String visit(AST.eq expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.EQ, op1, op2, expr.type, false, false);    
+        String get1 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e1.type,"get"),
+                    Utils.getStructName(expr.e1.type)+"* "+op1);
+        String get2 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e2.type,"get"),
+                    Utils.getStructName(expr.e2.type)+"* "+op2);
+        String resultBasic =  IRPrinter.createBinaryInst(IRPrinter.EQ, get1, get2, expr.type, false, false); // TODO - set flags correctly
+        String resultMem = IRPrinter.createAlloca(expr.type);
+        StringBuilder argBuilder = new StringBuilder();
+        argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
+        argBuilder.append(", ").append("i8 "+resultBasic);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        return resultMem; 
     }
     
     public String visit(AST.neg expr) {
-        String op = expr.e1.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.SUB, "0", op, expr.type, false, true); // TODO - set flags correctly    
+        String op1 = expr.e1.accept(this);
+        String get  = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e1.type,"get"),
+                    Utils.getStructName(expr.e1.type)+"* "+op1);
+        String resultBasic =  IRPrinter.createBinaryInst(IRPrinter.SUB, "0", get, expr.type, false, true); // TODO - set flags correctly
+        String resultMem = IRPrinter.createAlloca(expr.type);
+        StringBuilder argBuilder = new StringBuilder();
+        argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
+        argBuilder.append(", ").append("i32 "+resultBasic);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        return resultMem; 
     }
     
     public String visit(AST.object expr) {

@@ -32,7 +32,7 @@ entry:
 while.cond:
   %4 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
   %5 = call i8 @_CN4BoolFN3get_(%class.Bool* %4)
-  %6 = trunc %class.i8* %5 to %class.i1*
+  %6 = trunc i8 %5 to i1
   br i1 %6, label %while.body, label %while.end
 
 while.body:
@@ -41,36 +41,44 @@ while.body:
 while.cond.1:
   %7 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
   %8 = call i8 @_CN4BoolFN3get_(%class.Bool* %7)
-  %9 = trunc %class.i8* %8 to %class.i1*
+  %9 = trunc i8 %8 to i1
   br i1 %9, label %while.body.1, label %while.end.1
 
 while.body.1:
   %10 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
   %11 = call i32 @_CN3IntFN3get_(%class.Int* %10)
-  %12 = add nsw i32* %11, 1
-  %13 = getelementptr inbounds %class.Int, %class.Int* Main,null
-  %14 = call i32 @_CN3IntFN3get_(%class.Int* %12)
-  call void @_CN3IntFN3set_(%class.Int* c, i32 %13)
+  %12 = call i32 @_CN3IntFN3get_(%class.Int* 1)
+  %13 = add nsw i32 %11, %12
+  %14 = alloca %class.Int, align 8
+  call void @_CN3IntFN3set_(%class.Int* %14, i32 %13)
+  %15 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
+  %16 = call i32 @_CN3IntFN3get_(%class.Int* %14)
+  call void @_CN3IntFN3set_(%class.Int* %15, i32 %16)
   br label %while.cond.1
 
 while.end.1:
-  %15 = load %class.Object*, %class.Object** undef, align 8
-  %16 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
-  %17 = call i32 @_CN3IntFN3get_(%class.Int* %16)
-  %18 = add nsw i32* %17, 1
-  %19 = getelementptr inbounds %class.Int, %class.Int* Main,null
-  %20 = call i32 @_CN3IntFN3get_(%class.Int* %18)
-  call void @_CN3IntFN3set_(%class.Int* c, i32 %19)
+  %17 = load %class.Object, %class.Object* undef, align 4
+  %18 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
+  %19 = call i32 @_CN3IntFN3get_(%class.Int* %18)
+  %20 = call i32 @_CN3IntFN3get_(%class.Int* 1)
+  %21 = add nsw i32 %19, %20
+  %22 = alloca %class.Int, align 8
+  call void @_CN3IntFN3set_(%class.Int* %22, i32 %21)
+  %23 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
+  %24 = call i32 @_CN3IntFN3get_(%class.Int* %22)
+  call void @_CN3IntFN3set_(%class.Int* %23, i32 %24)
   br label %while.cond
 
 while.end:
-  %21 = load %class.Object*, %class.Object** undef, align 8
-  store %class.Object %21, %class.Object* %3, align 4
-  %22 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 4
-  %23 = call noalias i8* @malloc(i64 32)
-  %24 = bitcast %class.i8** %23 to %class.A*
-  call void @_CN1AFN1A_(%class.A* %24)
-  store %class.A %24, %class.A* %22, align 4
+  %25 = load %class.Object, %class.Object* undef, align 4
+  %26 = load %class.Object, %class.Object* %25, align 4
+  store %class.Object %26, %class.Object* %3, align 4
+  %27 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 4
+  %28 = call noalias i8* @malloc(i64 32)
+  %29 = bitcast i8* %28 to A
+  call void @_CN1AFN1A_(%class.A* %29)
+  %30 = load %class.A, %class.A* %29, align 4
+  store %class.A %30, %class.A* %27, align 4
   ret void
 }
 
@@ -144,7 +152,7 @@ entry:
 define i8* @_CN6StringFN3get_(%class.String* %this) {
 entry:
   %0 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1
-  %1 = load %class.i8**, %class.i8*** %0, align 8
+  %1 = load %class.i8*, %class.i8** %0, align 8
   ret i8* %1
 }
 
@@ -160,7 +168,7 @@ entry:
 define i32 @_CN3IntFN3get_(%class.Int* %this) {
 entry:
   %0 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1
-  %1 = load %class.i32*, %class.i32** %0, align 8
+  %1 = load %class.i32, %class.i32* %0, align 4
   ret i32 %1
 }
 
@@ -176,7 +184,7 @@ entry:
 define i8 @_CN4BoolFN3get_(%class.Bool* %this) {
 entry:
   %0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1
-  %1 = load %class.i8*, %class.i8** %0, align 8
+  %1 = load %class.i8, %class.i8* %0, align 4
   ret i8 %1
 }
 
@@ -188,8 +196,8 @@ define %class.Int @_CN4MainFN4main_(%class.Main* %this) {
 
 entry:
   %2 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 4
-  %3 = load %class.A*, %class.A** %2, align 8
-  %4 = call %class.Int* @_CN4MainFN2f1_(%class.Int* 1, )
+  %3 = load %class.Int, %class.Int* 1, align 4
+  %4 = call %class.Int* @_CN1AFN2f1_(%class.A* %2, %class.Int %3)
 }
 
 ; Class: A, Method: f1
@@ -198,10 +206,13 @@ define %class.Int @_CN1AFN2f1_(%class.A* %this, %class.Int %x) {
 entry:
   %x.addr = alloca %class.Int, align 8
   store %class.Int %x, %class.Int* %x.addr, align 4
-  %5 = load i32*, i32** %x.addr, align 8
-  %6 = add nsw i32* %5, 1
-  %7 = call i32 @_CN3IntFN3get_(%class.Int* %6)
-  call void @_CN3IntFN3set_(%class.Int* x, i32 %x.addr)
+  %5 = call i32 @_CN3IntFN3get_(%class.Int* %x.addr)
+  %6 = call i32 @_CN3IntFN3get_(%class.Int* 1)
+  %7 = add nsw i32 %5, %6
+  %8 = alloca %class.Int, align 8
+  call void @_CN3IntFN3set_(%class.Int* %8, i32 %7)
+  %9 = call i32 @_CN3IntFN3get_(%class.Int* %8)
+  call void @_CN3IntFN3set_(%class.Int* %x.addr, i32 %9)
 }
 
 ; Class: Object, Method: abort
