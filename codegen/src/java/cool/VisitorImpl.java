@@ -9,6 +9,8 @@ class VisitorImpl extends ExpressionVisitorImpl {
              Check Visitor.java 
     */
 
+    private String mainReturnType;
+
     private void printStringConstants() {
         StringBuilder structBuilder = new StringBuilder();
         if(!Global.stringConstantToRegisterMap.containsKey("")) {
@@ -203,6 +205,14 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("\n; C Malloc declaration");
         Global.out.println("declare noalias i8* @malloc(i64)");
 
+        Global.out.println("\n; main() function");
+        Global.out.println("define i32 @main() {");
+        Global.out.println("entry:");
+        Global.out.println(IRPrinter.INDENT+"%retval = alloca i32, align 4");
+        Global.out.println(IRPrinter.INDENT+"%main = alloca %class.Main, align 8");
+        String 
+        Global.out.println(IRPrinter.INDENT+"ret i32 0");
+
     }
 
     public void visit(AST.program prog) {
@@ -299,6 +309,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.method mthd) {
+        if(Global.currentClass.equals("Main") && mthd.name.equals("main")) {
+           mainReturnType = mthd.typeid;
+        }
         Global.methodParams.clear();
         Global.out.println("\n; Class: "+Global.currentClass+", Method: "+mthd.name);
         Global.out.print("define " + Utils.getStructName(mthd.typeid) + "* @" + 
