@@ -301,7 +301,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     public void visit(AST.method mthd) {
         Global.methodParams.clear();
         Global.out.println("\n; Class: "+Global.currentClass+", Method: "+mthd.name);
-        Global.out.print("define " + Utils.getStructName(mthd.typeid) + " @" + 
+        Global.out.print("define " + Utils.getStructName(mthd.typeid) + "* @" + 
             Utils.getMangledName(Global.currentClass, mthd.name) + "(");
         Global.out.print(Utils.getStructName(Global.currentClass)+"* %this");
 

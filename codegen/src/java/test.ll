@@ -25,29 +25,32 @@ entry:
   %0 = bitcast %class.A* %this to %class.Object*
   call void @_CN6ObjectFN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  call void @_CN3IntFN3set_(%class.Int* %1, i32 100)
-  %2 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 2
+  %2 = call i32 @_CN3IntFN3get_(%class.Int* 100)
+  call void @_CN3IntFN3set_(%class.Int* %1, i32 %2)
+  %3 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 2
   br label %while.cond
 
 while.cond:
-  %3 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
-  %4 = call i8 @_CN4BoolFN3get_(%class.Bool* %3)
-  %5 = trunc i8 %4 to i1
-  br i1 %5, label %while.body, label %while.end
+  %4 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
+  %5 = call i8 @_CN4BoolFN3get_(%class.Bool* %4)
+  %6 = trunc i8 %5 to i1
+  br i1 %6, label %while.body, label %while.end
 
 while.body:
-  %6 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  %7 = call i32 @_CN3IntFN3get_(%class.Int* %6)
+  %7 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
   %8 = add nsw i32* %7, 1
-  %9 = getelementptr inbounds %class.Int, %class.Int* %this,null
-  call void @_CN1eFN3set_(%class.Int* %9, i32* %8)
+  %9 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
+  %10 = call i32 @_CN3IntFN3get_(%class.Int* %8)
+  call void @_CN3IntFN3set_(%class.Int* %9, i32 %10)
   br label %while.cond
 
 while.end:
-  %10 = load %class.Object*, %class.Object** undef, align 8
-  store %class.Object %10, %class.Object* %2, align 4
-  %11 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
-  call void @_CN4BoolFN3set_(%class.Bool* %11, i8 1)
+  %11 = load %class.Object, %class.Object* undef, align 4
+  %12 = load %class.Object, %class.Object* %11, align 4
+  store %class.Object %12, %class.Object* %3, align 4
+  %13 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
+  %14 = call i8 @_CN4BoolFN3get_(%class.Bool* 1)
+  call void @_CN4BoolFN3set_(%class.Bool* %13, i8 %14)
   ret void
 }
 
@@ -59,9 +62,10 @@ entry:
   call void @_CN1AFN1A_(%class.A* %0)
   %1 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 1
   %2 = getelementptr inbounds [17 x i8], [17 x i8]* @.str.0, i32 0, i32 0
-  call void @_CN6StringFN3set_(%class.String* %1, i8* %2)
-  %3 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 2
-  store %class.A undef, %class.A* %3, align 4
+  %3 = call i8* @_CN6StringFN3get_(%class.String* %2)
+  call void @_CN6StringFN3set_(%class.String* %1, i8* %3)
+  %4 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 2
+  store %class.A undef, %class.A* %4, align 4
   ret void
 }
 
@@ -77,9 +81,10 @@ entry:
   call void @_CN4BoolFN4Bool_(%class.Bool* %2)
   %3 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 3
   %4 = call noalias i8* @malloc(i64 32)
-  %5 = bitcast i8* %4 to %class.A*
+  %5 = bitcast i8* %4 to A
   call void @_CN1AFN1A_(%class.A* %5)
-  store %class.A %5, %class.A* %3, align 4
+  %6 = load %class.A, %class.A* %5, align 4
+  store %class.A %6, %class.A* %3, align 4
   ret void
 }
 
@@ -138,7 +143,7 @@ entry:
 define i8* @_CN6StringFN3get_(%class.String* %this) {
 entry:
   %0 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1
-  %1 = load %class.i8**, %class.i8*** %0, align 8
+  %1 = load %class.i8*, %class.i8** %0, align 8
   ret i8* %1
 }
 
@@ -154,7 +159,7 @@ entry:
 define i32 @_CN3IntFN3get_(%class.Int* %this) {
 entry:
   %0 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1
-  %1 = load %class.i32*, %class.i32** %0, align 8
+  %1 = load %class.i32, %class.i32* %0, align 4
   ret i32 %1
 }
 
@@ -170,7 +175,7 @@ entry:
 define i8 @_CN4BoolFN3get_(%class.Bool* %this) {
 entry:
   %0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1
-  %1 = load %class.i8*, %class.i8** %0, align 8
+  %1 = load %class.i8, %class.i8* %0, align 4
   ret i8 %1
 }
 
@@ -178,37 +183,37 @@ entry:
 declare noalias i8* @malloc(i64)
 
 ; Class: A, Method: test
-define %class.Int @_CN1AFN4test_(%class.A* %this) {
+define %class.Int* @_CN1AFN4test_(%class.A* %this) {
 
 entry:
 }
 
 ; Class: Main, Method: main
-define %class.Int @_CN4MainFN4main_(%class.Main* %this) {
+define %class.Int* @_CN4MainFN4main_(%class.Main* %this) {
 
 entry:
 }
 
 ; Class: Object, Method: abort
-define %class.Object @_CN6ObjectFN5abort_(%class.Object* %this) {
+define %class.Object* @_CN6ObjectFN5abort_(%class.Object* %this) {
 
 entry:
 }
 
 ; Class: Object, Method: type_name
-define %class.String @_CN6ObjectFN9type_name_(%class.Object* %this) {
+define %class.String* @_CN6ObjectFN9type_name_(%class.Object* %this) {
 
 entry:
 }
 
 ; Class: Object, Method: copy
-define %class.Object @_CN6ObjectFN4copy_(%class.Object* %this) {
+define %class.Object* @_CN6ObjectFN4copy_(%class.Object* %this) {
 
 entry:
 }
 
 ; Class: IO, Method: out_string
-define %class.IO @_CN2IOFN10out_string_(%class.IO* %this, %class.String %x) {
+define %class.IO* @_CN2IOFN10out_string_(%class.IO* %this, %class.String %x) {
 
 entry:
   %x.addr = alloca %class.String, align 8
@@ -216,7 +221,7 @@ entry:
 }
 
 ; Class: IO, Method: out_int
-define %class.IO @_CN2IOFN7out_int_(%class.IO* %this, %class.Int %x) {
+define %class.IO* @_CN2IOFN7out_int_(%class.IO* %this, %class.Int %x) {
 
 entry:
   %x.addr = alloca %class.Int, align 8
@@ -224,25 +229,25 @@ entry:
 }
 
 ; Class: IO, Method: in_string
-define %class.String @_CN2IOFN9in_string_(%class.IO* %this) {
+define %class.String* @_CN2IOFN9in_string_(%class.IO* %this) {
 
 entry:
 }
 
 ; Class: IO, Method: in_int
-define %class.Int @_CN2IOFN6in_int_(%class.IO* %this) {
+define %class.Int* @_CN2IOFN6in_int_(%class.IO* %this) {
 
 entry:
 }
 
 ; Class: String, Method: length
-define %class.Int @_CN6StringFN6length_(%class.String* %this) {
+define %class.Int* @_CN6StringFN6length_(%class.String* %this) {
 
 entry:
 }
 
 ; Class: String, Method: concat
-define %class.String @_CN6StringFN6concat_(%class.String* %this, %class.String %s) {
+define %class.String* @_CN6StringFN6concat_(%class.String* %this, %class.String %s) {
 
 entry:
   %s.addr = alloca %class.String, align 8
@@ -250,7 +255,7 @@ entry:
 }
 
 ; Class: String, Method: substr
-define %class.String @_CN6StringFN6substr_(%class.String* %this, %class.Int %i, %class.Int %l) {
+define %class.String* @_CN6StringFN6substr_(%class.String* %this, %class.Int %i, %class.Int %l) {
 
 entry:
   %i.addr = alloca %class.Int, align 8
