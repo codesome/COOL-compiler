@@ -75,8 +75,6 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
 
     public String visit(AST.static_dispatch expr) {
-        // TODO FIXEME : pointer to caller should be the first argument in dispatch
-        // TODO : bitcast when calling function of parent class
         String caller = expr.caller.accept(this);
 
         if(!expr.typeid.equals(expr.caller.type)) {
@@ -253,7 +251,12 @@ abstract class ExpressionVisitorImpl implements Visitor {
     
     public String visit(AST.int_const expr) {
         // TODO : value or object pointer
-        return ""+expr.value;
+        String pointer = IRPrinter.createAlloca(Global.Constants.INT_TYPE);
+        StringBuilder argsBuilder = new StringBuilder();
+        argsBuilder.append(Utils.getStructName(Global.Constants.INT_TYPE)).append("* ").append(pointer)
+            .append(", ").append("i32 ").append(expr.value);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(Global.Constants.INT_TYPE, "set"), argsBuilder.toString());
+        return pointer;
         // String loadReg = IRPrinter.createLoadInst(""+expr.value, expr.type);
         // return loadReg;
     /*    String objectPointer = IRPrinter.createClassAttrGEP(expr.type,"%this",expr.name);
@@ -264,13 +267,25 @@ abstract class ExpressionVisitorImpl implements Visitor {
     
     public String visit(AST.string_const expr) {
         // TODO : value or object pointer
-        return IRPrinter.createStringGEP(expr.value);    
+        String stringReg = IRPrinter.createStringGEP(expr.value);
+        String pointer = IRPrinter.createAlloca(Global.Constants.STRING_TYPE);
+        StringBuilder argsBuilder = new StringBuilder();
+        argsBuilder.append(Utils.getStructName(Global.Constants.STRING_TYPE)).append("* ").append(pointer)
+            .append(", ").append("i8* ").append(stringReg);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(Global.Constants.STRING_TYPE, "set"), argsBuilder.toString());
+        return pointer;
     }
     
     public String visit(AST.bool_const expr) {
         // TODO : value or object pointer
-        if(expr.value) return "1";
-        else return "0";
+        String pointer = IRPrinter.createAlloca(Global.Constants.BOOL_TYPE);
+        StringBuilder argsBuilder = new StringBuilder();
+        argsBuilder.append(Utils.getStructName(Global.Constants.BOOL_TYPE)).append("* ").append(pointer)
+            .append(", ").append("i8 ").append(expr.value? 1 : 0);
+        IRPrinter.createVoidCallInst("void", Utils.getMangledName(Global.Constants.BOOL_TYPE, "set"), argsBuilder.toString());
+        return pointer;
+        // if(expr.value) return "1";
+        // else return "0";
         // String loadReg = IRPrinter.createLoadInst(""+expr.value, expr.type);
         // return loadReg;   
      /*   String objectPointer = IRPrinter.createClassAttrGEP(expr.type,"%this",expr.name);
