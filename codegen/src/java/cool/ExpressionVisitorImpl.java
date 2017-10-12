@@ -6,6 +6,12 @@ abstract class ExpressionVisitorImpl implements Visitor {
              Check Visitor.java 
     */
 
+    private boolean isPrimitiveType(String type) {
+        return Global.Constants.STRING_TYPE.equals(type)
+                || Global.Constants.INT_TYPE.equals(type)
+                || Global.Constants.BOOL_TYPE.equals(type);
+    }
+
     public String visit(AST.no_expr expr) {
         return null;
     }
@@ -14,23 +20,20 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String retVal = expr.e1.accept(this);
         String castVal = retVal;
         if(Global.methodParams.contains(expr.name)) {
-            if((Global.Constants.STRING_TYPE.equals(expr.e1.type)
-            || Global.Constants.INT_TYPE.equals(expr.e1.type)
-            || Global.Constants.BOOL_TYPE.equals(expr.e1.type)) && !expr.type.equals(expr.e1.type)) {
-                castVal = IRPrinter.createConvertInst(retVal, Utils.getBasicType(expr.e1.type), 
-                                                    expr.type, IRPrinter.BITCAST);
-            }
-            else if(!expr.e1.type.equals(expr.type)) {
-                castVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
+            if(!expr.type.equals(expr.e1.type)) {
+                if(isPrimitiveType(expr.e1.type)) {
+                    castVal = IRPrinter.createConvertInst(retVal, Utils.getBasicType(expr.e1.type), 
+                                                        expr.type, IRPrinter.BITCAST);
+                } else {
+                    castVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
+                }
             }
             IRPrinter.createStoreInst(castVal, expr.name, expr.type);
         }
         if(!expr.e1.type.equals(expr.type)) {
             castVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
         }
-        if(Global.Constants.STRING_TYPE.equals(expr.type)
-            || Global.Constants.INT_TYPE.equals(expr.type)
-            || Global.Constants.BOOL_TYPE.equals(expr.type)) {
+        if(isPrimitiveType(expr.type)) {
             String objectPointer = IRPrinter.createClassAttrGEP(expr.type,"%this",expr.name);
             String args = Utils.convertTypeWithPtr(expr.type) + " " 
                         + objectPointer + ", " + Utils.getBasicTypePtr(expr.type) + " " + castVal;
@@ -46,10 +49,12 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String caller = expr.caller.accept(this);
         StringBuilder builder = new StringBuilder();
         for(AST.expression argument : expr.actuals) {
+            // TODO: why convert with ptr?
             builder.append(Utils.convertTypeWithPtr(argument.type));
             builder.append(" ");
             builder.append(argument.accept(this));
             builder.append(", ");
+            // TODO: wont a comma be left at the end?
         }
         // TODO type or typeid?
         String returnValue = IRPrinter.createCallInst(expr.type, Utils.getMangledName(Global.currentClass, 
@@ -172,19 +177,18 @@ abstract class ExpressionVisitorImpl implements Visitor {
     
     public String visit(AST.object expr) {
         // INCOMPLETE, TODO - need to check scope, etc. here, and may need GEP
+        // TODO get for method params if they are method params and primitive type
         if(Global.methodParams.contains(expr.name)) {
-            return IRPrinter.createLoadInst(expr.name, expr.type);
+            return IRPrinter.createLoadInst("%"+expr.name+".addr", expr.type);
         }
-        if(Global.Constants.STRING_TYPE.equals(expr.type)
-            || Global.Constants.INT_TYPE.equals(expr.type)
-            || Global.Constants.BOOL_TYPE.equals(expr.type)) {
-            String objectPointer = IRPrinter.createClassAttrGEP(expr.type,"%this",expr.name);
+        String objectPointer = IRPrinter.createClassAttrGEP(Global.currentClass,"%this",expr.name);
+        if(isPrimitiveType(expr.type)) {
             String getVal = IRPrinter.createCallInst(Utils.getBasicType(expr.type),
                         Utils.getMangledName(expr.type,"get"),Utils.convertTypeWithPtr(expr.type) 
                         + " " + objectPointer);
             return getVal;
         }
-        return IRPrinter.createLoadInst(expr.name, expr.type);    
+        return IRPrinter.createLoadInst(objectPointer, expr.type);
     }
     
     public String visit(AST.int_const expr) {

@@ -304,19 +304,20 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("\n; Class: "+Global.currentClass+", Method: "+mthd.name);
         Global.out.print("define " + Utils.getStructName(mthd.typeid) + " @" + 
             Utils.getMangledName(Global.currentClass, mthd.name) + "(");
+        Global.out.print(Utils.getStructName(Global.currentClass)+"* %this");
 
-        boolean first = true;
         for(AST.formal fm: mthd.formals) {
-            if(first) {
-                first = false;
-            } else {
-                Global.out.print(", ");
-            }
+            Global.out.print(", ");
             fm.accept(this);
         }
 
         Global.out.println(") {");
         IRPrinter.createLabel("entry");
+        // TODO: add alloca for method params
+        for(AST.formal fm: mthd.formals) {
+            IRPrinter.createAlloca(fm.typeid, fm.name+".addr");
+            IRPrinter.createStoreInst("%"+fm.name, "%"+fm.name+".addr", fm.typeid);
+        }
         mthd.body.accept(this);
         Global.out.println("}");
 

@@ -47,7 +47,7 @@ class IRPrinter {
 
     public static void createStoreInst(String reg, String mem, String type) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getBasicTypePtr(type);
+        type = Utils.getStructName(type);
         builder.append("store ").append(type).append(" ");
         builder.append(reg).append(", ");
         builder.append(type+"*").append(" ");
@@ -214,6 +214,25 @@ class IRPrinter {
         .append(structName).append("* ").append(classRegister).append(",")
         .append(Global.classToVariableToIndexListMap.get(className).get(at));
         
+        Global.out.println(builder.toString());
+        return gepRegister;
+    }
+
+    public static String createAlloca(String className) {
+        String gepRegister = "%"+Global.registerCounter;
+        Global.registerCounter++;
+        String structName = Utils.getStructName(className);
+        StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
+        builder.append(gepRegister).append(" = alloca ").append(structName).append(", align 8");
+        Global.out.println(builder.toString());
+        return gepRegister;
+    }
+
+    public static String createAlloca(String className, String regName) {
+        String gepRegister = "%"+regName;
+        String structName = Utils.getStructName(className);
+        StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
+        builder.append(gepRegister).append(" = alloca ").append(structName).append(", align 8");
         Global.out.println(builder.toString());
         return gepRegister;
     }
