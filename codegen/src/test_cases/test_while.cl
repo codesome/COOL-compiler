@@ -1,0 +1,20 @@
+class Main {
+    b : Bool;
+    c : Int;
+    a : Object <- while b loop {
+                                while b loop c <- c + 1 pool; c <- c + 1; } pool;
+    
+    e : A <- new A;
+    main() : Int {
+        e@A.f1(1)
+    };
+};
+
+class A {
+    a : Int;
+    b : Bool;
+    c : String;
+    f1(x : Int) : Int {
+        x <- x + 1
+    };
+};

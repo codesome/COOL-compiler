@@ -77,8 +77,8 @@ class IRPrinter {
 
     public static String createConvertInst(String reg, String exprFromType, String exprToType, String convertType) {
         StringBuilder builder = new StringBuilder(INDENT);
-        exprFromType = Utils.convertTypeWithPtr(exprFromType);
-        exprToType = Utils.convertTypeWithPtr(exprToType);
+        exprFromType = Utils.getStructName(exprFromType) + "*";
+        exprToType = Utils.getStructName(exprToType) + "*";
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);

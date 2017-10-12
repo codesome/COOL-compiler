@@ -19,7 +19,32 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.assign expr) {
         String retVal = expr.e1.accept(this);
         String castVal = retVal;
+        String storeID;
+        if(!expr.type.equals(expr.e1.type)) {
+            castVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
+        }
         if(Global.methodParams.contains(expr.name)) {
+            storeID = "%" + expr.name + ".addr";
+        } else {
+            storeID = IRPrinter.createClassAttrGEP(expr.type, Global.currentClass, expr.name);
+        }
+        if(isPrimitiveType(expr.type)) {
+            StringBuilder argsBuilder = new StringBuilder();
+            argsBuilder.append(Utils.getStructName(expr.type)).append("* ").append(castVal);
+
+            String getVal = IRPrinter.createCallInst(Utils.getBasicType(expr.type),
+                        Utils.getMangledName(expr.type,"get"),argsBuilder.toString());
+
+            argsBuilder.setLength(0);
+            argsBuilder.append(Utils.getStructName(expr.type)).append("* ").append(expr.name)
+            .append(", ").append(Utils.getBasicType(expr.type)).append(" ").append(storeID);
+            
+            IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type, "set"), argsBuilder.toString());
+        } else {
+            IRPrinter.createStoreInst(castVal, storeID, expr.type);
+        }
+        return retVal; // TODO - check this
+    /*    if(Global.methodParams.contains(expr.name)) {
             if(!expr.type.equals(expr.e1.type)) {
                 if(isPrimitiveType(expr.e1.type)) {
                     castVal = IRPrinter.createConvertInst(retVal, Utils.getBasicType(expr.e1.type), 
@@ -42,7 +67,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         else {
             IRPrinter.createStoreInst(castVal, expr.name, expr.type);  
         }
-        return castVal;
+        return castVal; */
     }
 
     public String visit(AST.static_dispatch expr) {

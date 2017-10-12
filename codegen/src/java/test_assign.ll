@@ -1,8 +1,9 @@
 @.str.0 = private unnamed_addr constant [1 x i8] c"\00", align 1
 
 %class.Object = type {}
-%class.Main = type { %class.Object, %class.Bool, %class.Int, %class.Object, %class.A }
-%class.A = type { %class.Object, %class.Int, %class.Bool, %class.String }
+%class.A = type { %class.Object, %class.Int }
+%class.B = type { %class.Object, %class.A, %class.A }
+%class.Main = type { %class.Object }
 %class.IO = type { %class.Object }
 %class.Int = type { %class.Object, i32 }
 %class.String = type { %class.Object, i8* }
@@ -16,64 +17,6 @@ entry:
   ret void
 }
 
-; Constructor of class 'Main'
-define void @_CN4MainFN4Main_(%class.Main* %this) {
-
-entry:
-  %0 = bitcast %class.Main* %this to %class.Object*
-  call void @_CN6ObjectFN6Object_(%class.Object* %0)
-  %1 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
-  call void @_CN4BoolFN4Bool_(%class.Bool* %1)
-  %2 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
-  call void @_CN3IntFN3Int_(%class.Int* %2)
-  %3 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 3
-  br label %while.cond
-
-while.cond:
-  %4 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
-  %5 = call i8 @_CN4BoolFN3get_(%class.Bool* %4)
-  %6 = trunc %class.i8* %5 to %class.i1*
-  br i1 %6, label %while.body, label %while.end
-
-while.body:
-  br label %while.cond.1
-
-while.cond.1:
-  %7 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
-  %8 = call i8 @_CN4BoolFN3get_(%class.Bool* %7)
-  %9 = trunc %class.i8* %8 to %class.i1*
-  br i1 %9, label %while.body.1, label %while.end.1
-
-while.body.1:
-  %10 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
-  %11 = call i32 @_CN3IntFN3get_(%class.Int* %10)
-  %12 = add nsw i32* %11, 1
-  %13 = getelementptr inbounds %class.Int, %class.Int* Main,null
-  %14 = call i32 @_CN3IntFN3get_(%class.Int* %12)
-  call void @_CN3IntFN3set_(%class.Int* c, i32 %13)
-  br label %while.cond.1
-
-while.end.1:
-  %15 = load %class.Object*, %class.Object** undef, align 8
-  %16 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
-  %17 = call i32 @_CN3IntFN3get_(%class.Int* %16)
-  %18 = add nsw i32* %17, 1
-  %19 = getelementptr inbounds %class.Int, %class.Int* Main,null
-  %20 = call i32 @_CN3IntFN3get_(%class.Int* %18)
-  call void @_CN3IntFN3set_(%class.Int* c, i32 %19)
-  br label %while.cond
-
-while.end:
-  %21 = load %class.Object*, %class.Object** undef, align 8
-  store %class.Object %21, %class.Object* %3, align 4
-  %22 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 4
-  %23 = call noalias i8* @malloc(i64 32)
-  %24 = bitcast %class.i8** %23 to %class.A*
-  call void @_CN1AFN1A_(%class.A* %24)
-  store %class.A %24, %class.A* %22, align 4
-  ret void
-}
-
 ; Constructor of class 'A'
 define void @_CN1AFN1A_(%class.A* %this) {
 
@@ -81,11 +24,32 @@ entry:
   %0 = bitcast %class.A* %this to %class.Object*
   call void @_CN6ObjectFN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  call void @_CN3IntFN3Int_(%class.Int* %1)
-  %2 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 2
-  call void @_CN4BoolFN4Bool_(%class.Bool* %2)
-  %3 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
-  call void @_CN6StringFN6String_(%class.String* %3)
+  call void @_CN3IntFN3set_(%class.Int* %1, i32 1)
+  ret void
+}
+
+; Constructor of class 'B'
+define void @_CN1BFN1B_(%class.B* %this) {
+
+entry:
+  %0 = bitcast %class.B* %this to %class.Object*
+  call void @_CN6ObjectFN6Object_(%class.Object* %0)
+  %1 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 1
+  store %class.A undef, %class.A* %1, align 4
+  %2 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 2
+  %3 = call noalias i8* @malloc(i64 32)
+  %4 = bitcast %class.i8** %3 to %class.A*
+  call void @_CN1AFN1A_(%class.A* %4)
+  store %class.A %4, %class.A* %2, align 4
+  ret void
+}
+
+; Constructor of class 'Main'
+define void @_CN4MainFN4Main_(%class.Main* %this) {
+
+entry:
+  %0 = bitcast %class.Main* %this to %class.Object*
+  call void @_CN6ObjectFN6Object_(%class.Object* %0)
   ret void
 }
 
@@ -183,25 +147,41 @@ entry:
 ; C Malloc declaration
 declare noalias i8* @malloc(i64)
 
-; Class: Main, Method: main
-define %class.Int @_CN4MainFN4main_(%class.Main* %this) {
-
-entry:
-  %2 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 4
-  %3 = load %class.A*, %class.A** %2, align 8
-  %4 = call %class.Int* @_CN4MainFN2f1_(%class.Int* 1, )
-}
-
 ; Class: A, Method: f1
 define %class.Int @_CN1AFN2f1_(%class.A* %this, %class.Int %x) {
 
 entry:
   %x.addr = alloca %class.Int, align 8
   store %class.Int %x, %class.Int* %x.addr, align 4
-  %5 = load i32*, i32** %x.addr, align 8
-  %6 = add nsw i32* %5, 1
-  %7 = call i32 @_CN3IntFN3get_(%class.Int* %6)
+  %2 = load i32*, i32** %x.addr, align 8
+  %3 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
+  %4 = call i32 @_CN3IntFN3get_(%class.Int* %3)
+  %5 = add nsw i32* %2, %4
+  %6 = call i32 @_CN3IntFN3get_(%class.Int* %5)
   call void @_CN3IntFN3set_(%class.Int* x, i32 %x.addr)
+}
+
+; Class: B, Method: f2
+define %class.A @_CN1BFN2f2_(%class.B* %this, %class.Int %x, %class.A %y) {
+
+entry:
+  %x.addr = alloca %class.Int, align 8
+  store %class.Int %x, %class.Int* %x.addr, align 4
+  %y.addr = alloca %class.A, align 8
+  store %class.A %y, %class.A* %y.addr, align 4
+  %7 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 1
+  %8 = load %class.A*, %class.A** %7, align 8
+  store %class.A %8, %class.A* %y.addr, align 4
+  %9 = call noalias i8* @malloc(i64 32)
+  %10 = bitcast %class.i8** %9 to %class.A*
+  call void @_CN1AFN1A_(%class.A* %10)
+  store %class.A %10, %class.A* %y.addr, align 4
+}
+
+; Class: Main, Method: main
+define %class.Int @_CN4MainFN4main_(%class.Main* %this) {
+
+entry:
 }
 
 ; Class: Object, Method: abort
