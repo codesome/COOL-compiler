@@ -139,9 +139,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("define void @" + Utils.getMangledName(Global.Constants.STRING_TYPE, "set") 
             + "(" + Utils.getStructName(Global.Constants.STRING_TYPE) + "* %this, i8* %s) {");
         Global.out.println("entry:");
-        String gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.STRING_TYPE, "%this", "val");
-        IRPrinter.createStoreInst("%s", gepRegister, "i8*");
-        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1");
+        Global.out.println(IRPrinter.INDENT + "store i8* %s, i8** %0, align 8");
+        Global.out.println(IRPrinter.INDENT + "ret void");
         Global.out.println("}");
 
         // String get method
@@ -150,9 +150,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("define i8* @" + Utils.getMangledName(Global.Constants.STRING_TYPE, "get") 
             + "(" + Utils.getStructName(Global.Constants.STRING_TYPE) + "* %this) {");
         Global.out.println("entry:");
-        gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.STRING_TYPE, "%this", "val");
-        String loadReg = IRPrinter.createLoadInst(gepRegister, "i8*");
-        Global.out.println(IRPrinter.INDENT+"ret i8* "+loadReg);
+        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1");
+        Global.out.println(IRPrinter.INDENT + "%1 = load i8*, i8** %0, align 8");
+        Global.out.println(IRPrinter.INDENT + "ret i8* %1");
         Global.out.println("}");
 
         // Int set method
@@ -161,9 +161,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("define void @" + Utils.getMangledName(Global.Constants.INT_TYPE, "set") 
             + "(" + Utils.getStructName(Global.Constants.INT_TYPE) + "* %this, i32 %s) {");
         Global.out.println("entry:");
-        gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.INT_TYPE, "%this", "val");
-        IRPrinter.createStoreInst("%s", gepRegister, "i32");
-        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1");
+        Global.out.println(IRPrinter.INDENT + "store i32 %s, i32* %0, align 8");
+        Global.out.println(IRPrinter.INDENT + "ret void");
         Global.out.println("}");
 
         // Int get method
@@ -172,9 +172,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("define i32 @" + Utils.getMangledName(Global.Constants.INT_TYPE, "get") 
             + "(" + Utils.getStructName(Global.Constants.INT_TYPE) + "* %this) {");
         Global.out.println("entry:");
-        gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.INT_TYPE, "%this", "val");
-        loadReg = IRPrinter.createLoadInst(gepRegister, "i32");
-        Global.out.println(IRPrinter.INDENT+"ret i32 "+loadReg);
+        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1");
+        Global.out.println(IRPrinter.INDENT + "%1 = load i32, i32* %0, align 8");
+        Global.out.println(IRPrinter.INDENT + "ret i32 %1");
         Global.out.println("}");
 
         // Bool set method
@@ -183,9 +183,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("define void @" + Utils.getMangledName(Global.Constants.BOOL_TYPE, "set") 
             + "(" + Utils.getStructName(Global.Constants.BOOL_TYPE) + "* %this, i8 %s) {");
         Global.out.println("entry:");
-        gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.BOOL_TYPE, "%this", "val");
-        IRPrinter.createStoreInst("%s", gepRegister, "i8");
-        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1");
+        Global.out.println(IRPrinter.INDENT + "store i8 %s, i8* %0, align 8");
+        Global.out.println(IRPrinter.INDENT + "ret void");
         Global.out.println("}");
 
         // String get method
@@ -194,9 +194,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("define i8 @" + Utils.getMangledName(Global.Constants.BOOL_TYPE, "get") 
             + "(" + Utils.getStructName(Global.Constants.BOOL_TYPE) + "* %this) {");
         Global.out.println("entry:");
-        gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.BOOL_TYPE, "%this", "val");
-        loadReg = IRPrinter.createLoadInst(gepRegister, "i8");
-        Global.out.println(IRPrinter.INDENT+"ret i8 "+loadReg);
+        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1");
+        Global.out.println(IRPrinter.INDENT + "%1 = load i8, i8* %0, align 8");
+        Global.out.println(IRPrinter.INDENT + "ret i32 %1");
         Global.out.println("}");
 
         // malloc declaration - see https://groups.google.com/forum/#!topic/llvm-dev/QElg-R1CqNg
@@ -217,12 +217,13 @@ class VisitorImpl extends ExpressionVisitorImpl {
         
         printStringConstants();
         generateStructs();
-        generateConstructors();
-        generateDefaultMethods();
 
         for(AST.class_ cl: prog.classes) {
             cl.accept(this);
         }
+
+        generateConstructors();
+        generateDefaultMethods();
 
     }
 
