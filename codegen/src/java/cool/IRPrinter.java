@@ -33,7 +33,7 @@ class IRPrinter {
 
     public static String createLoadInst(String mem, String type) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getBasicTypePtr(type);
+        type = Utils.getStructName(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -76,9 +76,12 @@ class IRPrinter {
     }
 
     public static String createConvertInst(String reg, String exprFromType, String exprToType, String convertType) {
+        // TODO: verify if we need pointer everywhere
         StringBuilder builder = new StringBuilder(INDENT);
-        exprFromType = Utils.getStructName(exprFromType) + "*";
-        exprToType = Utils.getStructName(exprToType) + "*";
+        if(!"i8*".equals(exprFromType) && !"i32".equals(exprFromType) && !"i8".equals(exprFromType) && !"i1".equals(exprFromType))
+            exprFromType = Utils.getStructName(exprFromType) + "*";
+        if(!"i8*".equals(exprFromType) && !"i32".equals(exprFromType) && !"i8".equals(exprFromType) && !"i1".equals(exprFromType))
+            exprToType = Utils.getStructName(exprToType) + "*";
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);

@@ -90,4 +90,10 @@ public class Utils {
         return Utils.getStructName(type)+"*";
     }
 
+    public static boolean isPrimitiveType(String type) {
+        return Global.Constants.STRING_TYPE.equals(type)
+                || Global.Constants.INT_TYPE.equals(type)
+                || Global.Constants.BOOL_TYPE.equals(type);
+    }
+
 }

@@ -235,18 +235,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
     }
 
-    public String getDefaultValue(String type) {
-        if(Global.Constants.INT_TYPE.equals(type)) {
-            return "0";
-        } else if(Global.Constants.BOOL_TYPE.equals(type)) {
-            return "0";
-        } else if(Global.Constants.STRING_TYPE.equals(type)) {
-            return IRPrinter.createStringGEP("");
-        } else {
-            return "undef";
-        }
-    }
-
     private void createCallForConstructor(String className, String reg) {
         StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
         builder.append("call void @").append(Utils.getMangledName(className, className))
@@ -278,11 +266,14 @@ class VisitorImpl extends ExpressionVisitorImpl {
     public void visit(AST.attr at) {
         String gepRegister = IRPrinter.createClassAttrGEP(Global.currentClass, "%this", at.name);
         String valueRegister = at.value.accept(this);
-        if(Global.inheritanceGraph.isRestrictedInheritanceClass(at.typeid)) {
+        if(Utils.isPrimitiveType(at.typeid)) {
             if(valueRegister==null) {
+                // no assignment
                 createCallForConstructor(at.typeid, gepRegister);
             } else {
                 // call function
+                valueRegister = IRPrinter.createCallInst(getRegisterForPrimitiveType(at.typeid), 
+                    Utils.getMangledName(at.typeid,"get"), Utils.getStructName(at.typeid) + "* " + valueRegister);
                 StringBuilder argsBuilder = new StringBuilder();
                 argsBuilder.append(Utils.getStructName(at.typeid)).append("* ").append(gepRegister)
                 .append(", ").append(getRegisterForPrimitiveType(at.value.type)).append(" ").append(valueRegister);
@@ -291,10 +282,18 @@ class VisitorImpl extends ExpressionVisitorImpl {
             }
         } else {
             if(valueRegister==null) {
-                IRPrinter.createStoreInst(getDefaultValue(at.typeid), gepRegister, at.typeid);
+                // no assignment
+                IRPrinter.createStoreInst("undef", gepRegister, at.typeid);
             } else {
-                // TODO bitcast if not same
-                IRPrinter.createStoreInst(valueRegister, gepRegister, at.typeid);
+                if(at.typeid.equals(at.value.type)) {
+                    valueRegister = IRPrinter.createLoadInst(valueRegister, at.value.type);
+                    IRPrinter.createStoreInst(valueRegister, gepRegister, at.typeid);
+                } else {
+                    // TODO : make sure bitcast is for pointer
+                    String convertedReg = IRPrinter.createConvertInst(valueRegister, at.value.type, at.typeid, IRPrinter.BITCAST);
+                    convertedReg = IRPrinter.createLoadInst(convertedReg, at.typeid);
+                    IRPrinter.createStoreInst(convertedReg, gepRegister, at.typeid);
+                }
             }
         }
     }
@@ -313,7 +312,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
         Global.out.println(") {");
         IRPrinter.createLabel("entry");
-        // TODO: add alloca for method params
         for(AST.formal fm: mthd.formals) {
             IRPrinter.createAlloca(fm.typeid, fm.name+".addr");
             IRPrinter.createStoreInst("%"+fm.name, "%"+fm.name+".addr", fm.typeid);

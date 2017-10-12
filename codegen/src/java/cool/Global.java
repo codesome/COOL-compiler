@@ -39,6 +39,8 @@ public class Global {
 
     public static String currentClass;
 
+    public static boolean needPointer;
+
     static {
         methodParams = new HashSet<>();
         labelToCountMap = new HashMap<>();
@@ -46,6 +48,7 @@ public class Global {
         classToVariableToIndexListMap = new HashMap<>();
         registerCounter = 0;
         stringRegisterCounter = 0;
+        needPointer = false;
     }
 
 
