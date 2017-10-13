@@ -96,4 +96,14 @@ public class Utils {
                 || Global.Constants.BOOL_TYPE.equals(type);
     }
 
+    public static int getAttrSize(String type) {
+        if(Global.Constants.INT_TYPE.equals(type)) {
+            return 4;
+        }
+        else if(Global.Constants.BOOL_TYPE.equals(type)) {
+            return 1;
+        }
+        return 8;
+    }
+
 }

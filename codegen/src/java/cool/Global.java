@@ -28,6 +28,8 @@ public class Global {
 
     public static Map<String,Integer> labelToCountMap;
 
+    public static Map<String,Integer> classSizeMap;
+
     public static int stringRegisterCounter;
     public static Map<String,String> stringConstantToRegisterMap;
 
@@ -44,6 +46,7 @@ public class Global {
     static {
         methodParams = new HashSet<>();
         labelToCountMap = new HashMap<>();
+        classSizeMap = new HashMap<>();
         stringConstantToRegisterMap = new HashMap<>();
         classToVariableToIndexListMap = new HashMap<>();
         registerCounter = 0;

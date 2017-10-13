@@ -236,6 +236,27 @@ class VisitorImpl extends ExpressionVisitorImpl {
         printStringConstants();
         generateStructs();
 
+        int memNeededByClass;
+
+        for(AST.class_ cl : prog.classes) {
+            memNeededByClass = 0;
+            for(AST.feature f : cl.features) {
+                if(f instanceof AST.attr) {
+                    memNeededByClass += Utils.getAttrSize(((AST.attr)f).typeid);
+                }
+            }
+            Global.classSizeMap.put(cl.name, memNeededByClass);
+        }
+
+        Global.classSizeMap.put("Int",4);
+        Global.classSizeMap.put("Bool",1);
+        Global.classSizeMap.put("String",8);
+        Global.classSizeMap.put("Object",0);
+        Global.classSizeMap.put("IO",0);
+
+        // TODO - check above
+        // TODO - what to do when user does new Int, etc.
+
         for(AST.class_ cl: prog.classes) {
             if(!isDefaultClass(cl.name))
                 cl.accept(this);
@@ -248,6 +269,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     public void visit(AST.class_ cl) {
         Global.currentClass = cl.name;
+
         for(AST.feature f : cl.features) {
             if(f instanceof AST.method) {
                 ((AST.method) f).accept(this);

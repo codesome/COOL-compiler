@@ -166,7 +166,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
         // TODO - expr.type or expr.typeid?
     //    String storeRegisterForCall = IRPrinter.createCallInst(Global.Constants.PTR_TYPE, 
     //                                Utils.getMangledName(expr.type, expr.type), ""); // INCOMPLETE
-        String storeRegisterForCall = IRPrinter.createMallocInst("32"); // TODO - set the correct size, malloc or alloc?
+        String bytesToAllocate = ""+Global.classSizeMap.get(expr.type);
+        String storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate); // TODO - set the correct size, malloc or alloc?
         String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
                                         expr.typeid, IRPrinter.BITCAST);
         IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.typeid, expr.typeid), 

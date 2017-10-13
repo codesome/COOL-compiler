@@ -11,8 +11,8 @@ class Main {
 };
 
 class A {
-    a : Int;
-    b : Bool;
+    a : Int <- new Int;
+    b : Bool <- new Bool;
     c : String;
     f1(x : Int) : Int {
         x <- x + 1
