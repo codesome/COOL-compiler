@@ -93,13 +93,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
             builder.append(loadReg);
         }
         // TODO : check what to return from the function, pointer or value?
-        // Function always returns a value
         String returnValue = IRPrinter.createCallInst(expr.type, Utils.getMangledName(expr.typeid, 
                             expr.name), builder.toString());
-        // creating alloca and storing return value in it
-        String objAlloca = IRPrinter.createAlloca(expr.type);
-        IRPrinter.createStoreInst(returnValue, objAlloca, expr.type);
-        return objAlloca;
+        return returnValue;
     }
 
     public String visit(AST.cond expr) { // incomplete TODO: what is incomplete?
@@ -170,8 +166,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         // TODO - expr.type or expr.typeid?
     //    String storeRegisterForCall = IRPrinter.createCallInst(Global.Constants.PTR_TYPE, 
     //                                Utils.getMangledName(expr.type, expr.type), ""); // INCOMPLETE
-        String bytesToAllocate = ""+Global.classSizeMap.get(expr.type);
-        String storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate); // TODO - set the correct size, malloc or alloc?
+        String storeRegisterForCall = IRPrinter.createMallocInst("32"); // TODO - set the correct size, malloc or alloc?
         String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
                                         expr.typeid, IRPrinter.BITCAST);
         IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.typeid, expr.typeid), 

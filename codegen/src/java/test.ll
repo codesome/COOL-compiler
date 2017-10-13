@@ -6,27 +6,33 @@
 %class.B = type { %class.A, %class.String, %class.A }
 %class.Main = type { %class.Object, %class.Int, %class.Bool, %class.A }
 %class.IO = type { %class.Object }
-%class.Int = type { %class.Object, i32 }
 %class.String = type { %class.Object, i8* }
+%class.Int = type { %class.Object, i32 }
 %class.Bool = type { %class.Object, i8 }
 
 
 ; Class: A, Method: test
-define %class.Int* @_CN1AFN4test_(%class.A* %this) {
+define %class.Int @_CN1AFN4test_(%class.A* %this) {
 
 entry:
   %0 = alloca %class.Int, align 8
   call void @_CN3IntFN3set_(%class.Int* %0, i32 99)
-  ret %class.Int* %0
+  %1 = load %class.Int, %class.Int* %0, align 4
+  ret %class.Int %1
 }
 
 ; Class: Main, Method: main
-define %class.Int* @_CN4MainFN4main_(%class.Main* %this) {
+define %class.Int @_CN4MainFN4main_(%class.Main* %this) {
 
 entry:
-  %0 = alloca %class.Int, align 8
-  call void @_CN3IntFN3set_(%class.Int* %0, i32 0)
-  ret %class.Int* %0
+  %0 = call noalias i8* @malloc(i64 13)
+  %1 = bitcast i8* %0 to %class.A*
+  call void @_CN1AFN1A_(%class.A* %1)
+  %2 = call %class.Int @_CN1AFN4test_(%class.A* %1)
+  %3 = alloca %class.Int, align 8
+  store %class.Int %2, %class.Int* %3, align 4
+  %4 = load %class.Int, %class.Int* %3, align 4
+  ret %class.Int %4
 }
 
 ; Constructor of class 'Object'
@@ -111,7 +117,7 @@ entry:
   %2 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 2
   call void @_CN4BoolFN4Bool_(%class.Bool* %2)
   %3 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 3
-  %4 = call noalias i8* @malloc(i64 32)
+  %4 = call noalias i8* @malloc(i64 13)
   %5 = bitcast i8* %4 to %class.A*
   call void @_CN1AFN1A_(%class.A* %5)
   %6 = load %class.A, %class.A* %5, align 4
@@ -128,17 +134,6 @@ entry:
   ret void
 }
 
-; Constructor of class 'Int'
-define void @_CN3IntFN3Int_(%class.Int* %this) {
-
-entry:
-  %0 = bitcast %class.Int* %this to %class.Object*
-  call void @_CN6ObjectFN6Object_(%class.Object* %0)
-  %1 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1
-  store i32 0, i32* %1, align 4
-  ret void
-}
-
 ; Constructor of class 'String'
 define void @_CN6StringFN6String_(%class.String* %this) {
 
@@ -148,6 +143,17 @@ entry:
   %1 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1
   %2 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.1, i32 0, i32 0
   store i8* %2, i8** %1, align 8
+  ret void
+}
+
+; Constructor of class 'Int'
+define void @_CN3IntFN3Int_(%class.Int* %this) {
+
+entry:
+  %0 = bitcast %class.Int* %this to %class.Object*
+  call void @_CN6ObjectFN6Object_(%class.Object* %0)
+  %1 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1
+  store i32 0, i32* %1, align 4
   ret void
 }
 

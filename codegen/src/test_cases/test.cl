@@ -18,6 +18,6 @@ class Main {
     b : Bool;
     x : A <- new A;
     main() : Int {
-        0
+        (new A)@A.test()
     };
 };

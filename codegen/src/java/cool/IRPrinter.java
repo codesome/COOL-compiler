@@ -167,7 +167,7 @@ class IRPrinter {
 
     public static String createCallInst(String type, String callee, String args) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.convertTypeWithPtr(type);
+        type = Utils.getReturnTypeForMethod(type);
         String storeRegisterForCall = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegisterForCall);

@@ -64,6 +64,17 @@ public class Utils {
         return Utils.getStructName(type) + "*";
     }
 
+    public static String getReturnTypeForMethod(String type) {
+
+        if("i32".equals(type) || "i8".equals(type) || "i1".equals(type)) {
+            return type;
+        }
+        if("i32*".equals(type) || "i8*".equals(type) || "i1*".equals(type)) {
+            return type;
+        }
+        return Utils.getStructName(type);   
+    }
+
     public static String getBasicType(String type) {
         if(Global.Constants.STRING_TYPE.equals(type)) {
             return "i8*";

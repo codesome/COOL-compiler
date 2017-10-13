@@ -34,9 +34,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
         for(InheritanceGraph.Node child: rootNode.getChildren()) {
             generateStructsDFS(child);
         }
-        // Global.out.println("%class.Int = type { %class.Object, i32 }");
-        // Global.out.println("%class.String = type { %class.Object, i8* }");
-        // Global.out.println("%class.Bool = type { %class.Object, i8 }");
         Global.out.println();
     }
 
@@ -231,7 +228,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
         // preparing inheritance graph
         Global.inheritanceGraph = new InheritanceGraph();
         for(AST.class_ cl: prog.classes) {
-            System.out.println(cl.name);
             Global.inheritanceGraph.addClass(cl);
         }
 
@@ -239,27 +235,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
         
         printStringConstants();
         generateStructs();
-
-        int memNeededByClass;
-
-        for(AST.class_ cl : prog.classes) {
-            memNeededByClass = 0;
-            for(AST.feature f : cl.features) {
-                if(f instanceof AST.attr) {
-                    memNeededByClass += Utils.getAttrSize(((AST.attr)f).typeid);
-                }
-            }
-            Global.classSizeMap.put(cl.name, memNeededByClass);
-        }
-
-        Global.classSizeMap.put("Int",4);
-        Global.classSizeMap.put("Bool",1);
-        Global.classSizeMap.put("String",8);
-        Global.classSizeMap.put("Object",0);
-        Global.classSizeMap.put("IO",0);
-
-        // TODO - check above
-        // TODO - what to do when user does new Int, etc.
 
         for(AST.class_ cl: prog.classes) {
             if(!isDefaultClass(cl.name))
@@ -273,7 +248,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     public void visit(AST.class_ cl) {
         Global.currentClass = cl.name;
-
         for(AST.feature f : cl.features) {
             if(f instanceof AST.method) {
                 ((AST.method) f).accept(this);
@@ -351,7 +325,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
         Global.methodParams.clear();
         Global.out.println("\n; Class: "+Global.currentClass+", Method: "+mthd.name);
-        Global.out.print("define " + Utils.getStructName(mthd.typeid) + " @" + 
+        Global.out.print("define " + Utils.getStructName(mthd.typeid) + "* @" + 
             Utils.getMangledName(Global.currentClass, mthd.name) + "(");
         Global.out.print(Utils.getStructName(Global.currentClass)+"* %this");
 
@@ -371,8 +345,8 @@ class VisitorImpl extends ExpressionVisitorImpl {
             returnReg = IRPrinter.createConvertInst(returnReg, mthd.body.type, 
                 mthd.typeid, IRPrinter.BITCAST);
         }
-        String loadReturnReg = IRPrinter.createLoadInst(returnReg, mthd.typeid);
-        Global.out.println(IRPrinter.INDENT + "ret " + Utils.getStructName(mthd.typeid) + " " + loadReturnReg);
+        // String loadReturnReg = IRPrinter.createLoadInst(returnReg, mthd.typeid);
+        Global.out.println(IRPrinter.INDENT + "ret " + Utils.getStructName(mthd.typeid) + "* " + returnReg);
         Global.out.println("}");
 
     }
