@@ -4,8 +4,11 @@ class Main {
     a : Object <- while b loop c <- c + 1 pool;
     
     e : A <- new A;
-    main() : Int {
-        e@A.f1(1)
+    main() : A {
+        {
+            e@A.f1(1);
+            e;
+        }
     };
 };
 

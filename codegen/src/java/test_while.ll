@@ -7,13 +7,15 @@
 
 
 ; Class: Main, Method: main
-define i32 @_CN4Main_FN4main_(%class.Main* %this) {
+define %class.A* @_CN4Main_FN4main_(%class.Main* %this) {
 
 entry:
   %0 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 4
   %1 = load %class.A*, %class.A** %0, align 8
   %2 = call i32 @_CN1A_FN2f1_(%class.A* %1, i32 1)
-  ret i32 %2
+  %3 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 4
+  %4 = load %class.A*, %class.A** %3, align 8
+  ret %class.A* %4
 }
 
 ; Class: A, Method: f1
@@ -112,7 +114,8 @@ define void @_CN6Object_FN5abort_() {
 ; C main() function
 define i32 @main() {
 entry:
-  %retval = alloca i32, align 4
   %main = alloca %class.Main, align 8
+  call void @_CN4Main_FN4Main_(%class.Main* %main)
+  %dummyretval = call %class.A* @_CN4Main_FN4main_(%class.Main* %main)
   ret i32 0
 }

@@ -247,10 +247,15 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("\n; C main() function");
         Global.out.println("define i32 @main() {");
         Global.out.println("entry:");
-        Global.out.println(IRPrinter.INDENT+"%retval = alloca i32, align 4");
         Global.out.println(IRPrinter.INDENT+"%main = alloca %class.Main, align 8");
-        // String 
-        Global.out.println(IRPrinter.INDENT+"ret i32 0");
+        Global.out.println(IRPrinter.INDENT+"call void @"+Utils.getMangledName("Main","Main")+"(%class.Main* %main)");
+        if(Global.Constants.INT_TYPE.equals(mainReturnType)) {
+            Global.out.println(IRPrinter.INDENT+"%retval = call i32 @"+Utils.getMangledName("Main","main")+"(%class.Main* %main)");
+            Global.out.println(IRPrinter.INDENT+"ret i32 %retval");
+        } else {
+            Global.out.println(IRPrinter.INDENT+"%dummyretval = call "+Utils.getBasicTypeOrPointer(mainReturnType)+" @"+Utils.getMangledName("Main","main")+"(%class.Main* %main)");
+            Global.out.println(IRPrinter.INDENT+"ret i32 0");
+        }
         Global.out.println("}");
 
     }
