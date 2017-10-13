@@ -80,7 +80,7 @@ class IRPrinter {
         StringBuilder builder = new StringBuilder(INDENT);
         if(!"i8*".equals(exprFromType) && !"i32".equals(exprFromType) && !"i8".equals(exprFromType) && !"i1".equals(exprFromType))
             exprFromType = Utils.getStructName(exprFromType) + "*";
-        if(!"i8*".equals(exprFromType) && !"i32".equals(exprFromType) && !"i8".equals(exprFromType) && !"i1".equals(exprFromType))
+        if(!"i8*".equals(exprToType) && !"i32".equals(exprToType) && !"i8".equals(exprToType) && !"i1".equals(exprToType))
             exprToType = Utils.getStructName(exprToType) + "*";
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;

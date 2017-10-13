@@ -17,84 +17,16 @@ define %class.Int* @_CN1AFN4test_(%class.A* %this) {
 entry:
   %0 = alloca %class.Int, align 8
   call void @_CN3IntFN3set_(%class.Int* %0, i32 99)
+  ret %class.Int* %0
 }
 
 ; Class: Main, Method: main
 define %class.Int* @_CN4MainFN4main_(%class.Main* %this) {
 
 entry:
-  %1 = alloca %class.Int, align 8
-  call void @_CN3IntFN3set_(%class.Int* %1, i32 0)
-}
-
-; Class: Object, Method: abort
-define %class.Object* @_CN6ObjectFN5abort_(%class.Object* %this) {
-
-entry:
-}
-
-; Class: Object, Method: type_name
-define %class.String* @_CN6ObjectFN9type_name_(%class.Object* %this) {
-
-entry:
-}
-
-; Class: Object, Method: copy
-define %class.Object* @_CN6ObjectFN4copy_(%class.Object* %this) {
-
-entry:
-}
-
-; Class: IO, Method: out_string
-define %class.IO* @_CN2IOFN10out_string_(%class.IO* %this, %class.String %x) {
-
-entry:
-  %x.addr = alloca %class.String, align 8
-  store %class.String %x, %class.String* %x.addr, align 4
-}
-
-; Class: IO, Method: out_int
-define %class.IO* @_CN2IOFN7out_int_(%class.IO* %this, %class.Int %x) {
-
-entry:
-  %x.addr = alloca %class.Int, align 8
-  store %class.Int %x, %class.Int* %x.addr, align 4
-}
-
-; Class: IO, Method: in_string
-define %class.String* @_CN2IOFN9in_string_(%class.IO* %this) {
-
-entry:
-}
-
-; Class: IO, Method: in_int
-define %class.Int* @_CN2IOFN6in_int_(%class.IO* %this) {
-
-entry:
-}
-
-; Class: String, Method: length
-define %class.Int* @_CN6StringFN6length_(%class.String* %this) {
-
-entry:
-}
-
-; Class: String, Method: concat
-define %class.String* @_CN6StringFN6concat_(%class.String* %this, %class.String %s) {
-
-entry:
-  %s.addr = alloca %class.String, align 8
-  store %class.String %s, %class.String* %s.addr, align 4
-}
-
-; Class: String, Method: substr
-define %class.String* @_CN6StringFN6substr_(%class.String* %this, %class.Int %i, %class.Int %l) {
-
-entry:
-  %i.addr = alloca %class.Int, align 8
-  store %class.Int %i, %class.Int* %i.addr, align 4
-  %l.addr = alloca %class.Int, align 8
-  store %class.Int %l, %class.Int* %l.addr, align 4
+  %0 = alloca %class.Int, align 8
+  call void @_CN3IntFN3set_(%class.Int* %0, i32 0)
+  ret %class.Int* %0
 }
 
 ; Constructor of class 'Object'
@@ -139,7 +71,8 @@ while.body:
   br label %while.cond
 
 while.end:
-  %16 = load %class.Object, %class.Object* undef, align 4
+  %16 = alloca %class.Object, align 8
+  store %class.Object undef, %class.Object* %16, align 4
   %17 = load %class.Object, %class.Object* %16, align 4
   store %class.Object %17, %class.Object* %4, align 4
   %18 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
@@ -179,7 +112,7 @@ entry:
   call void @_CN4BoolFN4Bool_(%class.Bool* %2)
   %3 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 3
   %4 = call noalias i8* @malloc(i64 32)
-  %5 = bitcast i8* %4 to A
+  %5 = bitcast i8* %4 to %class.A*
   call void @_CN1AFN1A_(%class.A* %5)
   %6 = load %class.A, %class.A* %5, align 4
   store %class.A %6, %class.A* %3, align 4
@@ -202,7 +135,7 @@ entry:
   %0 = bitcast %class.Int* %this to %class.Object*
   call void @_CN6ObjectFN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1
-  store %class.i32 0, %class.i32* %1, align 4
+  store i32 0, i32* %1, align 4
   ret void
 }
 
@@ -214,7 +147,7 @@ entry:
   call void @_CN6ObjectFN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1
   %2 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.1, i32 0, i32 0
-  store %class.i8* %2, %class.i8** %1, align 8
+  store i8* %2, i8** %1, align 8
   ret void
 }
 
@@ -225,7 +158,7 @@ entry:
   %0 = bitcast %class.Bool* %this to %class.Object*
   call void @_CN6ObjectFN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1
-  store %class.i8 0, %class.i8* %1, align 4
+  store i8 0, i8* %1, align 4
   ret void
 }
 
@@ -274,8 +207,16 @@ define i8 @_CN4BoolFN3get_(%class.Bool* %this) {
 entry:
   %0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1
   %1 = load i8, i8* %0, align 8
-  ret i32 %1
+  ret i8 %1
 }
 
 ; C Malloc declaration
 declare noalias i8* @malloc(i64)
+
+; main() function
+define i32 @main() {
+entry:
+  %retval = alloca i32, align 4
+  %main = alloca %class.Main, align 8
+  ret i32 0
+}

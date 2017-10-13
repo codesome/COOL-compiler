@@ -120,17 +120,18 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     private void generateStringConstructBody() {
         String gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.STRING_TYPE, "%this", "val");
-        IRPrinter.createStoreInst(IRPrinter.createStringGEP(""), gepRegister, "i8*");
+        String emptyStringReg = IRPrinter.createStringGEP("");
+        Global.out.println(IRPrinter.INDENT + "store i8* "+ emptyStringReg +", i8** "+ gepRegister +", align 8");
     }
 
     private void generateIntConstructBody() {
         String gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.INT_TYPE, "%this", "val");
-        IRPrinter.createStoreInst("0", gepRegister, "i32");
+        Global.out.println(IRPrinter.INDENT + "store i32 0, i32* "+ gepRegister +", align 4");
     }
 
     private void generateBoolConstructBody() {
         String gepRegister = IRPrinter.createClassAttrGEP(Global.Constants.BOOL_TYPE, "%this", "val");
-        IRPrinter.createStoreInst("0", gepRegister, "i8");
+        Global.out.println(IRPrinter.INDENT + "store i8 0, i8* "+ gepRegister +", align 4");
     }
 
     private void generateDefaultMethods() {
@@ -190,7 +191,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println(IRPrinter.INDENT + "ret void");
         Global.out.println("}");
 
-        // String get method
+        // Bool get method
         Global.out.println("\n; Class: Bool, Method: get");
         Global.registerCounter = 0;
         Global.out.println("define i8 @" + Utils.getMangledName(Global.Constants.BOOL_TYPE, "get") 
@@ -198,7 +199,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("entry:");
         Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1");
         Global.out.println(IRPrinter.INDENT + "%1 = load i8, i8* %0, align 8");
-        Global.out.println(IRPrinter.INDENT + "ret i32 %1");
+        Global.out.println(IRPrinter.INDENT + "ret i8 %1");
         Global.out.println("}");
 
         // malloc declaration - see https://groups.google.com/forum/#!topic/llvm-dev/QElg-R1CqNg
@@ -210,9 +211,16 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("entry:");
         Global.out.println(IRPrinter.INDENT+"%retval = alloca i32, align 4");
         Global.out.println(IRPrinter.INDENT+"%main = alloca %class.Main, align 8");
-        String 
+        // String 
         Global.out.println(IRPrinter.INDENT+"ret i32 0");
+        Global.out.println("}");
 
+    }
+
+    private boolean isDefaultClass(String name) {
+        return Global.Constants.IO_TYPE.equals(name) || Global.Constants.INT_TYPE.equals(name) 
+        || Global.Constants.STRING_TYPE.equals(name) || Global.Constants.BOOL_TYPE.equals(name)
+        || Global.Constants.ROOT_TYPE.equals(name);
     }
 
     public void visit(AST.program prog) {
@@ -229,7 +237,8 @@ class VisitorImpl extends ExpressionVisitorImpl {
         generateStructs();
 
         for(AST.class_ cl: prog.classes) {
-            cl.accept(this);
+            if(!isDefaultClass(cl.name))
+                cl.accept(this);
         }
 
         generateConstructors();
@@ -310,6 +319,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.method mthd) {
+        Global.registerCounter = 0;
         if(Global.currentClass.equals("Main") && mthd.name.equals("main")) {
            mainReturnType = mthd.typeid;
         }
@@ -330,7 +340,13 @@ class VisitorImpl extends ExpressionVisitorImpl {
             IRPrinter.createAlloca(fm.typeid, fm.name+".addr");
             IRPrinter.createStoreInst("%"+fm.name, "%"+fm.name+".addr", fm.typeid);
         }
-        mthd.body.accept(this);
+        String returnReg = mthd.body.accept(this);
+        if(!mthd.typeid.equals(mthd.body.type)) {
+            returnReg = IRPrinter.createConvertInst(returnReg, mthd.body.type, 
+                mthd.typeid, IRPrinter.BITCAST);
+        }
+        // String loadReturnReg = IRPrinter.createLoadInst(returnReg, mthd.typeid);
+        Global.out.println(IRPrinter.INDENT + "ret " + Utils.getStructName(mthd.typeid) + "* " + returnReg);
         Global.out.println("}");
 
     }

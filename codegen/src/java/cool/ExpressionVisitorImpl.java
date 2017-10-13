@@ -147,8 +147,11 @@ abstract class ExpressionVisitorImpl implements Visitor {
         IRPrinter.createBreakInst(whileCondLabel);
 
         IRPrinter.createLabel(whileEndLabel);
-        String voidReturn = IRPrinter.createLoadInst(IRPrinter.UNDEF, "Object");
-        return voidReturn;
+        // TODO : should return a pointer
+        String objAlloca = IRPrinter.createAlloca("Object");
+        IRPrinter.createStoreInst("undef", objAlloca, "Object");
+        // String voidReturn = IRPrinter.createLoadInst(IRPrinter.UNDEF, "Object");
+        return objAlloca;
     }
 
     public String visit(AST.block expr) {
