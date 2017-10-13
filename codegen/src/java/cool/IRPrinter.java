@@ -234,7 +234,7 @@ class IRPrinter {
     public static String createAlloca(String className) {
         String gepRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
-        String structName = Utils.getStructName(className);
+        String structName = Utils.convertTypeWithPtr(Utils.getBasicType(className));
         StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
         builder.append(gepRegister).append(" = alloca ").append(structName).append(", align 8");
         Global.out.println(builder.toString());

@@ -22,6 +22,18 @@ public class Utils {
         }
     }
 
+    public static String getDefaultValue(String type) {
+        if(Global.Constants.INT_TYPE.equals(type)) {
+            return "0";
+        } else if(Global.Constants.BOOL_TYPE.equals(type)) {
+            return "0";
+        } else if(Global.Constants.STRING_TYPE.equals(type)) {
+            return IRPrinter.createStringGEP("");
+        } else {
+            return "undef";
+        }
+    }
+
     public static String convertType(String type) {
     /*    if("i32".equals(type) || Global.Constants.INT_TYPE.equals(type)) {
             return "i32";
