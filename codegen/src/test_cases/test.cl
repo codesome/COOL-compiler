@@ -20,4 +20,10 @@ class Main {
     main() : Int {
         (new A)@A.test()
     };
+    xyz(x:Int, y:Int, z:Int, v:A) : A {
+        {
+            x+y+z;
+            v;
+        }
+    };
 };

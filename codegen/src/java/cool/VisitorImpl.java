@@ -11,6 +11,21 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     private String mainReturnType;
 
+
+    private String getBasicTypeOrPointer(String type) {
+        if(Global.Constants.STRING_TYPE.equals(type)) {
+            return "i8*";
+        }
+        else if(Global.Constants.INT_TYPE.equals(type)) {
+            return "i32";
+        }
+        else if(Global.Constants.BOOL_TYPE.equals(type)) {
+            return "i8";
+        }
+        return Utils.getStructName(type) + "*";
+    }
+
+
     private void printStringConstants() {
         StringBuilder structBuilder = new StringBuilder();
         if(!Global.stringConstantToRegisterMap.containsKey("")) {
@@ -42,6 +57,10 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     private void generateStructsDFS(InheritanceGraph.Node node) {
         AST.class_ cl = node.getAstClass();
+        
+        if(Utils.isPrimitiveType(cl.name)) 
+            return;
+        
         StringBuilder builder = new StringBuilder(Utils.getStructName(cl.name));
         builder.append(" = type { ").append(Utils.getStructName(node.getParent().getAstClass().name));
         
@@ -52,30 +71,29 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
 
 
-        if(Global.Constants.STRING_TYPE.equals(cl.name)) {
-            builder.append(", i8*");
-            variableToIndexListMap.put("val", " i32 0, i32 1");
-        } else if(Global.Constants.INT_TYPE.equals(cl.name)) {
-            builder.append(", i32");
-            variableToIndexListMap.put("val", " i32 0, i32 1");
-        } else if(Global.Constants.BOOL_TYPE.equals(cl.name)) {
-            builder.append(", i8");
-            variableToIndexListMap.put("val", " i32 0, i32 1");
-        } else {
+        // if(Global.Constants.STRING_TYPE.equals(cl.name)) {
+        //     builder.append(", i8*");
+        //     variableToIndexListMap.put("val", " i32 0, i32 1");
+        // } else if(Global.Constants.INT_TYPE.equals(cl.name)) {
+        //     builder.append(", i32");
+        //     variableToIndexListMap.put("val", " i32 0, i32 1");
+        // } else if(Global.Constants.BOOL_TYPE.equals(cl.name)) {
+        //     builder.append(", i8");
+        //     variableToIndexListMap.put("val", " i32 0, i32 1");
+        // } else {
             int index = 0;
             for(AST.feature f : cl.features) {
                 if(f instanceof AST.attr) {
                     index++;
                     AST.attr a = (AST.attr) f;
-                    builder.append(", ").append(Utils.getStructName(a.typeid));
+                    builder.append(", ").append(getBasicTypeOrPointer(a.typeid));
                     variableToIndexListMap.put(a.name, " i32 0, i32 "+index);
                 }
             }
-        }
+        // }
 
         builder.append(" }");
         Global.out.println(builder.toString());
-
 
         Global.classToVariableToIndexListMap.put(cl.name, variableToIndexListMap);
         
@@ -91,6 +109,10 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     public void generateConstructorsDFS(InheritanceGraph.Node node) {
         AST.class_ cl = node.getAstClass();
+
+        if(Utils.isPrimitiveType(cl.name)) 
+            return;
+
         Global.out.println("\n; Constructor of class '" + cl.name + "'");
         Global.labelToCountMap.clear();
         Global.registerCounter = 0;
@@ -99,20 +121,20 @@ class VisitorImpl extends ExpressionVisitorImpl {
         IRPrinter.createLabel("entry");
         createCallForParentConstructor(Global.currentClass, "%this");
         
-        if(Global.Constants.STRING_TYPE.equals(cl.name)) {
-            generateStringConstructBody();
-        } else if(Global.Constants.INT_TYPE.equals(cl.name)) {
-            generateIntConstructBody();
-        } else if(Global.Constants.BOOL_TYPE.equals(cl.name)) {
-            generateBoolConstructBody();
-        } else {
+        // if(Global.Constants.STRING_TYPE.equals(cl.name)) {
+        //     generateStringConstructBody();
+        // } else if(Global.Constants.INT_TYPE.equals(cl.name)) {
+        //     generateIntConstructBody();
+        // } else if(Global.Constants.BOOL_TYPE.equals(cl.name)) {
+        //     generateBoolConstructBody();
+        // } else {
             for(AST.feature f : cl.features) {
                 if(f instanceof AST.attr) {
                     AST.attr a = (AST.attr) f;
                     a.accept(this);
                 }
             }
-        } 
+        // }
 
         Global.out.println(IRPrinter.INDENT+"ret void");
         Global.out.println("}");
@@ -138,7 +160,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     private void generateDefaultMethods() {
-
+        /*
         // String set method
         Global.out.println("\n; Class: String, Method: set");
         Global.registerCounter = 0;
@@ -204,7 +226,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println(IRPrinter.INDENT + "%1 = load i8, i8* %0, align 8");
         Global.out.println(IRPrinter.INDENT + "ret i8 %1");
         Global.out.println("}");
-
+        */
         // malloc declaration - see https://groups.google.com/forum/#!topic/llvm-dev/QElg-R1CqNg
         Global.out.println("\n; C Malloc declaration");
         Global.out.println("declare noalias i8* @malloc(i64)");
@@ -309,37 +331,68 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
     }
 
+    public String getDefaultValue(String type) {
+        if(Global.Constants.INT_TYPE.equals(type)) {
+            return "0";
+        } else if(Global.Constants.BOOL_TYPE.equals(type)) {
+            return "0";
+        } else if(Global.Constants.STRING_TYPE.equals(type)) {
+            return IRPrinter.createStringGEP("");
+        } else {
+            return "undef";
+        }
+    }
+
     public void visit(AST.attr at) {
+        // this is double pointer
         String gepRegister = IRPrinter.createClassAttrGEP(Global.currentClass, "%this", at.name);
         String valueRegister = at.value.accept(this);
+
         if(Utils.isPrimitiveType(at.typeid)) {
+            // gep is single pointer
+            // String mallocRegister = IRPrinter.createMallocInst(""+Global.classSizeMap.get(at.typeid));
+            // String bitcastReg = IRPrinter.createConvertInst(mallocRegister, "i8*", 
+            //                         at.typeid, IRPrinter.BITCAST);
             if(valueRegister==null) {
                 // no assignment
-                createCallForConstructor(at.typeid, gepRegister);
+                // createCallForConstructor(at.typeid, bitcastReg);
+                IRPrinter.createStoreInst(getDefaultValue(at.typeid), gepRegister, Utils.getBasicType(at.typeid));
             } else {
                 // call function
-                valueRegister = IRPrinter.createCallInst(getRegisterForPrimitiveType(at.typeid), 
-                    Utils.getMangledName(at.typeid,"get"), Utils.getStructName(at.typeid) + "* " + valueRegister);
-                StringBuilder argsBuilder = new StringBuilder();
-                argsBuilder.append(Utils.getStructName(at.typeid)).append("* ").append(gepRegister)
-                .append(", ").append(getRegisterForPrimitiveType(at.value.type)).append(" ").append(valueRegister);
+                // valueRegister = IRPrinter.createCallInst(getRegisterForPrimitiveType(at.typeid), 
+                //     Utils.getMangledName(at.typeid,"get"), Utils.getStructName(at.typeid) + "* " + valueRegister);
+                // StringBuilder argsBuilder = new StringBuilder();
+                // argsBuilder.append(Utils.getStructName(at.typeid)).append("* ").append(bitcastReg)
+                // .append(", ").append(getRegisterForPrimitiveType(at.value.type)).append(" ").append(valueRegister);
                 
-                IRPrinter.createVoidCallInst("void", Utils.getMangledName(at.typeid, "set"), argsBuilder.toString());
+                // IRPrinter.createVoidCallInst("void", Utils.getMangledName(at.typeid, "set"), argsBuilder.toString());
+                IRPrinter.createStoreInst(valueRegister, gepRegister, Utils.getBasicType(at.typeid));
             }
+            // IRPrinter.createDoublePointerStoreInst(bitcastReg, gepRegister, at.typeid);
         } else {
+            // gep is double pointer
             if(valueRegister==null) {
                 // no assignment
-                IRPrinter.createStoreInst("undef", gepRegister, at.typeid);
+                // IRPrinter.createStoreInst("undef", gepRegister, at.typeid);
+                // TODO : store 0 in the register
+                IRPrinter.createDoublePointerStoreInst("0", gepRegister, at.typeid);
             } else {
-                if(at.typeid.equals(at.value.type)) {
-                    valueRegister = IRPrinter.createLoadInst(valueRegister, at.value.type);
-                    IRPrinter.createStoreInst(valueRegister, gepRegister, at.typeid);
-                } else {
-                    // TODO : make sure bitcast is for pointer
-                    String convertedReg = IRPrinter.createConvertInst(valueRegister, at.value.type, at.typeid, IRPrinter.BITCAST);
-                    convertedReg = IRPrinter.createLoadInst(convertedReg, at.typeid);
-                    IRPrinter.createStoreInst(convertedReg, gepRegister, at.typeid);
+                // String mallocRegister = IRPrinter.createMallocInst(""+Global.classSizeMap.get(at.typeid));
+                // String bitcastReg = IRPrinter.createConvertInst(mallocRegister, "i8*", 
+                //                         at.typeid, IRPrinter.BITCAST);
+                // if(at.typeid.equals(at.value.type)) {
+                //     valueRegister = IRPrinter.createLoadInst(valueRegister, at.value.type);
+                //     IRPrinter.createStoreInst(valueRegister, bitcastReg, at.typeid);
+                // } else {
+                //     // TODO : make sure bitcast is for pointer
+                //     String convertedReg = IRPrinter.createConvertInst(valueRegister, at.value.type, at.typeid, IRPrinter.BITCAST);
+                //     convertedReg = IRPrinter.createLoadInst(convertedReg, at.typeid);
+                //     IRPrinter.createStoreInst(convertedReg, bitcastReg, at.typeid);
+                // }
+                if(!at.typeid.equals(at.value.type)) {
+                    valueRegister = IRPrinter.createConvertInst(valueRegister, at.value.type, at.typeid, IRPrinter.BITCAST);
                 }
+                IRPrinter.createDoublePointerStoreInst(valueRegister, gepRegister, at.typeid);
             }
         }
     }
@@ -351,7 +404,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
         Global.methodParams.clear();
         Global.out.println("\n; Class: "+Global.currentClass+", Method: "+mthd.name);
-        Global.out.print("define " + Utils.getStructName(mthd.typeid) + " @" + 
+        Global.out.print("define " + getBasicTypeOrPointer(mthd.typeid) + " @" + 
             Utils.getMangledName(Global.currentClass, mthd.name) + "(");
         Global.out.print(Utils.getStructName(Global.currentClass)+"* %this");
 
@@ -363,23 +416,23 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println(") {");
         IRPrinter.createLabel("entry");
         for(AST.formal fm: mthd.formals) {
-            IRPrinter.createAlloca(fm.typeid, fm.name+".addr");
-            IRPrinter.createStoreInst("%"+fm.name, "%"+fm.name+".addr", fm.typeid);
+            IRPrinter.createAlloca(getBasicTypeOrPointer(fm.typeid), fm.name+".addr");
+            IRPrinter.createStoreInst("%"+fm.name, "%"+fm.name+".addr", getBasicTypeOrPointer(fm.typeid));
         }
         String returnReg = mthd.body.accept(this);
         if(!mthd.typeid.equals(mthd.body.type)) {
             returnReg = IRPrinter.createConvertInst(returnReg, mthd.body.type, 
                 mthd.typeid, IRPrinter.BITCAST);
         }
-        String loadReturnReg = IRPrinter.createLoadInst(returnReg, mthd.typeid);
-        Global.out.println(IRPrinter.INDENT + "ret " + Utils.getStructName(mthd.typeid) + " " + loadReturnReg);
+        // String loadReturnReg = IRPrinter.createLoadInst(returnReg, mthd.typeid);
+        Global.out.println(IRPrinter.INDENT + "ret " + getBasicTypeOrPointer(mthd.typeid) + " " + returnReg);
         Global.out.println("}");
 
     }
 
     public void visit(AST.formal fm) {
         Global.methodParams.add(fm.name);
-        Global.out.print(Utils.getStructName(fm.typeid) + " %" + fm.name);
+        Global.out.print(getBasicTypeOrPointer(fm.typeid) + " %" + fm.name);
     }
 
 }
