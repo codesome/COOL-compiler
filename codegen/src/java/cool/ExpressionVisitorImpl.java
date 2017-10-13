@@ -46,7 +46,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type, "set"), argsBuilder.toString());
         } else { */
             // Load castVal
-            IRPrinter.createStoreInst(castVal, storeID, expr.type);
+            IRPrinter.createStoreInst(castVal, storeID, Utils.getBasicTypeOrPointer(expr.type));
     //    }
         return retVal; // TODO - check this
     /*    if(Global.methodParams.contains(expr.name)) {
@@ -89,7 +89,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         builder.append(Utils.getStructName(expr.typeid)).append("* ").append(caller);
         for(AST.expression argument : expr.actuals) {
             builder.append(", ");
-            builder.append(Utils.getStructName(argument.type));
+            builder.append(Utils.getBasicTypeOrPointer(argument.type));
             builder.append(" ");
             String pointerReg = argument.accept(this);
         //    String loadReg = IRPrinter.createLoadInst(pointerReg, argument.type);
@@ -151,10 +151,11 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
         // it will be Bool class, get i8 from it
         String whilePredicate = expr.predicate.accept(this);
-        String whilePredicateVal = IRPrinter.createCallInst("i8", Utils.getMangledName(Global.Constants.BOOL_TYPE,"get"),
-            Utils.getStructName(Global.Constants.BOOL_TYPE) + "* " + whilePredicate);
+    //     String whilePredicateVal = IRPrinter.createCallInst("i8", Utils.getMangledName(Global.Constants.BOOL_TYPE,"get"),
+     //       Utils.getStructName(Global.Constants.BOOL_TYPE) + "* " + whilePredicate);
 
-        String truncVar = IRPrinter.createConvertInst(whilePredicateVal,"i8","i1",IRPrinter.TRUNC);
+
+        String truncVar = IRPrinter.createConvertInst(whilePredicate,"i8","i1",IRPrinter.TRUNC);
         IRPrinter.createCondBreak(truncVar,whileBodyLabel,whileEndLabel);
 
         IRPrinter.createLabel(whileBodyLabel);
@@ -162,12 +163,13 @@ abstract class ExpressionVisitorImpl implements Visitor {
         IRPrinter.createBreakInst(whileCondLabel);
 
         IRPrinter.createLabel(whileEndLabel);
+        return "0";
 
         // TODO : should return a pointer
-        String objAlloca = IRPrinter.createAlloca("Object");
-        IRPrinter.createStoreInst("0", objAlloca, "Object");
+    /*    String objAlloca = IRPrinter.createAlloca("Object");
+        IRPrinter.createStoreInst("0", objAlloca, Utils.getStructName("Object")); */
         // String voidReturn = IRPrinter.createLoadInst(IRPrinter.UNDEF, "Object");
-        return objAlloca;
+    //    return objAlloca;
     }
 
     public String visit(AST.block expr) {
@@ -358,10 +360,10 @@ abstract class ExpressionVisitorImpl implements Visitor {
         }
         String objectPointer = IRPrinter.createClassAttrGEP(Global.currentClass,"%this",expr.name);
         if(isPrimitiveType(expr.type)) {
-            objectPointer = IRPrinter.createLoadInst(objectPointer, expr.type);
+            objectPointer = IRPrinter.createLoadInst(objectPointer, Utils.getBasicType(expr.type));
         }
         else {
-            objectPointer = IRPrinter.createLoadInst(objectPointer, expr.type+"*");
+            objectPointer = IRPrinter.createLoadInst(objectPointer, Utils.getBasicType(expr.type)+"*");
         }
         return objectPointer;
  /*       String objectPointer = IRPrinter.createClassAttrGEP(Global.currentClass,"%this",expr.name);

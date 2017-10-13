@@ -33,7 +33,6 @@ class IRPrinter {
 
     public static String createLoadInst(String mem, String type) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getStructName(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -177,7 +176,7 @@ class IRPrinter {
 
     public static String createCallInst(String type, String callee, String args) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getReturnTypeForMethod(type);
+        type = Utils.getBasicTypeOrPointer(type);
         String storeRegisterForCall = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegisterForCall);
@@ -234,7 +233,7 @@ class IRPrinter {
     public static String createAlloca(String className) {
         String gepRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
-        String structName = Utils.convertTypeWithPtr(Utils.getBasicType(className));
+        String structName = Utils.getBasicType(className);
         StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
         builder.append(gepRegister).append(" = alloca ").append(structName).append(", align 8");
         Global.out.println(builder.toString());

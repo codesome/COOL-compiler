@@ -129,4 +129,17 @@ public class Utils {
         return 8;
     }
 
+    public static String getBasicTypeOrPointer(String type) {
+        if(Global.Constants.STRING_TYPE.equals(type)) {
+            return "i8*";
+        }
+        else if(Global.Constants.INT_TYPE.equals(type)) {
+            return "i32";
+        }
+        else if(Global.Constants.BOOL_TYPE.equals(type)) {
+            return "i8";
+        }
+        return Utils.getStructName(type) + "*";
+    }
+
 }
