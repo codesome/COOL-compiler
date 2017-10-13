@@ -181,6 +181,35 @@ public class InheritanceGraph {
         }
     }
 
+    public String getJoinOf(String type1, String type2) {
+        if(type1.equals(type2)) {
+            return type1;
+        } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
+            return Global.Constants.ROOT_TYPE;
+        }
+        Node type1Node = graph.get(classNameToIndexMap.get(type1));
+        Node type2Node = graph.get(classNameToIndexMap.get(type2));
+        Node lca = getLCA(type1Node, type2Node);
+        return lca.getAstClass().name;
+    }
+
+    private Node getLCA(Node node1, Node node2) {
+        Node lca = null;
+        List<Boolean> visited = new ArrayList<>(graph.size());
+        visited.addAll(Collections.nCopies(graph.size(),Boolean.FALSE));
+        while(node1!=null) {
+            visited.set(node1.getIndex(),true);
+            node1 = node1.getParent();
+        }
+        while(lca==null && node2!=null) {
+            if(visited.get(node2.getIndex())) {
+                lca = node2;
+            }
+            node2 = node2.getParent();
+        }
+        return lca;
+    }
+
     // The basic node in the graph
     public static class Node {
 

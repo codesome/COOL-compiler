@@ -28,9 +28,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
             storeID = "%" + expr.name + ".addr";
         } else {
             storeID = IRPrinter.createClassAttrGEP(Global.currentClass, "%this", expr.name);
-            storeID = IRPrinter.createLoadInst(storeID, expr.type+"*");
+    //        storeID = IRPrinter.createLoadInst(storeID, expr.type+"*");
         }
-        if(isPrimitiveType(expr.type)) {
+    /*    if(isPrimitiveType(expr.type)) {
             // getting value using get from castVal
             StringBuilder argsBuilder = new StringBuilder();
             argsBuilder.append(Utils.getStructName(expr.type)).append("* ").append(castVal);
@@ -44,10 +44,10 @@ abstract class ExpressionVisitorImpl implements Visitor {
             .append(", ").append(Utils.getBasicType(expr.type)).append(" ").append(getVal);
             
             IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type, "set"), argsBuilder.toString());
-        } else {
+        } else { */
             // Load castVal
             IRPrinter.createStoreInst(castVal, storeID, expr.type);
-        }
+    //    }
         return retVal; // TODO - check this
     /*    if(Global.methodParams.contains(expr.name)) {
             if(!expr.type.equals(expr.e1.type)) {
@@ -77,7 +77,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public String visit(AST.static_dispatch expr) {
         String caller = expr.caller.accept(this);
-
+        if(isPrimitiveType(expr.typeid)) {
+            // TODO
+        }
         if(!expr.typeid.equals(expr.caller.type)) {
             // TODO : check if the cast is for pointers
             caller = IRPrinter.createConvertInst(caller, expr.caller.type, expr.typeid, IRPrinter.BITCAST);
@@ -90,17 +92,18 @@ abstract class ExpressionVisitorImpl implements Visitor {
             builder.append(Utils.getStructName(argument.type));
             builder.append(" ");
             String pointerReg = argument.accept(this);
-            String loadReg = IRPrinter.createLoadInst(pointerReg, argument.type);
-            builder.append(loadReg);
+        //    String loadReg = IRPrinter.createLoadInst(pointerReg, argument.type);
+            builder.append(pointerReg);
         }
         // TODO : check what to return from the function, pointer or value?
         // Function always returns a value
         String returnValue = IRPrinter.createCallInst(expr.type, Utils.getMangledName(expr.typeid, 
                             expr.name), builder.toString());
+        return returnValue;
         // creating alloca and storing return value in it
-        String objAlloca = IRPrinter.createAlloca(expr.type);
+    /*    String objAlloca = IRPrinter.createAlloca(expr.type);
         IRPrinter.createStoreInst(returnValue, objAlloca, expr.type);
-        return objAlloca;
+        return objAlloca; */
     }
 
     public String visit(AST.cond expr) { // incomplete TODO: what is incomplete?
@@ -126,7 +129,14 @@ abstract class ExpressionVisitorImpl implements Visitor {
         
         IRPrinter.createBreakInst(ifEndLabel);
         IRPrinter.createLabel(ifEndLabel);
-        
+
+        String resultType = Global.inheritanceGraph.getJoinOf(expr.ifbody.type,expr.elsebody.type);
+        if(!resultType.equals(expr.ifbody.type)) {
+            ifBody = IRPrinter.createConvertInst(ifBody, expr.ifbody.type, resultType, IRPrinter.BITCAST);
+        }
+        if(!resultType.equals(expr.elsebody.type)) {
+            ifElse = IRPrinter.createConvertInst(ifElse, expr.elsebody.type, resultType, IRPrinter.BITCAST);
+        }
         String returnValue = IRPrinter.createPHINode(expr.type, ifBody, ifThenLabel, ifElse, ifElseLabel);
         return returnValue;
     }
@@ -152,9 +162,10 @@ abstract class ExpressionVisitorImpl implements Visitor {
         IRPrinter.createBreakInst(whileCondLabel);
 
         IRPrinter.createLabel(whileEndLabel);
+
         // TODO : should return a pointer
         String objAlloca = IRPrinter.createAlloca("Object");
-        IRPrinter.createStoreInst("undef", objAlloca, "Object");
+        IRPrinter.createStoreInst("0", objAlloca, "Object");
         // String voidReturn = IRPrinter.createLoadInst(IRPrinter.UNDEF, "Object");
         return objAlloca;
     }
@@ -171,6 +182,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
         // TODO - expr.type or expr.typeid?
     //    String storeRegisterForCall = IRPrinter.createCallInst(Global.Constants.PTR_TYPE, 
     //                                Utils.getMangledName(expr.type, expr.type), ""); // INCOMPLETE
+        if(isPrimitiveType(expr.type)) {
+            return Utils.getDefaultValue(expr.type);
+        }
         String bytesToAllocate = ""+Global.classSizeMap.get(expr.type);
     //    String allocaValue = IRPrinter.createAlloca()
         String storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate); // TODO - set the correct size, malloc or alloc?
@@ -342,8 +356,15 @@ abstract class ExpressionVisitorImpl implements Visitor {
             return "%"+expr.name+".addr";
             // return IRPrinter.createLoadInst("%"+expr.name+".addr", expr.type);
         }
-     //   if()
         String objectPointer = IRPrinter.createClassAttrGEP(Global.currentClass,"%this",expr.name);
+        if(isPrimitiveType(expr.type)) {
+            objectPointer = IRPrinter.createLoadInst(objectPointer, expr.type);
+        }
+        else {
+            objectPointer = IRPrinter.createLoadInst(objectPointer, expr.type+"*");
+        }
+        return objectPointer;
+ /*       String objectPointer = IRPrinter.createClassAttrGEP(Global.currentClass,"%this",expr.name);
         objectPointer = IRPrinter.createLoadInst(objectPointer, expr.type+"*");
         return objectPointer;
         // if(isPrimitiveType(expr.type)) {
@@ -353,7 +374,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         //                 + "* " + objectPointer);
         //     return getVal;
         // }
-        // return IRPrinter.createLoadInst(objectPointer, expr.type);
+        // return IRPrinter.createLoadInst(objectPointer, expr.type); */
     }
     
     public String visit(AST.int_const expr) {
