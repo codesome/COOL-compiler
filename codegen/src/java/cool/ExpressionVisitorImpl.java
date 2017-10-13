@@ -113,11 +113,11 @@ abstract class ExpressionVisitorImpl implements Visitor {
         
         // it will be Bool class, get i8 from it
         String cmpInst = expr.predicate.accept(this);
-        String cmpVal = IRPrinter.createCallInst("i8", Utils.getMangledName(Global.Constants.BOOL_TYPE,"get"),
-            Utils.getStructName(Global.Constants.BOOL_TYPE) + "* " + cmpInst);
+        // String cmpVal = IRPrinter.createCallInst("i8", Utils.getMangledName(Global.Constants.BOOL_TYPE,"get"),
+        //     Utils.getStructName(Global.Constants.BOOL_TYPE) + "* " + cmpInst);
         
-        String truncVar = IRPrinter.createConvertInst(cmpVal,"i8","i1",IRPrinter.TRUNC);
-        IRPrinter.createCondBreak(truncVar, ifThenLabel, ifElseLabel);
+        // String truncVar = IRPrinter.createConvertInst(cmpInst,"i8","i1",IRPrinter.TRUNC);
+        IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
         
         // TODO : should we bitcast to join of the return types?
         IRPrinter.createLabel(ifThenLabel);
@@ -155,8 +155,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
      //       Utils.getStructName(Global.Constants.BOOL_TYPE) + "* " + whilePredicate);
 
 
-        String truncVar = IRPrinter.createConvertInst(whilePredicate,"i8","i1",IRPrinter.TRUNC);
-        IRPrinter.createCondBreak(truncVar,whileBodyLabel,whileEndLabel);
+        // String truncVar = IRPrinter.createConvertInst(whilePredicate,"i8","i1",IRPrinter.TRUNC);
+        IRPrinter.createCondBreak(whilePredicate,whileBodyLabel,whileEndLabel);
 
         IRPrinter.createLabel(whileBodyLabel);
         String whileBody = expr.body.accept(this);
@@ -274,7 +274,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     
     public String visit(AST.comp expr) {
         String op = expr.e1.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.XOR, op, "true", expr.type, false, false);
+        return IRPrinter.createBinaryInst(IRPrinter.XOR, op, "true", expr.e1.type, false, false);
     /*    String get = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e1.type,"get"),
                     Utils.getStructName(expr.e1.type)+"* "+op);
         String resultBasic = IRPrinter.createBinaryInst(IRPrinter.XOR, get, "true", expr.type, false, false);
@@ -289,7 +289,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.lt expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.SLT, op1, op2, expr.type, false, false); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.SLT, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
     /*    String get1 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e1.type,"get"),
                     Utils.getStructName(expr.e1.type)+"* "+op1);
         String get2 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e2.type,"get"),
@@ -306,7 +306,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.leq expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.SLE, op1, op2, expr.type, false, false); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.SLE, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
     /*    String get1 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e1.type,"get"),
                     Utils.getStructName(expr.e1.type)+"* "+op1);
         String get2 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e2.type,"get"),
@@ -323,7 +323,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.eq expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.EQ, op1, op2, expr.type, false, false); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.EQ, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
     /*    String get1 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e1.type,"get"),
                     Utils.getStructName(expr.e1.type)+"* "+op1);
         String get2 = IRPrinter.createCallInst("i8", Utils.getMangledName(expr.e2.type,"get"),
