@@ -388,7 +388,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 // no assignment
                 // IRPrinter.createStoreInst("undef", gepRegister, at.typeid);
                 // TODO : store 0 in the register
-                IRPrinter.createDoublePointerStoreInst("0", gepRegister, at.typeid);
+                IRPrinter.createDoublePointerStoreInst("null", gepRegister, at.typeid);
             } else {
                 // String mallocRegister = IRPrinter.createMallocInst(""+Global.classSizeMap.get(at.typeid));
                 // String bitcastReg = IRPrinter.createConvertInst(mallocRegister, "i8*", 

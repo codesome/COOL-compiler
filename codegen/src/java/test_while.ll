@@ -22,9 +22,10 @@ define i32 @_CN1A_FN2f1_(%class.A* %this, i32 %x) {
 entry:
   %x.addr = alloca i32, align 8
   store i32 %x, i32* %x.addr, align 4
-  %0 = add nsw i32 %x.addr, 1
-  store i32 %0, i32* %x.addr, align 4
-  ret i32 %0
+  %0 = load i32, i32* %x.addr, align 4
+  %1 = add nsw i32 %0, 1
+  store i32 %1, i32* %x.addr, align 4
+  ret i32 %1
 }
 
 ; Constructor of class 'Object'
@@ -62,7 +63,7 @@ while.body:
   br label %while.cond
 
 while.end:
-  store %class.Object* 0, %class.Object** %3, align 4
+  store %class.Object* null, %class.Object** %3, align 4
   %11 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 4
   %12 = call noalias i8* @malloc(i64 13)
   %13 = bitcast i8* %12 to %class.A*

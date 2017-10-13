@@ -163,7 +163,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         IRPrinter.createBreakInst(whileCondLabel);
 
         IRPrinter.createLabel(whileEndLabel);
-        return "0";
+        return "null";
 
         // TODO : should return a pointer
     /*    String objAlloca = IRPrinter.createAlloca("Object");
@@ -201,7 +201,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.isvoid expr) {
         String op = expr.e1.accept(this);
         // TODO - is this correct?
-        return IRPrinter.createBinaryInst(IRPrinter.EQ, op, "0", expr.type, false, false);
+        return IRPrinter.createBinaryInst(IRPrinter.EQ, op, "null", expr.type, false, false);
     }
 
     public String visit(AST.plus expr) {
@@ -355,8 +355,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
         // INCOMPLETE, TODO - need to check scope, etc. here, and may need GEP
         // TODO get for method params if they are method params and primitive type
         if(Global.methodParams.contains(expr.name)) {
-            return "%"+expr.name+".addr";
-            // return IRPrinter.createLoadInst("%"+expr.name+".addr", expr.type);
+            // return "%"+expr.name+".addr";
+            return IRPrinter.createLoadInst("%"+expr.name+".addr", Utils.getBasicTypeOrPointer(expr.type));
         }
         String objectPointer = IRPrinter.createClassAttrGEP(Global.currentClass,"%this",expr.name);
         if(isPrimitiveType(expr.type)) {

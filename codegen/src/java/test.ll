@@ -23,9 +23,7 @@ entry:
   %1 = bitcast i8* %0 to %class.A*
   call void @_CN1A_FN1A_(%class.A* %1)
   %2 = call %class.Int @_CN1A_FN4test_(%class.A* %1)
-  %3 = alloca %class.Int, align 8
-  store Int %2, Int* %3, align 4
-  ret i32 %3
+  ret i32 %2
 }
 
 ; Class: Main, Method: xyz
@@ -65,27 +63,25 @@ entry:
 
 while.cond:
   %3 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
-  %4 = load %class.Bool*, %class.Bool** %3, align 8
+  %4 = load %class.Bool, %class.Bool* %3, align 4
   %5 = call i8 @_CN4Bool_FN3get_(%class.Bool* %4)
   %6 = trunc i8 %5 to i1
   br i1 %6, label %while.body, label %while.end
 
 while.body:
   %7 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  %8 = load %class.Int*, %class.Int** %7, align 8
+  %8 = load %class.Int, %class.Int* %7, align 4
   %9 = add nsw i32 %8, 1
   %10 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  %11 = load %class.Int*, %class.Int** %10, align 8
-  %12 = call i32 @_CN3Int_FN3get_(%class.Int* %9)
-  call void @_CN3Int_FN3set_(%class.Int* %11, i32 %12)
+  store Int %9, Int* %10, align 4
   br label %while.cond
 
 while.end:
-  %13 = alloca %class.Object, align 8
-  store Object undef, Object* %13, align 4
-  store %class.Object* %13, %class.Object** %2, align 4
-  %14 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
-  store i8 1, i8* %14, align 4
+  %11 = alloca %class.%class.Object*, align 8
+  store Object 0, Object* %11, align 4
+  store %class.Object* %11, %class.Object** %2, align 4
+  %12 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
+  store i8 1, i8* %12, align 4
   ret void
 }
 
