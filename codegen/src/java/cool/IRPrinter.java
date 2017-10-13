@@ -56,6 +56,17 @@ class IRPrinter {
         Global.out.println(builder.toString());
     }
 
+    public static void createDoublePointerStoreInst(String reg, String mem, String type) {
+        StringBuilder builder = new StringBuilder(INDENT);
+        type = Utils.getStructName(type);
+        builder.append("store ").append(type).append("* ");
+        builder.append(reg).append(", ");
+        builder.append(type).append("** ");
+        builder.append(mem).append(", align ");
+        builder.append(getAlign(type));
+        Global.out.println(builder.toString());
+    }
+
     public static String createBinaryInst(String opType, String op1, String op2, 
                                             String type, boolean nuw, boolean nsw) {
         StringBuilder builder = new StringBuilder(INDENT);
@@ -233,9 +244,9 @@ class IRPrinter {
 
     public static String createAlloca(String className, String regName) {
         String gepRegister = "%"+regName;
-        String structName = Utils.getStructName(className);
+        // String structName = Utils.getStructName(className);
         StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
-        builder.append(gepRegister).append(" = alloca ").append(structName).append(", align 8");
+        builder.append(gepRegister).append(" = alloca ").append(className).append(", align 8");
         Global.out.println(builder.toString());
         return gepRegister;
     }
