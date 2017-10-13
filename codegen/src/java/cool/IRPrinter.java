@@ -47,7 +47,6 @@ class IRPrinter {
 
     public static void createStoreInst(String reg, String mem, String type) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getStructName(type);
         builder.append("store ").append(type).append(" ");
         builder.append(reg).append(", ");
         builder.append(type+"*").append(" ");
