@@ -4,7 +4,7 @@ public class Utils {
 	
     public static String getMangledName(String className, String functionName) {
         return new StringBuilder().append("_CN").append(className.length())
-        .append(className).append("FN").append(functionName.length()).append(functionName)
+        .append(className).append("_FN").append(functionName.length()).append(functionName)
         .append("_").toString();
     }
 

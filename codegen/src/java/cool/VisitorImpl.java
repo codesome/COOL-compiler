@@ -227,11 +227,24 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println(IRPrinter.INDENT + "ret i8 %1");
         Global.out.println("}");
         */
+        
         // malloc declaration - see https://groups.google.com/forum/#!topic/llvm-dev/QElg-R1CqNg
-        Global.out.println("\n; C Malloc declaration");
+        Global.out.println("\n; C malloc declaration");
         Global.out.println("declare noalias i8* @malloc(i64)");
+        
+        // exit declaration for abort
+        Global.out.println("\n; C exit declaration");
+        Global.out.println("declare void @exit(i32)");
 
-        Global.out.println("\n; main() function");
+        // abort method of Object
+        Global.out.println("\n; Class: Object, Method: abort");
+        Global.out.println("define void @"+ Utils.getMangledName(Global.Constants.ROOT_TYPE, "abort") +"() {");
+        Global.out.println(IRPrinter.INDENT+"call void @exit(i32 0)");
+        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println("}");
+
+        // main method of C
+        Global.out.println("\n; C main() function");
         Global.out.println("define i32 @main() {");
         Global.out.println("entry:");
         Global.out.println(IRPrinter.INDENT+"%retval = alloca i32, align 4");
