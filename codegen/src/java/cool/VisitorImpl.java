@@ -32,6 +32,14 @@ class VisitorImpl extends ExpressionVisitorImpl {
             Global.stringConstantToRegisterMap.put("", "@.str."+Global.stringRegisterCounter);
             Global.stringRegisterCounter++;
         }
+        if(!Global.stringConstantToRegisterMap.containsKey("%s")) {
+            Global.stringConstantToRegisterMap.put("%s", "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
+        if(!Global.stringConstantToRegisterMap.containsKey("%d")) {
+            Global.stringConstantToRegisterMap.put("%d", "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
         for(Map.Entry<String,String> entry: Global.stringConstantToRegisterMap.entrySet()) {
             structBuilder.setLength(0);
             structBuilder.append(entry.getValue()).append(" = private unnamed_addr constant [")
@@ -235,11 +243,31 @@ class VisitorImpl extends ExpressionVisitorImpl {
         // exit declaration for abort
         Global.out.println("\n; C exit declaration");
         Global.out.println("declare void @exit(i32)");
+        
+        // printf declaration for out_string and out_int
+        Global.out.println("\n; C exit declaration");
+        Global.out.println("declare i32 @printf(i8*, ...)");
 
         // abort method of Object
         Global.out.println("\n; Class: Object, Method: abort");
         Global.out.println("define void @"+ Utils.getMangledName(Global.Constants.ROOT_TYPE, "abort") +"() {");
         Global.out.println(IRPrinter.INDENT+"call void @exit(i32 0)");
+        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println("}");
+
+        // out_string method of IO
+        Global.out.println("\n; Class: IO, Method: out_string");
+        Global.out.println("define void @"+ Utils.getMangledName(Global.Constants.IO_TYPE, "out_string") +"(i8* %s) {");
+        String arg1 = IRPrinter.createStringGEP("%s");
+        Global.out.println(IRPrinter.INDENT+"%call = call i32 @printf(i8* "+arg1+", i8* %s)");
+        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println("}");
+
+        // out_int method of IO
+        Global.out.println("\n; Class: IO, Method: out_int");
+        Global.out.println("define void @"+ Utils.getMangledName(Global.Constants.IO_TYPE, "out_int") +"(i32 %d) {");
+        arg1 = IRPrinter.createStringGEP("%d");
+        Global.out.println(IRPrinter.INDENT+"%call = call i32 @printf(i8* "+arg1+", i8* %d)");
         Global.out.println(IRPrinter.INDENT+"ret void");
         Global.out.println("}");
 

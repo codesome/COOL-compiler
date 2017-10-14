@@ -1,4 +1,6 @@
 @.str.0 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.1 = private unnamed_addr constant [3 x i8] c"%s\00", align 1
+@.str.2 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
 
 %class.Object = type {}
 %class.Fib = type { %class.Object }
@@ -112,9 +114,26 @@ declare noalias i8* @malloc(i64)
 ; C exit declaration
 declare void @exit(i32)
 
+; C exit declaration
+declare i32 @printf(i8*, ...)
+
 ; Class: Object, Method: abort
 define void @_CN6Object_FN5abort_() {
   call void @exit(i32 0)
+  ret void
+}
+
+; Class: IO, Method: out_string
+define void @_CN2IO_FN10out_string_(i8* %s) {
+  %1 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.1, i32 0, i32 0
+  %call = call i32 @printf(i8* %1, i8* %s)
+  ret void
+}
+
+; Class: IO, Method: out_int
+define void @_CN2IO_FN7out_int_(i32 %d) {
+  %2 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.2, i32 0, i32 0
+  %call = call i32 @printf(i8* %2, i8* %d)
   ret void
 }
 
