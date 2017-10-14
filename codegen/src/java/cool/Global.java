@@ -18,6 +18,8 @@ public class Global {
         public static final String STRING_TYPE = "String";
         public static final String MAIN_TYPE = "Main";
         public static final String PTR_TYPE = "i8*";
+        public static final String DIVIDE_BY_ZERO_ERROR = "\nDivide by 0 exception at line no ";
+        public static final String VOID_CALL_ERROR = "\nDispatch to void at line no ";
     }
 
     // Contains graph after parsing all the classes and its parents
@@ -43,8 +45,11 @@ public class Global {
 
     public static boolean needPointer;
 
+    public static Set<String> functionMangledNames;
+
     static {
         methodParams = new HashSet<>();
+        functionMangledNames = new HashSet<>();
         labelToCountMap = new HashMap<>();
         classSizeMap = new HashMap<>();
         stringConstantToRegisterMap = new HashMap<>();
