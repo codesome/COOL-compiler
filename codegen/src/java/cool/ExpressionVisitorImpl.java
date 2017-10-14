@@ -43,7 +43,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             argsBuilder.append(Utils.getStructName(expr.type)).append("* ").append(storeID)
             .append(", ").append(Utils.getBasicType(expr.type)).append(" ").append(getVal);
             
-            IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type, "set"), argsBuilder.toString());
+            IRPrinter.createVoidCallInst(Utils.getMangledName(expr.type, "set"), argsBuilder.toString());
         } else { */
             // Load castVal
             IRPrinter.createStoreInst(castVal, storeID, Utils.getBasicTypeOrPointer(expr.type));
@@ -110,7 +110,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String ifThenLabel = IRPrinter.getLabel("if.then",false);
         String ifElseLabel = IRPrinter.getLabel("if.else",false);
         String ifEndLabel = IRPrinter.getLabel("if.end",false);
-        
+        String resultType = Global.inheritanceGraph.getJoinOf(expr.ifbody.type,expr.elsebody.type);
+        String retVal = IRPrinter.createAlloca(resultType);
+
         // it will be Bool class, get i8 from it
         String cmpInst = expr.predicate.accept(this);
         // String cmpVal = IRPrinter.createCallInst("i8", Utils.getMangledName(Global.Constants.BOOL_TYPE,"get"),
@@ -122,23 +124,40 @@ abstract class ExpressionVisitorImpl implements Visitor {
         // TODO : should we bitcast to join of the return types?
         IRPrinter.createLabel(ifThenLabel);
         String ifBody = expr.ifbody.accept(this);
+        if(!resultType.equals(expr.ifbody.type)) {
+            ifBody = IRPrinter.createConvertInst(ifBody, expr.ifbody.type, resultType, IRPrinter.BITCAST);
+        }
+        if(Utils.isPrimitiveType(resultType)) {
+            IRPrinter.createStoreInst(ifBody, retVal, Utils.getBasicType(resultType));
+        } else {
+            String loadVal = IRPrinter.createLoadInst(ifBody, Utils.getBasicType(resultType));
+            IRPrinter.createStoreInst(loadVal, retVal, Utils.getBasicType(resultType));
+        }
         IRPrinter.createBreakInst(ifEndLabel);
         
         IRPrinter.createLabel(ifElseLabel);
         String ifElse = expr.elsebody.accept(this);
+        if(!resultType.equals(expr.elsebody.type)) {
+            ifElse = IRPrinter.createConvertInst(ifElse, expr.elsebody.type, resultType, IRPrinter.BITCAST);
+        }
+        if(Utils.isPrimitiveType(resultType)) {
+            IRPrinter.createStoreInst(ifElse, retVal, Utils.getBasicType(resultType));
+        } else {
+            String loadVal = IRPrinter.createLoadInst(ifElse, Utils.getBasicType(resultType));
+            IRPrinter.createStoreInst(loadVal, retVal, Utils.getBasicType(resultType));
+        }
         
         IRPrinter.createBreakInst(ifEndLabel);
         IRPrinter.createLabel(ifEndLabel);
 
-        String resultType = Global.inheritanceGraph.getJoinOf(expr.ifbody.type,expr.elsebody.type);
-        if(!resultType.equals(expr.ifbody.type)) {
-            ifBody = IRPrinter.createConvertInst(ifBody, expr.ifbody.type, resultType, IRPrinter.BITCAST);
+        
+        if(Utils.isPrimitiveType(resultType)) {
+            return IRPrinter.createLoadInst(retVal, Utils.getBasicType(resultType));
+        } else {
+            return retVal;
         }
-        if(!resultType.equals(expr.elsebody.type)) {
-            ifElse = IRPrinter.createConvertInst(ifElse, expr.elsebody.type, resultType, IRPrinter.BITCAST);
-        }
-        String returnValue = IRPrinter.createPHINode(expr.type, ifBody, ifThenLabel, ifElse, ifElseLabel);
-        return returnValue;
+        // String returnValue = IRPrinter.createPHINode(expr.type, ifBody, ifThenLabel, ifElse, ifElseLabel);
+        // return returnValue;
     }
 
     public String visit(AST.loop expr) { // incomplete
@@ -192,7 +211,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate); // TODO - set the correct size, malloc or alloc?
         String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
                                         expr.typeid, IRPrinter.BITCAST);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.typeid, expr.typeid), 
+        IRPrinter.createVoidCallInst(Utils.getMangledName(expr.typeid, expr.typeid), 
                                 Utils.getStructName(expr.typeid)+ "* " + returnValue);
         return returnValue;
     }
@@ -217,7 +236,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argBuilder = new StringBuilder();
         argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
         argBuilder.append(", ").append("i32 "+resultBasic);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(expr.type,"set"),argBuilder.toString());
         return resultMem; */
     }
 
@@ -234,7 +253,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argBuilder = new StringBuilder();
         argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
         argBuilder.append(", ").append("i32 "+resultBasic);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(expr.type,"set"),argBuilder.toString());
         return resultMem; */
     }
     
@@ -251,7 +270,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argBuilder = new StringBuilder();
         argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
         argBuilder.append(", ").append("i32 "+resultBasic);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(expr.type,"set"),argBuilder.toString());
         return resultMem; */
     }
     
@@ -268,7 +287,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argBuilder = new StringBuilder();
         argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
         argBuilder.append(", ").append("i32 "+resultBasic);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(expr.type,"set"),argBuilder.toString());
         return resultMem; */
     }
     
@@ -282,7 +301,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argBuilder = new StringBuilder();
         argBuilder.append(Utils.getStructName(expr.type)+"*"+resultMem);
         argBuilder.append(", ").append("i8 "+resultBasic);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(expr.type,"set"),argBuilder.toString());
         return resultMem; */
     }
     
@@ -299,7 +318,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argBuilder = new StringBuilder();
         argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
         argBuilder.append(", ").append("i8 "+resultBasic);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString()); 
+        IRPrinter.createVoidCallInst(Utils.getMangledName(expr.type,"set"),argBuilder.toString()); 
         return resultMem;   */
     }
     
@@ -316,7 +335,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argBuilder = new StringBuilder();
         argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
         argBuilder.append(", ").append("i8 "+resultBasic);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(expr.type,"set"),argBuilder.toString());
         return resultMem;  */
     }
     
@@ -333,7 +352,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argBuilder = new StringBuilder();
         argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
         argBuilder.append(", ").append("i8 "+resultBasic);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(expr.type,"set"),argBuilder.toString());
         return resultMem; */
     }
     
@@ -347,7 +366,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argBuilder = new StringBuilder();
         argBuilder.append(Utils.getStructName(expr.type)+"* "+resultMem);
         argBuilder.append(", ").append("i32 "+resultBasic);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(expr.type,"set"),argBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(expr.type,"set"),argBuilder.toString());
         return resultMem; */
     }
     
@@ -385,7 +404,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argsBuilder = new StringBuilder();
         argsBuilder.append(Utils.getStructName(Global.Constants.INT_TYPE)).append("* ").append(pointer)
             .append(", ").append("i32 ").append(expr.value);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(Global.Constants.INT_TYPE, "set"), argsBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(Global.Constants.INT_TYPE, "set"), argsBuilder.toString());
         return pointer; */
         // String loadReg = IRPrinter.createLoadInst(""+expr.value, expr.type);
         // return loadReg;
@@ -404,7 +423,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argsBuilder = new StringBuilder();
         argsBuilder.append(Utils.getStructName(Global.Constants.STRING_TYPE)).append("* ").append(pointer)
             .append(", ").append("i8* ").append(stringReg);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(Global.Constants.STRING_TYPE, "set"), argsBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(Global.Constants.STRING_TYPE, "set"), argsBuilder.toString());
         return pointer; */
     }
     
@@ -414,7 +433,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         StringBuilder argsBuilder = new StringBuilder();
         argsBuilder.append(Utils.getStructName(Global.Constants.BOOL_TYPE)).append("* ").append(pointer)
             .append(", ").append("i8 ").append(expr.value? 1 : 0);
-        IRPrinter.createVoidCallInst("void", Utils.getMangledName(Global.Constants.BOOL_TYPE, "set"), argsBuilder.toString());
+        IRPrinter.createVoidCallInst(Utils.getMangledName(Global.Constants.BOOL_TYPE, "set"), argsBuilder.toString());
         return pointer; */
         if(expr.value) return "1";
         else return "0";

@@ -144,7 +144,7 @@ class IRPrinter {
 
     public static String createPHINode(String type, String v1, String label1, String v2, String label2) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getBasicTypePtr(type);
+        type = Utils.getBasicTypeOrPointer(type);
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         builder.append(storeRegister);
@@ -157,18 +157,17 @@ class IRPrinter {
         return storeRegister;
     }
 
-    public static String createReturnInst(String type, String val) {
-        StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.getBasicTypePtr(type);
-        builder.append("ret ").append(type);
-        builder.append(" ").append(val);
-        Global.out.println(builder.toString());
-        return val;
-    }
+    // public static String createReturnInst(String type, String val) {
+    //     StringBuilder builder = new StringBuilder(INDENT);
+    //     type = Utils.getBasicTypePtr(type);
+    //     builder.append("ret ").append(type);
+    //     builder.append(" ").append(val);
+    //     Global.out.println(builder.toString());
+    //     return val;
+    // }
 
-    public static void createVoidCallInst(String type, String callee, String args) {
+    public static void createVoidCallInst(String callee, String args) {
         StringBuilder builder = new StringBuilder(INDENT);
-        type = Utils.convertTypeWithPtr(type);
         builder.append("call void @").append(callee);
         builder.append("(").append(args).append(")");
         Global.out.println(builder.toString());

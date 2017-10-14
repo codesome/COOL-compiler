@@ -14,42 +14,48 @@ entry:
   store i32 %i, i32* %i.addr, align 4
   %ff.addr = alloca %class.Fib*, align 8
   store %class.Fib* %ff, %class.Fib** %ff.addr, align 8
-  %0 = load i32, i32* %i.addr, align 4
-  %1 = icmp eq i32 %0, 0
-  br i1 %1, label %if.then, label %if.else
+  %0 = alloca i32, align 8
+  %1 = load i32, i32* %i.addr, align 4
+  %2 = icmp eq i32 %1, 0
+  br i1 %2, label %if.then, label %if.else
 
 if.then:
+  store i32 0, i32* %0, align 4
   br label %if.end
 
 if.else:
-  %2 = load i32, i32* %i.addr, align 4
-  %3 = icmp eq i32 %2, 1
-  br i1 %3, label %if.then.1, label %if.else.1
+  %3 = alloca i32, align 8
+  %4 = load i32, i32* %i.addr, align 4
+  %5 = icmp eq i32 %4, 1
+  br i1 %5, label %if.then.1, label %if.else.1
 
 if.then.1:
+  store i32 1, i32* %3, align 4
   br label %if.end.1
 
 if.else.1:
-  %4 = load %class.Fib*, %class.Fib** %ff.addr, align 8
-  %5 = load i32, i32* %i.addr, align 4
-  %6 = sub nsw i32 %5, 1
-  %7 = load %class.Fib*, %class.Fib** %ff.addr, align 8
-  %8 = call i32 @_CN3Fib_FN3fib_(%class.Fib* %4, i32 %6, %class.Fib* %7)
+  %6 = load %class.Fib*, %class.Fib** %ff.addr, align 8
+  %7 = load i32, i32* %i.addr, align 4
+  %8 = sub nsw i32 %7, 1
   %9 = load %class.Fib*, %class.Fib** %ff.addr, align 8
-  %10 = load i32, i32* %i.addr, align 4
-  %11 = sub nsw i32 %10, 2
-  %12 = load %class.Fib*, %class.Fib** %ff.addr, align 8
-  %13 = call i32 @_CN3Fib_FN3fib_(%class.Fib* %9, i32 %11, %class.Fib* %12)
-  %14 = add nsw i32 %8, %13
+  %10 = call i32 @_CN3Fib_FN3fib_(%class.Fib* %6, i32 %8, %class.Fib* %9)
+  %11 = load %class.Fib*, %class.Fib** %ff.addr, align 8
+  %12 = load i32, i32* %i.addr, align 4
+  %13 = sub nsw i32 %12, 2
+  %14 = load %class.Fib*, %class.Fib** %ff.addr, align 8
+  %15 = call i32 @_CN3Fib_FN3fib_(%class.Fib* %11, i32 %13, %class.Fib* %14)
+  %16 = add nsw i32 %10, %15
+  store i32 %16, i32* %3, align 4
   br label %if.end.1
 
 if.end.1:
-  %15 = phi i32* [ 1, %if.then.1 ] , [ %14, %if.else.1 ]
+  %17 = load i32, i32* %3, align 4
+  store i32 %17, i32* %0, align 4
   br label %if.end
 
 if.end:
-  %16 = phi i32* [ 0, %if.then ] , [ %15, %if.else ]
-  ret i32 %16
+  %18 = load i32, i32* %0, align 4
+  ret i32 %18
 }
 
 ; Class: Main, Method: main

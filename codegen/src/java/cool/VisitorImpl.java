@@ -383,7 +383,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 // argsBuilder.append(Utils.getStructName(at.typeid)).append("* ").append(bitcastReg)
                 // .append(", ").append(getRegisterForPrimitiveType(at.value.type)).append(" ").append(valueRegister);
                 
-                // IRPrinter.createVoidCallInst("void", Utils.getMangledName(at.typeid, "set"), argsBuilder.toString());
+                // IRPrinter.createVoidCallInst(Utils.getMangledName(at.typeid, "set"), argsBuilder.toString());
                 IRPrinter.createStoreInst(valueRegister, gepRegister, Utils.getBasicType(at.typeid));
             }
             // IRPrinter.createDoublePointerStoreInst(bitcastReg, gepRegister, at.typeid);
