@@ -118,23 +118,35 @@ declare void @exit(i32)
 declare i32 @printf(i8*, ...)
 
 ; Class: Object, Method: abort
-define void @_CN6Object_FN5abort_() {
+define %class.Object* @_CN6Object_FN5abort_(%class.Object* %this) {
+entry:
   call void @exit(i32 0)
-  ret void
+  %0 = call noalias i8* @malloc(i64 0)
+  %1 = bitcast i8* %0 to %class.Object*
+  call void @_CN6Object_FN6Object_(%class.Object* %1)
+  ret %class.Object* %1
 }
 
 ; Class: IO, Method: out_string
-define void @_CN2IO_FN10out_string_(i8* %s) {
-  %1 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.1, i32 0, i32 0
-  %call = call i32 @printf(i8* %1, i8* %s)
-  ret void
+define %class.IO* @_CN2IO_FN10out_string_(%class.IO* %this, i8* %s) {
+entry:
+  %0 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.1, i32 0, i32 0
+  %call = call i32 (i8*, ...) @printf(i8* %0, i8* %s)
+  %1 = call noalias i8* @malloc(i64 0)
+  %2 = bitcast i8* %1 to %class.IO*
+  call void @_CN2IO_FN2IO_(%class.IO* %2)
+  ret %class.IO* %2
 }
 
 ; Class: IO, Method: out_int
-define void @_CN2IO_FN7out_int_(i32 %d) {
-  %2 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.2, i32 0, i32 0
-  %call = call i32 @printf(i8* %2, i8* %d)
-  ret void
+define %class.IO* @_CN2IO_FN7out_int_(%class.IO* %this, i32 %d) {
+entry:
+  %0 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.2, i32 0, i32 0
+  %call = call i32 (i8*, ...) @printf(i8* %0, i32 %d)
+  %1 = call noalias i8* @malloc(i64 0)
+  %2 = bitcast i8* %1 to %class.IO*
+  call void @_CN2IO_FN2IO_(%class.IO* %2)
+  ret %class.IO* %2
 }
 
 ; C main() function

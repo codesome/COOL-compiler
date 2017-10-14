@@ -249,29 +249,57 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("declare i32 @printf(i8*, ...)");
 
         // abort method of Object
+        Global.registerCounter = 0;
         Global.out.println("\n; Class: Object, Method: abort");
-        Global.out.println("define void @"+ Utils.getMangledName(Global.Constants.ROOT_TYPE, "abort") +"() {");
+        Global.out.println("define "+Utils.getStructName(Global.Constants.ROOT_TYPE)+"* @"+ 
+            Utils.getMangledName(Global.Constants.ROOT_TYPE, "abort") +"("+Utils.getStructName(Global.Constants.ROOT_TYPE)+"* %this) {");
+        Global.out.println("entry:");
         Global.out.println(IRPrinter.INDENT+"call void @exit(i32 0)");
-        Global.out.println(IRPrinter.INDENT+"ret void");
+        String bytesToAllocate = ""+Global.classSizeMap.get(Global.Constants.ROOT_TYPE);
+        String storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate);
+        String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
+                                        Global.Constants.ROOT_TYPE, IRPrinter.BITCAST);
+        IRPrinter.createVoidCallInst(Utils.getMangledName(Global.Constants.ROOT_TYPE, Global.Constants.ROOT_TYPE), 
+                                Utils.getStructName(Global.Constants.ROOT_TYPE)+ "* " + returnValue);
+        Global.out.println(IRPrinter.INDENT+"ret "+Utils.getStructName(Global.Constants.ROOT_TYPE)+"* "+returnValue);
         Global.out.println("}");
 
         // out_string method of IO
+        Global.registerCounter = 0;
         Global.out.println("\n; Class: IO, Method: out_string");
-        Global.out.println("define void @"+ Utils.getMangledName(Global.Constants.IO_TYPE, "out_string") +"(i8* %s) {");
+        Global.out.println("define "+Utils.getStructName(Global.Constants.IO_TYPE)+"* @"+ 
+            Utils.getMangledName(Global.Constants.IO_TYPE, "out_string") +"("+Utils.getStructName(Global.Constants.IO_TYPE)+"* %this, i8* %s) {");
+        Global.out.println("entry:");
         String arg1 = IRPrinter.createStringGEP("%s");
-        Global.out.println(IRPrinter.INDENT+"%call = call i32 @printf(i8* "+arg1+", i8* %s)");
-        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println(IRPrinter.INDENT+"%call = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* %s)");
+        bytesToAllocate = ""+Global.classSizeMap.get(Global.Constants.IO_TYPE);
+        storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate);
+        returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
+                                        Global.Constants.IO_TYPE, IRPrinter.BITCAST);
+        IRPrinter.createVoidCallInst(Utils.getMangledName(Global.Constants.IO_TYPE, Global.Constants.IO_TYPE), 
+                                Utils.getStructName(Global.Constants.IO_TYPE)+ "* " + returnValue);
+        Global.out.println(IRPrinter.INDENT+"ret "+Utils.getStructName(Global.Constants.IO_TYPE)+"* "+returnValue);
         Global.out.println("}");
 
         // out_int method of IO
+        Global.registerCounter = 0;
         Global.out.println("\n; Class: IO, Method: out_int");
-        Global.out.println("define void @"+ Utils.getMangledName(Global.Constants.IO_TYPE, "out_int") +"(i32 %d) {");
+        Global.out.println("define "+Utils.getStructName(Global.Constants.IO_TYPE)+"* @"+ 
+            Utils.getMangledName(Global.Constants.IO_TYPE, "out_int") +"("+Utils.getStructName(Global.Constants.IO_TYPE)+"* %this, i32 %d) {");
+        Global.out.println("entry:");
         arg1 = IRPrinter.createStringGEP("%d");
-        Global.out.println(IRPrinter.INDENT+"%call = call i32 @printf(i8* "+arg1+", i8* %d)");
-        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println(IRPrinter.INDENT+"%call = call i32 (i8*, ...) @printf(i8* "+arg1+", i32 %d)");
+        bytesToAllocate = ""+Global.classSizeMap.get(Global.Constants.IO_TYPE);
+        storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate);
+        returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
+                                        Global.Constants.IO_TYPE, IRPrinter.BITCAST);
+        IRPrinter.createVoidCallInst(Utils.getMangledName(Global.Constants.IO_TYPE, Global.Constants.IO_TYPE), 
+                                Utils.getStructName(Global.Constants.IO_TYPE)+ "* " + returnValue);
+        Global.out.println(IRPrinter.INDENT+"ret "+Utils.getStructName(Global.Constants.IO_TYPE)+"* "+returnValue);
         Global.out.println("}");
 
         // main method of C
+        Global.registerCounter = 0;
         Global.out.println("\n; C main() function");
         Global.out.println("define i32 @main() {");
         Global.out.println("entry:");

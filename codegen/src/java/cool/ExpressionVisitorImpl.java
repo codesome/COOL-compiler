@@ -75,7 +75,24 @@ abstract class ExpressionVisitorImpl implements Visitor {
         return castVal; */
     }
 
+    private boolean isDefaultMethod(String methodName) {
+        return "abort".equals(methodName) || "out_int".equals(methodName) || "out_string".equals(methodName) 
+        || "in_int".equals(methodName) || "in_string".equals(methodName); 
+    }
+
+    private boolean handleDefaultMethod(AST.static_dispatch expr) {
+        boolean isDefault = false;
+        if("abort".equals(expr.name)) {
+            
+            isDefault = true;
+        }
+        return isDefault;
+    }
+
     public String visit(AST.static_dispatch expr) {
+        // if(handleDefaultMethod(expr)) {
+        //     return;
+        // }
         String caller = expr.caller.accept(this);
         if(isPrimitiveType(expr.typeid)) {
             // TODO
@@ -373,6 +390,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.object expr) {
         // INCOMPLETE, TODO - need to check scope, etc. here, and may need GEP
         // TODO get for method params if they are method params and primitive type
+        if("self".equals(expr.name)) {
+            return "%this";
+        }
         if(Global.methodParams.contains(expr.name)) {
             // return "%"+expr.name+".addr";
             return IRPrinter.createLoadInst("%"+expr.name+".addr", Utils.getBasicTypeOrPointer(expr.type));
