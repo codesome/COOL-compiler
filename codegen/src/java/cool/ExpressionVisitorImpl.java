@@ -80,30 +80,70 @@ abstract class ExpressionVisitorImpl implements Visitor {
         || "in_int".equals(methodName) || "in_string".equals(methodName); 
     }
 
-    private boolean handleDefaultMethod(AST.static_dispatch expr) {
-        boolean isDefault = false;
+    private String handleDefaultMethod(AST.static_dispatch expr) {
+        String def = null;
         if("abort".equals(expr.name)) {
-            
-            isDefault = true;
+            expr.caller.accept(this);
+            def = IRPrinter.createCallInst("Object", Utils.getMangledName("Object", 
+                            "abort"), "");
         }
-        return isDefault;
+        return def;
     }
 
     public String visit(AST.static_dispatch expr) {
-        // if(handleDefaultMethod(expr)) {
-        //     return;
-        // }
+
+
         String caller = expr.caller.accept(this);
-        if(isPrimitiveType(expr.typeid)) {
+
+
+        String ifThenLabel = IRPrinter.getLabel("if.then",false);
+        String ifElseLabel = IRPrinter.getLabel("if.else",false);
+        String ifEndLabel = IRPrinter.getLabel("if.end",false);
+
+        String cmpInst = IRPrinter.createBinaryInst(IRPrinter.EQ, caller, "null", expr.caller.type, false, false);
+        IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
+        
+        IRPrinter.createLabel(ifThenLabel);
+        String arg1 = IRPrinter.createStringGEP("%s");
+        String arg2 = IRPrinter.createStringGEP(Global.Constants.VOID_CALL_ERROR);
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        String arg1d = IRPrinter.createStringGEP("%d");
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1d+", i32 "+expr.lineNo+")");
+        Global.registerCounter++;
+        arg2 = IRPrinter.createStringGEP("\n");
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        IRPrinter.createCallInst("Object", Utils.getMangledName("Object", "abort"), "");
+        
+        IRPrinter.createBreakInst(ifEndLabel);
+ 
+        IRPrinter.createLabel(ifElseLabel);
+        IRPrinter.createBreakInst(ifEndLabel);
+
+        
+        IRPrinter.createLabel(ifEndLabel);
+
+
+
+
+
+        // TODO : check for null caller
+        String def = handleDefaultMethod(expr);
+        if(def!=null) {
+            return def;
+        }
+        String mthdClass = Utils.getNearestParentWithMethod(expr.typeid, expr.name);
+        if(isPrimitiveType(mthdClass)) {
             // TODO
         }
-        if(!expr.typeid.equals(expr.caller.type)) {
+        if(!mthdClass.equals(expr.caller.type)) {
             // TODO : check if the cast is for pointers
-            caller = IRPrinter.createConvertInst(caller, expr.caller.type, expr.typeid, IRPrinter.BITCAST);
+            caller = IRPrinter.createConvertInst(caller, expr.caller.type, mthdClass, IRPrinter.BITCAST);
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append(Utils.getStructName(expr.typeid)).append("* ").append(caller);
+        builder.append(Utils.getStructName(mthdClass)).append("* ").append(caller);
         for(AST.expression argument : expr.actuals) {
             builder.append(", ");
             builder.append(Utils.getBasicTypeOrPointer(argument.type));
@@ -114,7 +154,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         }
         // TODO : check what to return from the function, pointer or value?
         // Function always returns a value
-        String returnValue = IRPrinter.createCallInst(expr.type, Utils.getMangledName(expr.typeid, 
+        String returnValue = IRPrinter.createCallInst(expr.type, Utils.getMangledName(mthdClass, 
                             expr.name), builder.toString());
         return returnValue;
         // creating alloca and storing return value in it
@@ -243,6 +283,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.plus expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
+
         return IRPrinter.createBinaryInst(IRPrinter.ADD, op1, op2, expr.type, false, true); // TODO - set flags correctly
     /*    String get1 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e1.type,"get"),
                     Utils.getStructName(expr.e1.type)+"* "+op1);
@@ -294,7 +335,36 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.divide expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.DIV, op1, op2, expr.type, false, true); // TODO - set flags correctly
+        
+        String ifThenLabel = IRPrinter.getLabel("if.then",false);
+        String ifElseLabel = IRPrinter.getLabel("if.else",false);
+        String ifEndLabel = IRPrinter.getLabel("if.end",false);
+
+        String cmpInst = IRPrinter.createBinaryInst(IRPrinter.EQ, op2, "0", Global.Constants.INT_TYPE, false, false);;
+        IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
+        
+        IRPrinter.createLabel(ifThenLabel);
+        String arg1 = IRPrinter.createStringGEP("%s");
+        String arg2 = IRPrinter.createStringGEP(Global.Constants.DIVIDE_BY_ZERO_ERROR);
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        String arg1d = IRPrinter.createStringGEP("%d");
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1d+", i32 "+expr.lineNo+")");
+        Global.registerCounter++;
+        arg2 = IRPrinter.createStringGEP("\n");
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        IRPrinter.createCallInst("Object", Utils.getMangledName("Object", "abort"), "");
+        
+        IRPrinter.createBreakInst(ifEndLabel);
+ 
+        IRPrinter.createLabel(ifElseLabel);
+        IRPrinter.createBreakInst(ifEndLabel);
+
+        
+        IRPrinter.createLabel(ifEndLabel);
+
+        return IRPrinter.createBinaryInst(IRPrinter.DIV, op1, op2, expr.type, false, false); // TODO - set flags correctly
     /*    String get1 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e1.type,"get"),
                     Utils.getStructName(expr.e1.type)+"* "+op1);
         String get2 = IRPrinter.createCallInst("i32", Utils.getMangledName(expr.e2.type,"get"),

@@ -1,21 +1,31 @@
-@.str.0 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.1 = private unnamed_addr constant [3 x i8] c"%s\00", align 1
-@.str.2 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
+@.str.2 = private unnamed_addr constant [1 x i8] c"\00", align 1
+@.str.1 = private unnamed_addr constant [5 x i8] c"Main\00", align 1
+@.str.0 = private unnamed_addr constant [4 x i8] c"Fib\00", align 1
+@.str.3 = private unnamed_addr constant [3 x i8] c"%s\00", align 1
+@.str.4 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
 
 %class.Object = type {}
-%class.Fib = type { %class.Object }
-%class.Main = type { %class.Object, %class.Fib* }
+%class.Fib = type { %class.Object, i32 }
 %class.IO = type { %class.Object }
+%class.Main = type { %class.IO, %class.Fib* }
 
+
+; Class: Fib, Method: fff
+define i32 @_CN3Fib_FN3fff_(%class.Fib* %this) {
+
+entry:
+  %0 = getelementptr inbounds %class.Fib, %class.Fib* %this, i32 0, i32 1
+  %1 = load i32, i32* %0, align 4
+  %2 = call i32 @_CN3Fib_FN3fib_(%class.Fib* %this, i32 %1)
+  ret i32 %2
+}
 
 ; Class: Fib, Method: fib
-define i32 @_CN3Fib_FN3fib_(%class.Fib* %this, i32 %i, %class.Fib* %ff) {
+define i32 @_CN3Fib_FN3fib_(%class.Fib* %this, i32 %i) {
 
 entry:
   %i.addr = alloca i32, align 8
   store i32 %i, i32* %i.addr, align 4
-  %ff.addr = alloca %class.Fib*, align 8
-  store %class.Fib* %ff, %class.Fib** %ff.addr, align 8
   %0 = alloca i32, align 8
   %1 = load i32, i32* %i.addr, align 4
   %2 = icmp eq i32 %1, 0
@@ -36,40 +46,36 @@ if.then.1:
   br label %if.end.1
 
 if.else.1:
-  %6 = load %class.Fib*, %class.Fib** %ff.addr, align 8
-  %7 = load i32, i32* %i.addr, align 4
-  %8 = sub nsw i32 %7, 1
-  %9 = load %class.Fib*, %class.Fib** %ff.addr, align 8
-  %10 = call i32 @_CN3Fib_FN3fib_(%class.Fib* %6, i32 %8, %class.Fib* %9)
-  %11 = load %class.Fib*, %class.Fib** %ff.addr, align 8
-  %12 = load i32, i32* %i.addr, align 4
-  %13 = sub nsw i32 %12, 2
-  %14 = load %class.Fib*, %class.Fib** %ff.addr, align 8
-  %15 = call i32 @_CN3Fib_FN3fib_(%class.Fib* %11, i32 %13, %class.Fib* %14)
-  %16 = add nsw i32 %10, %15
-  store i32 %16, i32* %3, align 4
+  %6 = load i32, i32* %i.addr, align 4
+  %7 = sub nsw i32 %6, 1
+  %8 = call i32 @_CN3Fib_FN3fib_(%class.Fib* %this, i32 %7)
+  %9 = load i32, i32* %i.addr, align 4
+  %10 = sub nsw i32 %9, 2
+  %11 = call i32 @_CN3Fib_FN3fib_(%class.Fib* %this, i32 %10)
+  %12 = add nsw i32 %8, %11
+  store i32 %12, i32* %3, align 4
   br label %if.end.1
 
 if.end.1:
-  %17 = load i32, i32* %3, align 4
-  store i32 %17, i32* %0, align 4
+  %13 = load i32, i32* %3, align 4
+  store i32 %13, i32* %0, align 4
   br label %if.end
 
 if.end:
-  %18 = load i32, i32* %0, align 4
-  ret i32 %18
+  %14 = load i32, i32* %0, align 4
+  ret i32 %14
 }
 
 ; Class: Main, Method: main
 define i32 @_CN4Main_FN4main_(%class.Main* %this) {
 
 entry:
-  %0 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
-  %1 = load %class.Fib*, %class.Fib** %0, align 8
-  %2 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
-  %3 = load %class.Fib*, %class.Fib** %2, align 8
-  %4 = call i32 @_CN3Fib_FN3fib_(%class.Fib* %1, i32 10, %class.Fib* %3)
-  ret i32 %4
+  %0 = bitcast %class.Main* %this to %class.IO*
+  %1 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
+  %2 = load %class.Fib*, %class.Fib** %1, align 8
+  %3 = call i32 @_CN3Fib_FN3fff_(%class.Fib* %2)
+  %4 = call %class.IO* @_CN2IO_FN7out_int_(%class.IO* %0, i32 %3)
+  ret i32 99
 }
 
 ; Constructor of class 'Object'
@@ -85,17 +91,8 @@ define void @_CN3Fib_FN3Fib_(%class.Fib* %this) {
 entry:
   %0 = bitcast %class.Fib* %this to %class.Object*
   call void @_CN6Object_FN6Object_(%class.Object* %0)
-  ret void
-}
-
-; Constructor of class 'Main'
-define void @_CN4Main_FN4Main_(%class.Main* %this) {
-
-entry:
-  %0 = bitcast %class.Main* %this to %class.Object*
-  call void @_CN6Object_FN6Object_(%class.Object* %0)
-  %1 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
-  store %class.Fib* null, %class.Fib** %1, align 4
+  %1 = getelementptr inbounds %class.Fib, %class.Fib* %this, i32 0, i32 1
+  store i32 10, i32* %1, align 4
   ret void
 }
 
@@ -105,6 +102,17 @@ define void @_CN2IO_FN2IO_(%class.IO* %this) {
 entry:
   %0 = bitcast %class.IO* %this to %class.Object*
   call void @_CN6Object_FN6Object_(%class.Object* %0)
+  ret void
+}
+
+; Constructor of class 'Main'
+define void @_CN4Main_FN4Main_(%class.Main* %this) {
+
+entry:
+  %0 = bitcast %class.Main* %this to %class.IO*
+  call void @_CN2IO_FN2IO_(%class.IO* %0)
+  %1 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
+  store %class.Fib* null, %class.Fib** %1, align 4
   ret void
 }
 
@@ -118,7 +126,7 @@ declare void @exit(i32)
 declare i32 @printf(i8*, ...)
 
 ; Class: Object, Method: abort
-define %class.Object* @_CN6Object_FN5abort_(%class.Object* %this) {
+define %class.Object* @_CN6Object_FN5abort_() {
 entry:
   call void @exit(i32 0)
   %0 = call noalias i8* @malloc(i64 0)
@@ -130,7 +138,7 @@ entry:
 ; Class: IO, Method: out_string
 define %class.IO* @_CN2IO_FN10out_string_(%class.IO* %this, i8* %s) {
 entry:
-  %0 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.1, i32 0, i32 0
+  %0 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.3, i32 0, i32 0
   %call = call i32 (i8*, ...) @printf(i8* %0, i8* %s)
   %1 = call noalias i8* @malloc(i64 0)
   %2 = bitcast i8* %1 to %class.IO*
@@ -141,7 +149,7 @@ entry:
 ; Class: IO, Method: out_int
 define %class.IO* @_CN2IO_FN7out_int_(%class.IO* %this, i32 %d) {
 entry:
-  %0 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.2, i32 0, i32 0
+  %0 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.4, i32 0, i32 0
   %call = call i32 (i8*, ...) @printf(i8* %0, i32 %d)
   %1 = call noalias i8* @malloc(i64 0)
   %2 = bitcast i8* %1 to %class.IO*

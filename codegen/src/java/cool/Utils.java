@@ -65,5 +65,11 @@ public class Utils {
         }
         return Utils.getStructName(type) + "*";
     }
+    public static String getNearestParentWithMethod(String className, String mthdName) {
+        while(!Global.functionMangledNames.contains(Utils.getMangledName(className, mthdName))) {
+            className = Global.inheritanceGraph.getParentClassName(className);
+        }
+        return className;
+    }
 
 }

@@ -1,17 +1,24 @@
 class Fib {
-    fib(i: Int, ff : Fib) : Int {
+    a : Int <- 10;
+    fff() : Int {
+        self@Fib.fib(a)
+    };
+    fib(i: Int) : Int {
         if i = 0 then 0
         else
             if i = 1 then 1
-            else ff@Fib.fib(i-1, ff) + ff@Fib.fib(i-2, ff)
+            else self@Fib.fib(i-1) + self@Fib.fib(i-2)
         fi fi
     };
 };
 
 
-class Main {
+class Main inherits IO {
     f : Fib;
     main() : Int {
-        f@Fib.fib(10, f)
+        {
+            self@IO.out_int(f@Fib.fff());
+            99;
+        }
     };
 };

@@ -11,33 +11,38 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     private String mainReturnType;
 
-
-    private String getBasicTypeOrPointer(String type) {
-        if(Global.Constants.STRING_TYPE.equals(type)) {
-            return "i8*";
-        }
-        else if(Global.Constants.INT_TYPE.equals(type)) {
-            return "i32";
-        }
-        else if(Global.Constants.BOOL_TYPE.equals(type)) {
-            return "i8";
-        }
-        return Utils.getStructName(type) + "*";
-    }
-
-
     private void printStringConstants() {
         StringBuilder structBuilder = new StringBuilder();
         if(!Global.stringConstantToRegisterMap.containsKey("")) {
             Global.stringConstantToRegisterMap.put("", "@.str."+Global.stringRegisterCounter);
             Global.stringRegisterCounter++;
         }
+        if(!Global.stringConstantToRegisterMap.containsKey("\n")) {
+            Global.stringConstantToRegisterMap.put("\n", "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
         if(!Global.stringConstantToRegisterMap.containsKey("%s")) {
             Global.stringConstantToRegisterMap.put("%s", "@.str."+Global.stringRegisterCounter);
             Global.stringRegisterCounter++;
         }
+        if(!Global.stringConstantToRegisterMap.containsKey("%1024[^\n]")) {
+            Global.stringConstantToRegisterMap.put("%1024[^\n]", "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
         if(!Global.stringConstantToRegisterMap.containsKey("%d")) {
             Global.stringConstantToRegisterMap.put("%d", "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
+        if(!Global.stringConstantToRegisterMap.containsKey("%d\n")) {
+            Global.stringConstantToRegisterMap.put("%d\n", "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
+        if(!Global.stringConstantToRegisterMap.containsKey(Global.Constants.DIVIDE_BY_ZERO_ERROR)) {
+            Global.stringConstantToRegisterMap.put(Global.Constants.DIVIDE_BY_ZERO_ERROR, "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
+        if(!Global.stringConstantToRegisterMap.containsKey(Global.Constants.VOID_CALL_ERROR)) {
+            Global.stringConstantToRegisterMap.put(Global.Constants.VOID_CALL_ERROR, "@.str."+Global.stringRegisterCounter);
             Global.stringRegisterCounter++;
         }
         for(Map.Entry<String,String> entry: Global.stringConstantToRegisterMap.entrySet()) {
@@ -94,7 +99,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 if(f instanceof AST.attr) {
                     index++;
                     AST.attr a = (AST.attr) f;
-                    builder.append(", ").append(getBasicTypeOrPointer(a.typeid));
+                    builder.append(", ").append(Utils.getBasicTypeOrPointer(a.typeid));
                     variableToIndexListMap.put(a.name, " i32 0, i32 "+index);
                 }
             }
@@ -245,14 +250,18 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("declare void @exit(i32)");
         
         // printf declaration for out_string and out_int
-        Global.out.println("\n; C exit declaration");
+        Global.out.println("\n; C printf declaration");
         Global.out.println("declare i32 @printf(i8*, ...)");
+
+        // scanf declaration for in_string and in_int
+        Global.out.println("\n; C scanf declaration");
+        Global.out.println("declare i32 @scanf(i8*, ...)");
 
         // abort method of Object
         Global.registerCounter = 0;
         Global.out.println("\n; Class: Object, Method: abort");
         Global.out.println("define "+Utils.getStructName(Global.Constants.ROOT_TYPE)+"* @"+ 
-            Utils.getMangledName(Global.Constants.ROOT_TYPE, "abort") +"("+Utils.getStructName(Global.Constants.ROOT_TYPE)+"* %this) {");
+            Utils.getMangledName(Global.Constants.ROOT_TYPE, "abort") +"() {");
         Global.out.println("entry:");
         Global.out.println(IRPrinter.INDENT+"call void @exit(i32 0)");
         String bytesToAllocate = ""+Global.classSizeMap.get(Global.Constants.ROOT_TYPE);
@@ -298,6 +307,33 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println(IRPrinter.INDENT+"ret "+Utils.getStructName(Global.Constants.IO_TYPE)+"* "+returnValue);
         Global.out.println("}");
 
+        // in_int method of IO
+        Global.registerCounter = 0;
+        Global.out.println("\n; Class: IO, Method: in_int");
+        Global.out.println("define i32 @"+ 
+            Utils.getMangledName(Global.Constants.IO_TYPE, "in_int") +"("+Utils.getStructName(Global.Constants.IO_TYPE)+"* %this) {");
+        Global.out.println("entry:");
+        String allocaReg = IRPrinter.createAlloca(Global.Constants.INT_TYPE);
+        arg1 = IRPrinter.createStringGEP("%d\n");
+        Global.out.println(IRPrinter.INDENT+"%call = call i32 (i8*, ...) @scanf(i8* "+arg1+", i32* "+allocaReg+")");
+        returnValue = IRPrinter.createLoadInst(allocaReg, "i32");
+        Global.out.println(IRPrinter.INDENT+"ret i32 "+returnValue);
+        Global.out.println("}");
+
+        // in_string method of IO
+        Global.registerCounter = 0;
+        Global.out.println("\n; Class: IO, Method: in_string");
+        Global.out.println("define i8* @"+ 
+            Utils.getMangledName(Global.Constants.IO_TYPE, "in_string") +"("+Utils.getStructName(Global.Constants.IO_TYPE)+"* %this) {");
+        Global.out.println("entry:");
+        allocaReg = IRPrinter.createAlloca(Global.Constants.STRING_TYPE);
+        arg1 = IRPrinter.createStringGEP("%1024[^\n]");
+        String loadVal = IRPrinter.createLoadInst(allocaReg, "i8*");
+        Global.out.println(IRPrinter.INDENT+"%call = call i32 (i8*, ...) @scanf(i8* "+arg1+", i8* "+loadVal+")");
+        returnValue = IRPrinter.createLoadInst(allocaReg, "i8*");
+        Global.out.println(IRPrinter.INDENT+"ret i8* "+returnValue);
+        Global.out.println("}");
+
         // main method of C
         Global.registerCounter = 0;
         Global.out.println("\n; C main() function");
@@ -327,7 +363,10 @@ class VisitorImpl extends ExpressionVisitorImpl {
         // preparing inheritance graph
         Global.inheritanceGraph = new InheritanceGraph();
         for(AST.class_ cl: prog.classes) {
-            System.out.println(cl.name);
+            if(!Global.stringConstantToRegisterMap.containsKey(cl.name)) {
+                Global.stringConstantToRegisterMap.put(cl.name, "@.str."+Global.stringRegisterCounter);
+                Global.stringRegisterCounter++;
+            }
             Global.inheritanceGraph.addClass(cl);
         }
 
@@ -356,6 +395,14 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
         // TODO - check above
         // TODO - what to do when user does new Int, etc.
+
+        Global.functionMangledNames.add(Utils.getMangledName("Object", "type_name"));
+        Global.functionMangledNames.add(Utils.getMangledName("Object", "abort"));
+        Global.functionMangledNames.add(Utils.getMangledName("Object", "copy"));
+        Global.functionMangledNames.add(Utils.getMangledName("IO", "out_int"));
+        Global.functionMangledNames.add(Utils.getMangledName("IO", "out_string"));
+        Global.functionMangledNames.add(Utils.getMangledName("IO", "in_int"));
+        Global.functionMangledNames.add(Utils.getMangledName("IO", "in_string"));
 
         for(AST.class_ cl: prog.classes) {
             if(!isDefaultClass(cl.name))
@@ -472,13 +519,14 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.method mthd) {
+        Global.functionMangledNames.add(Utils.getMangledName(Global.currentClass, mthd.name));
         Global.registerCounter = 0;
         if(Global.currentClass.equals("Main") && mthd.name.equals("main")) {
            mainReturnType = mthd.typeid;
         }
         Global.methodParams.clear();
         Global.out.println("\n; Class: "+Global.currentClass+", Method: "+mthd.name);
-        Global.out.print("define " + getBasicTypeOrPointer(mthd.typeid) + " @" + 
+        Global.out.print("define " + Utils.getBasicTypeOrPointer(mthd.typeid) + " @" + 
             Utils.getMangledName(Global.currentClass, mthd.name) + "(");
         Global.out.print(Utils.getStructName(Global.currentClass)+"* %this");
 
@@ -490,8 +538,8 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println(") {");
         IRPrinter.createLabel("entry");
         for(AST.formal fm: mthd.formals) {
-            IRPrinter.createAlloca(getBasicTypeOrPointer(fm.typeid), fm.name+".addr");
-            IRPrinter.createStoreInst("%"+fm.name, "%"+fm.name+".addr", getBasicTypeOrPointer(fm.typeid));
+            IRPrinter.createAlloca(Utils.getBasicTypeOrPointer(fm.typeid), fm.name+".addr");
+            IRPrinter.createStoreInst("%"+fm.name, "%"+fm.name+".addr", Utils.getBasicTypeOrPointer(fm.typeid));
         }
         String returnReg = mthd.body.accept(this);
         if(!mthd.typeid.equals(mthd.body.type)) {
@@ -499,14 +547,14 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 mthd.typeid, IRPrinter.BITCAST);
         }
         // String loadReturnReg = IRPrinter.createLoadInst(returnReg, mthd.typeid);
-        Global.out.println(IRPrinter.INDENT + "ret " + getBasicTypeOrPointer(mthd.typeid) + " " + returnReg);
+        Global.out.println(IRPrinter.INDENT + "ret " + Utils.getBasicTypeOrPointer(mthd.typeid) + " " + returnReg);
         Global.out.println("}");
 
     }
 
     public void visit(AST.formal fm) {
         Global.methodParams.add(fm.name);
-        Global.out.print(getBasicTypeOrPointer(fm.typeid) + " %" + fm.name);
+        Global.out.print(Utils.getBasicTypeOrPointer(fm.typeid) + " %" + fm.name);
     }
 
 }
