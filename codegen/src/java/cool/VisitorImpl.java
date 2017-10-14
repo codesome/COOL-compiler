@@ -53,14 +53,14 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
     }
 
-    private void generateStructs() {
+    private void generateStructsAndCalculateSize() {
         Global.out.println();
         InheritanceGraph.Node rootNode = Global.inheritanceGraph.getRootNode();
         Global.out.println(Utils.getStructName(Global.Constants.ROOT_TYPE) + " = type {}");
         Global.classToVariableToIndexListMap.put(Global.Constants.ROOT_TYPE, new HashMap<>());
 
         for(InheritanceGraph.Node child: rootNode.getChildren()) {
-            generateStructsDFS(child);
+            generateStructsAndCalculateSizeDFS(child);
         }
         // Global.out.println("%class.Int = type { %class.Object, i32 }");
         // Global.out.println("%class.String = type { %class.Object, i8* }");
@@ -68,13 +68,15 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println();
     }
 
-    private void generateStructsDFS(InheritanceGraph.Node node) {
+    private void generateStructsAndCalculateSizeDFS(InheritanceGraph.Node node) {
         AST.class_ cl = node.getAstClass();
+        int size = 0;
         
         if(Utils.isPrimitiveType(cl.name)) 
             return;
         
         StringBuilder builder = new StringBuilder(Utils.getStructName(cl.name));
+        size += Global.classSizeMap.get(node.getParent().getAstClass().name);
         builder.append(" = type { ").append(Utils.getStructName(node.getParent().getAstClass().name));
         
         Map<String, String> variableToIndexListMap = new HashMap<>();
@@ -84,34 +86,25 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
 
 
-        // if(Global.Constants.STRING_TYPE.equals(cl.name)) {
-        //     builder.append(", i8*");
-        //     variableToIndexListMap.put("val", " i32 0, i32 1");
-        // } else if(Global.Constants.INT_TYPE.equals(cl.name)) {
-        //     builder.append(", i32");
-        //     variableToIndexListMap.put("val", " i32 0, i32 1");
-        // } else if(Global.Constants.BOOL_TYPE.equals(cl.name)) {
-        //     builder.append(", i8");
-        //     variableToIndexListMap.put("val", " i32 0, i32 1");
-        // } else {
-            int index = 0;
-            for(AST.feature f : cl.features) {
-                if(f instanceof AST.attr) {
-                    index++;
-                    AST.attr a = (AST.attr) f;
-                    builder.append(", ").append(Utils.getBasicTypeOrPointer(a.typeid));
-                    variableToIndexListMap.put(a.name, " i32 0, i32 "+index);
-                }
+        int index = 0;
+        for(AST.feature f : cl.features) {
+            if(f instanceof AST.attr) {
+                index++;
+                AST.attr a = (AST.attr) f;
+                size += Utils.getSizeForStruct(a.typeid);
+                builder.append(", ").append(Utils.getBasicTypeOrPointer(a.typeid));
+                variableToIndexListMap.put(a.name, " i32 0, i32 "+index);
             }
-        // }
+        }
 
         builder.append(" }");
         Global.out.println(builder.toString());
 
         Global.classToVariableToIndexListMap.put(cl.name, variableToIndexListMap);
+        Global.classSizeMap.put(cl.name, size);
         
         for(InheritanceGraph.Node child: node.getChildren()) {
-            generateStructsDFS(child);
+            generateStructsAndCalculateSizeDFS(child);
         }
     }
 
@@ -173,74 +166,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     private void generateDefaultMethods() {
-        /*
-        // String set method
-        Global.out.println("\n; Class: String, Method: set");
-        Global.registerCounter = 0;
-        Global.out.println("define void @" + Utils.getMangledName(Global.Constants.STRING_TYPE, "set") 
-            + "(" + Utils.getStructName(Global.Constants.STRING_TYPE) + "* %this, i8* %s) {");
-        Global.out.println("entry:");
-        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1");
-        Global.out.println(IRPrinter.INDENT + "store i8* %s, i8** %0, align 8");
-        Global.out.println(IRPrinter.INDENT + "ret void");
-        Global.out.println("}");
-
-        // String get method
-        Global.out.println("\n; Class: String, Method: get");
-        Global.registerCounter = 0;
-        Global.out.println("define i8* @" + Utils.getMangledName(Global.Constants.STRING_TYPE, "get") 
-            + "(" + Utils.getStructName(Global.Constants.STRING_TYPE) + "* %this) {");
-        Global.out.println("entry:");
-        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.String, %class.String* %this, i32 0, i32 1");
-        Global.out.println(IRPrinter.INDENT + "%1 = load i8*, i8** %0, align 8");
-        Global.out.println(IRPrinter.INDENT + "ret i8* %1");
-        Global.out.println("}");
-
-        // Int set method
-        Global.out.println("\n; Class: Int, Method: set");
-        Global.registerCounter = 0;
-        Global.out.println("define void @" + Utils.getMangledName(Global.Constants.INT_TYPE, "set") 
-            + "(" + Utils.getStructName(Global.Constants.INT_TYPE) + "* %this, i32 %s) {");
-        Global.out.println("entry:");
-        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1");
-        Global.out.println(IRPrinter.INDENT + "store i32 %s, i32* %0, align 8");
-        Global.out.println(IRPrinter.INDENT + "ret void");
-        Global.out.println("}");
-
-        // Int get method
-        Global.out.println("\n; Class: Int, Method: get");
-        Global.registerCounter = 0;
-        Global.out.println("define i32 @" + Utils.getMangledName(Global.Constants.INT_TYPE, "get") 
-            + "(" + Utils.getStructName(Global.Constants.INT_TYPE) + "* %this) {");
-        Global.out.println("entry:");
-        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.Int, %class.Int* %this, i32 0, i32 1");
-        Global.out.println(IRPrinter.INDENT + "%1 = load i32, i32* %0, align 8");
-        Global.out.println(IRPrinter.INDENT + "ret i32 %1");
-        Global.out.println("}");
-
-        // Bool set method
-        Global.out.println("\n; Class: Bool, Method: set");
-        Global.registerCounter = 0;
-        Global.out.println("define void @" + Utils.getMangledName(Global.Constants.BOOL_TYPE, "set") 
-            + "(" + Utils.getStructName(Global.Constants.BOOL_TYPE) + "* %this, i8 %s) {");
-        Global.out.println("entry:");
-        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1");
-        Global.out.println(IRPrinter.INDENT + "store i8 %s, i8* %0, align 8");
-        Global.out.println(IRPrinter.INDENT + "ret void");
-        Global.out.println("}");
-
-        // Bool get method
-        Global.out.println("\n; Class: Bool, Method: get");
-        Global.registerCounter = 0;
-        Global.out.println("define i8 @" + Utils.getMangledName(Global.Constants.BOOL_TYPE, "get") 
-            + "(" + Utils.getStructName(Global.Constants.BOOL_TYPE) + "* %this) {");
-        Global.out.println("entry:");
-        Global.out.println(IRPrinter.INDENT + "%0 = getelementptr inbounds %class.Bool, %class.Bool* %this, i32 0, i32 1");
-        Global.out.println(IRPrinter.INDENT + "%1 = load i8, i8* %0, align 8");
-        Global.out.println(IRPrinter.INDENT + "ret i8 %1");
-        Global.out.println("}");
-        */
-        
         // malloc declaration - see https://groups.google.com/forum/#!topic/llvm-dev/QElg-R1CqNg
         Global.out.println("\n; C malloc declaration");
         Global.out.println("declare noalias i8* @malloc(i64)");
@@ -372,26 +297,18 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
         Global.inheritanceGraph.update();
         
-        printStringConstants();
-        generateStructs();
-
-        int memNeededByClass;
-
-        for(AST.class_ cl : prog.classes) {
-            memNeededByClass = 0;
-            for(AST.feature f : cl.features) {
-                if(f instanceof AST.attr) {
-                    memNeededByClass += Utils.getAttrSize(((AST.attr)f).typeid);
-                }
-            }
-            Global.classSizeMap.put(cl.name, memNeededByClass);
-        }
-
         Global.classSizeMap.put("Int",4);
         Global.classSizeMap.put("Bool",1);
         Global.classSizeMap.put("String",8);
         Global.classSizeMap.put("Object",0);
         Global.classSizeMap.put("IO",0);
+        
+        printStringConstants();
+        generateStructsAndCalculateSize();
+
+        for(Map.Entry<String, Integer> entry : Global.classSizeMap.entrySet()) {
+            System.out.println(entry.getKey() + " " + entry.getValue());
+        }
 
         // TODO - check above
         // TODO - what to do when user does new Int, etc.

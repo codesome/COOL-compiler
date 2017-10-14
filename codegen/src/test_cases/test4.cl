@@ -10,7 +10,7 @@ class Main inherits IO {
     x : A;
     main() : Int {
         {
-            self@IO.out_string("Yesss");
+            self@IO.out_string("Yes\n");
             x@A.f();
         }
     };

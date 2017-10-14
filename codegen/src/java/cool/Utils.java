@@ -65,6 +65,17 @@ public class Utils {
         }
         return Utils.getStructName(type) + "*";
     }
+
+    public static int getSizeForStruct(String type) {
+        if(Global.Constants.INT_TYPE.equals(type)) {
+            return 4;
+        } else if(Global.Constants.BOOL_TYPE.equals(type)) {
+            return 1;
+        } else {
+            return 8;
+        }
+    }
+
     public static String getNearestParentWithMethod(String className, String mthdName) {
         while(!Global.functionMangledNames.contains(Utils.getMangledName(className, mthdName))) {
             className = Global.inheritanceGraph.getParentClassName(className);
