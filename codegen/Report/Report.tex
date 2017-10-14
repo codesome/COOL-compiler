@@ -45,7 +45,7 @@ The string constants used in the COOL program are declared globally in the IR. T
 \begin{enumerate}
 	\item Modify the \verb|visit()| method for string constants in the semantic analyzer so that each string constant is stored in a map.
 	\item After the inheritance graph is generated in the code generator, in the \verb|program| node itself, values from this map are read and declarations are added to the output.
-	\item For facilitating input and output of integers and strings, for using in the calls to \verb|printf()| and \verb|scanf()|, we declare three more strings, which are the empty string, \verb|%d|, and \verb|%s|.
+	\item For facilitating input and output of integers and strings, for using in the calls to \verb|printf()| and \verb|scanf()|, we declare three more strings, which are the empty string, \verb|%d|,\verb|%d\n|, \verb|\n|, a string with at most 1024 characters ending with \verb|\n|, and \verb|%s|.
 \end{enumerate} 
 At the end of this, all the string constants have been declared in the resultant IR.
 
@@ -81,7 +81,7 @@ The compiler now traverses the AST to generate IR for each input program constru
 	\item \textbf{AST.assign} \\
 	This first recursively visits the expression on the right hand side of the assign. If the types do not match, a \verb|bitcast| is performed. If the left hand side is a method parameter, the pointer to it, allocated at the start of the method, is used for storing. If not, the appropriate attribute from the class is fetched using a \verb|getelementptr|. The result is then stored using a \verb|store|, and the right hand side result is returned.
 	\item \textbf{AST.static\_dispatch} \\
-	TODO
+	First, the caller is visited. Then, creating a conditional structure, a check is made for \verb|null| on the caller. If it is \verb|null|, an error message is displayed and \verb|abort()| is called. In-built functions are then separately handled. Then, the name of the function to be called and its class name is found, the caller is bitcasted if necessary, and a call instruction to the dispatch is created. The return value of the call is returned.
 	\item \textbf{AST.cond} \\
 	Labels for three new basic blocks are created. Memory is allocated to store the result. The label for the condition is added. First, the visitor visits the predicate. The result is used to create a \verb|br| instruction to jump to the appropriate block. Then, the label for the body is added and the visitor visits it. The result is stored in the memory allocated, and a jump to the end is created. The same is done for the else block. The result type is determined by computing the join of the the types of the individual blocks. If necessary, a \verb|bitcast| and a \verb|load| is performed, and the result returned.
 	\item \textbf{AST.loop} \\
@@ -115,9 +115,6 @@ After all the IR for the input program is generated, the constructors for each c
 	\item Starting from the root, the constructor for each class is generated. The traversal of classes is done in a depth first fashion using the inheritance graph.
 	\item For each class, a method is defined by generating a mangled name with the same name as the class name. It first creates a call in the IR for the constructor of its parent. Then, it traverses and visits each attribute node of the class, adding the IR as per the input given. The return type of the constructor is \verb|void|.
 \end{enumerate}
-
-\subsection{Name mangling}
-TODO?
 
 \section{Structure of the code}
 The code is organized into the following files
