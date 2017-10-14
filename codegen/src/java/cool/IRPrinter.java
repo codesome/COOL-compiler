@@ -84,12 +84,16 @@ class IRPrinter {
         return storeRegister;
     }
 
+    private static boolean isLLVMPrimitive(String type) {
+        return "i8*".equals(type) || "i32".equals(type) || "i64".equals(type) || "i8".equals(type) || "i1".equals(type);
+    }
+
     public static String createConvertInst(String reg, String exprFromType, String exprToType, String convertType) {
         // TODO: verify if we need pointer everywhere
         StringBuilder builder = new StringBuilder(INDENT);
-        if(!"i8*".equals(exprFromType) && !"i32".equals(exprFromType) && !"i64".equals(exprFromType) && !"i8".equals(exprFromType) && !"i1".equals(exprFromType))
+        if(!isLLVMPrimitive(exprFromType))
             exprFromType = Utils.getStructName(exprFromType) + "*";
-        if(!"i8*".equals(exprToType) && !"i32".equals(exprToType) && !"i64".equals(exprToType) && !"i8".equals(exprToType) && !"i1".equals(exprToType))
+        if(!isLLVMPrimitive(exprToType))
             exprToType = Utils.getStructName(exprToType) + "*";
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
@@ -156,15 +160,6 @@ class IRPrinter {
         Global.out.println(builder.toString());
         return storeRegister;
     }
-
-    // public static String createReturnInst(String type, String val) {
-    //     StringBuilder builder = new StringBuilder(INDENT);
-    //     type = Utils.getBasicTypePtr(type);
-    //     builder.append("ret ").append(type);
-    //     builder.append(" ").append(val);
-    //     Global.out.println(builder.toString());
-    //     return val;
-    // }
 
     public static void createVoidCallInst(String callee, String args) {
         StringBuilder builder = new StringBuilder(INDENT);

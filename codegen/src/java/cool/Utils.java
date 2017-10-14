@@ -24,31 +24,31 @@ public class Utils {
         }
     }
 
+
+    public static boolean isDefaultClass(String name) {
+        return Global.Constants.IO_TYPE.equals(name) || Global.Constants.INT_TYPE.equals(name) 
+        || Global.Constants.STRING_TYPE.equals(name) || Global.Constants.BOOL_TYPE.equals(name)
+        || Global.Constants.ROOT_TYPE.equals(name);
+    }
+
+
     public static boolean isPrimitiveType(String type) {
         return Global.Constants.STRING_TYPE.equals(type)
                 || Global.Constants.INT_TYPE.equals(type)
                 || Global.Constants.BOOL_TYPE.equals(type);
     }
 
-    public static int getAttrSize(String type) {
-        if(Global.Constants.INT_TYPE.equals(type)) {
-            return 4;
-        }
-        else if(Global.Constants.BOOL_TYPE.equals(type)) {
-            return 1;
-        }
-        return 8;
-    }
-
     public static String getBasicType(String type) {
         if(Global.Constants.STRING_TYPE.equals(type)) {
             return "i8*";
-        }
-        else if(Global.Constants.INT_TYPE.equals(type)) {
+        } else if(Global.Constants.INT_TYPE.equals(type)) {
             return "i32";
-        }
-        else if(Global.Constants.BOOL_TYPE.equals(type)) {
+        } else if(Global.Constants.BOOL_TYPE.equals(type)) {
             return "i8";
+        } else if("i64".equals(type)) {
+            return "i64";
+        } else if("i1".equals(type)) {
+            return "i1";
         }
         return Utils.getStructName(type);
     }
@@ -62,6 +62,8 @@ public class Utils {
             return "i8";
         } else if("i64".equals(type)) {
             return "i64";
+        } else if("i1".equals(type)) {
+            return "i1";
         }
         return Utils.getStructName(type) + "*";
     }

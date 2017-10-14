@@ -107,15 +107,6 @@ public class InheritanceGraph {
     /* Method definitions */
 
     public Node getRootNode() {
-        // if(rootNode==null) {
-        //     for(Node node: graph) {
-        //         if(Global.Constants.ROOT_TYPE.equals(node.getAstClass().name)) {
-        //             rootNode = node;
-        //             break;
-        //         }
-        //     }
-        // }
-        // return rootNode;
         return ROOT_AST_NODE;
     }
 
@@ -134,23 +125,6 @@ public class InheritanceGraph {
     public String getParentClassName(String className) {
         Node classNode = graph.get(classNameToIndexMap.get(className));
         return classNode.getAstClass().parent;
-    }
-
-    // Restricted base classes for redefinition
-    private boolean isRestrictedClass(String name) {
-        return Global.Constants.IO_TYPE.equals(name) || Global.Constants.INT_TYPE.equals(name) 
-        || Global.Constants.STRING_TYPE.equals(name) || Global.Constants.BOOL_TYPE.equals(name);
-    }
-
-    // Restricted base classes for inheritance
-    public boolean isRestrictedInheritanceClass(String name) {
-        return Global.Constants.INT_TYPE.equals(name) || Global.Constants.STRING_TYPE.equals(name) 
-        || Global.Constants.BOOL_TYPE.equals(name);
-    }
-
-    // Base classes with no methods in it
-    public boolean isNoMethodClass(String name) {
-        return Global.Constants.INT_TYPE.equals(name) || Global.Constants.BOOL_TYPE.equals(name);
     }
 
     // Used to add a class to the graph
@@ -181,10 +155,11 @@ public class InheritanceGraph {
         }
     }
 
+    // gives join of type1 and type2 : nearest common parent
     public String getJoinOf(String type1, String type2) {
         if(type1.equals(type2)) {
             return type1;
-        } else if(isRestrictedInheritanceClass(type1) || isRestrictedInheritanceClass(type2)) {
+        } else if(Utils.isPrimitiveType(type1) || Utils.isPrimitiveType(type2)) {
             return Global.Constants.ROOT_TYPE;
         }
         Node type1Node = graph.get(classNameToIndexMap.get(type1));
@@ -193,6 +168,7 @@ public class InheritanceGraph {
         return lca.getAstClass().name;
     }
 
+    // least common parent of node1 and node2
     private Node getLCA(Node node1, Node node2) {
         Node lca = null;
         List<Boolean> visited = new ArrayList<>(graph.size());
