@@ -182,6 +182,17 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println("\n; C scanf declaration");
         Global.out.println("declare i32 @scanf(i8*, ...)");
 
+        // strlen declaration for length
+        Global.out.println("\n; C strlen declaration");
+        Global.out.println("declare i64 @strlen(i8*)");
+
+        // for concat
+        Global.out.println("\n; C strlen declaration");
+        Global.out.println("declare i8* @strcpy(i8*, i8*)");
+
+        Global.out.println("\n; C strlen declaration");
+        Global.out.println("declare i8* @strcat(i8*, i8*)");
+
         // abort method of Object
         Global.registerCounter = 0;
         Global.out.println("\n; Class: Object, Method: abort");
@@ -259,6 +270,56 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println(IRPrinter.INDENT+"ret i8* "+returnValue);
         Global.out.println("}");
 
+        // concat method of String
+        Global.registerCounter = 0;
+        Global.out.println("\n; Class: String, Method: concat");
+        Global.out.println("define i8* @"+ 
+            Utils.getMangledName(Global.Constants.STRING_TYPE, "concat") +"(i8* %s1, i8* %s2) {");
+        Global.out.println("entry:");
+        String lenS1 = IRPrinter.createCallInst("i64", "strlen", "i8* %s1");
+        String lenS2 = IRPrinter.createCallInst("i64", "strlen", "i8* %s2");
+        String addReg = IRPrinter.createBinaryInst(IRPrinter.ADD, lenS1, lenS2, "i64", false, true);
+        addReg = IRPrinter.createBinaryInst(IRPrinter.ADD, addReg, "1", "i64", false, true);
+        String newStringReg = IRPrinter.createMallocInst(addReg);
+        IRPrinter.createCallInst(Global.Constants.STRING_TYPE, "strcpy", "i8* "+newStringReg+", i8* %s1");
+        IRPrinter.createCallInst(Global.Constants.STRING_TYPE, "strcat", "i8* "+newStringReg+", i8* %s2");
+        Global.out.println(IRPrinter.INDENT+"ret i8* "+newStringReg);
+        Global.out.println("}");
+
+        // to print divide by 0 error
+        Global.registerCounter = 0;
+        Global.out.println("define void @"+Global.Constants.DIVIDE_BY_ZERO_FUNCTION+"(i32 %lineNo) {");
+        Global.out.println("entry:");
+        arg1 = IRPrinter.createStringGEP("%s");
+        String arg2 = IRPrinter.createStringGEP(Global.Constants.DIVIDE_BY_ZERO_ERROR);
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        String arg1d = IRPrinter.createStringGEP("%d");
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1d+", i32 %lineNo)");
+        Global.registerCounter++;
+        arg2 = IRPrinter.createStringGEP("\n");
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println("}");
+
+        // to print dispatch on void error
+        Global.registerCounter = 0;
+        Global.out.println("define void @"+Global.Constants.VOID_CALL_FUNCTION+"(i32 %lineNo) {");
+        Global.out.println("entry:");
+        arg1 = IRPrinter.createStringGEP("%s");
+        arg2 = IRPrinter.createStringGEP(Global.Constants.VOID_CALL_ERROR);
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        arg1d = IRPrinter.createStringGEP("%d");
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1d+", i32 %lineNo)");
+        Global.registerCounter++;
+        arg2 = IRPrinter.createStringGEP("\n");
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println("}");
+
         // main method of C
         Global.registerCounter = 0;
         Global.out.println("\n; C main() function");
@@ -306,10 +367,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
         printStringConstants();
         generateStructsAndCalculateSize();
 
-        for(Map.Entry<String, Integer> entry : Global.classSizeMap.entrySet()) {
-            System.out.println(entry.getKey() + " " + entry.getValue());
-        }
-
         // TODO - check above
         // TODO - what to do when user does new Int, etc.
 
@@ -320,6 +377,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.functionMangledNames.add(Utils.getMangledName("IO", "out_string"));
         Global.functionMangledNames.add(Utils.getMangledName("IO", "in_int"));
         Global.functionMangledNames.add(Utils.getMangledName("IO", "in_string"));
+        Global.functionMangledNames.add(Utils.getMangledName("String", "length"));
+        Global.functionMangledNames.add(Utils.getMangledName("String", "concat"));
+        Global.functionMangledNames.add(Utils.getMangledName("String", "substr"));
 
         for(AST.class_ cl: prog.classes) {
             if(!isDefaultClass(cl.name))

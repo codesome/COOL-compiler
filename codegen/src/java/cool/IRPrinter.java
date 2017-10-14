@@ -87,9 +87,9 @@ class IRPrinter {
     public static String createConvertInst(String reg, String exprFromType, String exprToType, String convertType) {
         // TODO: verify if we need pointer everywhere
         StringBuilder builder = new StringBuilder(INDENT);
-        if(!"i8*".equals(exprFromType) && !"i32".equals(exprFromType) && !"i8".equals(exprFromType) && !"i1".equals(exprFromType))
+        if(!"i8*".equals(exprFromType) && !"i32".equals(exprFromType) && !"i64".equals(exprFromType) && !"i8".equals(exprFromType) && !"i1".equals(exprFromType))
             exprFromType = Utils.getStructName(exprFromType) + "*";
-        if(!"i8*".equals(exprToType) && !"i32".equals(exprToType) && !"i8".equals(exprToType) && !"i1".equals(exprToType))
+        if(!"i8*".equals(exprToType) && !"i32".equals(exprToType) && !"i64".equals(exprToType) && !"i8".equals(exprToType) && !"i1".equals(exprToType))
             exprToType = Utils.getStructName(exprToType) + "*";
         String storeRegister = "%"+Global.registerCounter;
         Global.registerCounter++;

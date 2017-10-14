@@ -96,7 +96,7 @@ public class CodegenTest {
 
 		PrintWriter writer = new PrintWriter(outputFilename);
 
-		Codegen codeGenerator = new Codegen(prog.value, writer);
+		Codegen codeGenerator = new Codegen(prog.value, writer, filename);
 		writer.close();
 	}
 
