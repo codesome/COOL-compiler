@@ -1,0 +1,162 @@
+\documentclass{article}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{chngcntr}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listing}
+\graphicspath{ {images/} }
+
+\counterwithin*{equation}{section}
+\counterwithin*{equation}{subsection}
+
+\title{Code Generation for COOL}
+\author{Ganesh Vernekar - CS15BTECH11018 \\ Sukrut Rao - CS15BTECH11036}
+
+
+\begin{document}
+	\maketitle
+	
+This assignment creates a simplified Code Generator for the COOL language. The lexer, parser, and semantic analyzer are already given. The output for a correct input COOL program is its semantically equivalent code in the LLVM intermediate representation. This compiler assumes that the input COOL program will not have any \verb|SELF_TYPE|, dynamic dispatch, \verb|let|, and \verb|case| constructs. The resultant IR can be compiled using \verb|clang|, to get an executable, and the program can then be executed.
+	
+\section{Code Design}
+\subsection{Overview}
+We are already given a lexer, parser, and a semantic analyzer. The output of the semantic analyzer is a type annotated abstract syntax tree. Our code generator uses this AST to generate LLVM IR.
+	
+At a high level, the program does the following steps:
+\begin{enumerate}
+	\item Generate an inheritance graph of the existing classes is generated. As the program has passed the semantic analyzer stage, we know that the graph is valid. We create the graph to get the inheritance information, to find which class is a parent of which class.
+	\item Add the structure of each class as a struct in the IR, and add the global string constants in the program to the IR. We also compute the memory that needs to be allocate when a new object of a class is created.
+	\item Traverse the AST, for each class one by one. For each AST node, depending on the type, IR is generated and sent to the output.
+	\item Add the constructors for all the classes and the methods defined for the default classes in COOL, i.e., \verb|Object|, \verb|IO|, and \verb|String|.
+\end{enumerate}
+The output is the LLVM IR. Runtime checks have been done for division by zero and static dispatch on \verb|void|.
+
+\subsection{Preparing the inheritance graph}
+The execution of the code generator starts by visiting the root of the AST, which is the node for \verb|program|. Here, first, it prepares the inheritance graph of the program. As the program has already passed semantic checks, it is known that the inheritance graph will be valid. This is prepared in a similar way as when done to create the semantic analyzer. Classes are added to the graph in their appropriate positions, such that the child nodes of a class represent the classes that inherit from it, and the parent node represents the class it inherits from. The purpose of creating this inheritance graph is to have this inheritance information, so that when class types are defined as structs in IR, the members of the ancestors can be included in an indirect way in the struct of the children. The inheritance graph also provides a helper function to get the join of two types, which then determines the return type of a conditional statement.
+
+\subsection{Declaring String constants}
+The string constants used in the COOL program are declared globally in the IR. To facilitate this, the following has been done:
+\begin{enumerate}
+	\item Modify the \verb|visit()| method for string constants in the semantic analyzer so that each string constant is stored in a map.
+	\item After the inheritance graph is generated in the code generator, in the \verb|program| node itself, values from this map are read and declarations are added to the output.
+	\item For facilitating input and output of integers and strings, for using in the calls to \verb|printf()| and \verb|scanf()|, we declare three more strings, which are the empty string, \verb|%d|, and \verb|%s|.
+\end{enumerate} 
+At the end of this, all the string constants have been declared in the resultant IR.
+
+\subsection{Generating structs for each class and calculating their memory requirements}
+Next, the compiler generates a \verb|struct| declaration in LLVM IR corresponding to every class. This is done as follows:
+\begin{enumerate}
+	\item First, it declares an empty struct for \verb|Object|, as it has no members.
+	\item Then, the inheritance graph is traversed in a depth first fashion. For each class, except \verb|Int|, \verb|String|, and \verb|Bool|, a \verb|struct| declaration is created based on the members of the class. For \verb|Int|, \verb|i32| is used, for \verb|Bool|, \verb|i8| is used, and for \verb|String|, \verb|i8*| is used. For other class objects, a pointer to the class \verb|struct| type is created. The first member is always an object of the current class' parent's \verb|struct|. In COOL, every class other than \verb|Object| has a parent, so this is valid.
+	\item In the case of \verb|Int|, \verb|String|, and \verb|Bool|, we use the primitive types, hence no \verb|struct| is created for them.
+	\item Here, while creating the \verb|struct|, we also create a map that maps the each class name to a variable name, which then maps to the index in the \verb|struct| for that name in that class. This is useful when calling \verb|getelementptr| in the IR, as it easily provides the index given the name.
+\end{enumerate}
+
+Now, we also need the sizes of each class type, so that memory can appropriately be allocated on the heap when a new class object is created using \verb|new|. This is done in the following way:
+\begin{enumerate}
+	\item In the program, iterate over each class. In the class, iterate over all the attributes. For each attribute, the memory needed by it, in bytes, is added.
+	\item The memory needed by \verb|Int|, stored as \verb|i32|, is 4 bytes, by \verb|Bool|, stored as \verb|i8|, is 1 byte, and by \verb|String|, stored as \verb|i8*|, is 8 bytes, as it is a pointer type. For all other class members, as their pointers are stored, 8 bytes is allocated. Memory is also allocated for the parent's members.
+	\item The memory requirements computed for each class is stored in a map that maps the class name to the memory needed. For the in-built classes, values are directly added to the map. This map helps in quickly accessing the amount needed when calling \verb|malloc()|.
+\end{enumerate}
+
+\subsection{Traversing the AST}
+The compiler now traverses the AST to generate IR for each input program construct. The previous steps took place in the \verb|program| node of the AST. From here, we start traversing each \verb|class| node of the AST, and recursively visit each node's children using the visitor pattern. For each node, based on the type of the node, IR is generated. In this recursive manner, IR for all the code in the input COOL program is generated. Printing of IR is defined largely in methods in a separate class, \verb|IRPrinter.java|. The \verb|visit()| methods return values or registers when appropriate that build up the IR. The following is broadly done at each node:
+\begin{enumerate}
+	\item \textbf{AST.class} \\
+	A global variable that sets which class we are currently at is set so that this information is available to all the child nodes, for creating IR. Then, we iterate over the children, and all nodes that correspond to methods of the class are visited.
+	\item \textbf{AST.mthd} \\
+	Here, the methods are defined in the IR. The name is the mangled name generated using the class name and the method name. The first argument is a pointer of the class type, the \verb|this| pointer, which is the pointer of the object calling the method. The \verb|accept()| of each formal parameter is called, and added to the list of formal parameters. In the method body, an entry basic block is created, and pointers are allocated on the stack to store each parameter using \verb|alloca|. The body of the method is next visited. If the return type does not match the declared return type, a \verb|bitcast| is called and the method then returns. This node is also responsible for storing the return type of the \verb|main()| method from the \verb|Main| class in order to correctly call it in the \verb|main()| of the IR. 
+	\item \textbf{AST.formal} \\
+	This stores the name of the formal in a global map corresponding to the method it belongs to so that it can be distinguished from attribute names inside the method. In the IR, it prints the type of the parameter as in the IR, followed by a variable with the name as the name of the formal.
+	\item \textbf{AST.attr} \\
+	This is traversed when creating the constructor. If an assignment has been made, a store is created to store it in the attribute. The value to be stored is found in the node of the AST corresponding to the right hand side. For each primitive type, i.e., \verb|Int|, \verb|String|, and \verb|Bool|, if no assignment has been made, the default value of the type is stored in it. For other types, if no assignment is made, \verb|null| in IR is stored in the pointer of the object. For the case of other types, the type to be assigned might be conforming but not the same as the attribute type, in which case a \verb|bitcast| operation is created.
+	\item \textbf{AST.no\_expr} \\
+	This node just returns \verb|null|. This is used only when new attributes are created, and in the node for attributes, a check for \verb|null| is used to check if no assignment has been made along with the declaration.
+	\item \textbf{AST.assign} \\
+	This first recursively visits the expression on the right hand side of the assign. If the types do not match, a \verb|bitcast| is performed. If the left hand side is a method parameter, the pointer to it, allocated at the start of the method, is used for storing. If not, the appropriate attribute from the class is fetched using a \verb|getelementptr|. The result is then stored using a \verb|store|, and the right hand side result is returned.
+	\item \textbf{AST.static\_dispatch} \\
+	TODO
+	\item \textbf{AST.cond} \\
+	Labels for three new basic blocks are created. Memory is allocated to store the result. The label for the condition is added. First, the visitor visits the predicate. The result is used to create a \verb|br| instruction to jump to the appropriate block. Then, the label for the body is added and the visitor visits it. The result is stored in the memory allocated, and a jump to the end is created. The same is done for the else block. The result type is determined by computing the join of the the types of the individual blocks. If necessary, a \verb|bitcast| and a \verb|load| is performed, and the result returned.
+	\item \textbf{AST.loop} \\
+	As with conditionals, three blocks are created for the loop. First, the label for the condition is added and the predicate visited. Then, a conditional break to either the body or the end is created. A label for the body is added, and the body is visited. This is followed by a break back to the condition block, to evaluate the condition again. The label for the end is finally created and \verb|null| of the IR is returned.
+	\item \textbf{AST.block} \\
+	Each expression in the block is visited. The result of visiting the last expression is returned.
+	\item \textbf{AST.new\_} \\
+	For a primitive type, as memory is already allocated, this just reassigns the value to the default value. For other types, using the memory information stored in the map, a call to \verb|malloc| of C is created to allocate the required memory. Then, the result is appropriately bitcasted, the constructor of the type called, and the resultant bitcasted pointer returned.
+	\item \textbf{AST.isvoid} \\
+	This visits the expression, and then performs an equality check with \verb|null| of the IR. The result of this is returned.
+	\item \textbf{AST.plus, AST.sub, AST.mul} \\
+	Each of the operands are visited. Then, the appropriate instruction is created in the IR and the result returned.
+	\item \textbf{AST.divide} \\
+	This is similar to the previous case. Here, however, we also have a special check for if the division is being done by 0.
+	\item \textbf{AST.comp, AST.lt, AST.leq, AST.eq} \\
+	This is very similar to \verb|AST.add|. Here, the appropriate \verb|icmp| instructions are called and a boolean type is returned.
+	\item \textbf{AST.neg} \\
+	The expression is first visited. Then, the result is created by subtracting it from zero and is returned.
+	\item \textbf{AST.object} \\
+	If the identifier is a method parameter, it is simply loaded and returned. If not, it must be an attribute, and then, a \verb|getelementptr| is called to fetch it from the \verb|struct|. It is then loaded and returned.
+	\item \textbf{AST.int\_const, AST.bool\_const} \\
+	This returns the constant converted to a string.
+	\item \textbf{AST.string\_const} \\
+	This fetches the string from the global string constants stored using a \verb|getelementptr|, and returns the result.
+\end{enumerate}
+The other nodes in the AST just return \verb|null| because as per the assumptions, the constructs they represent would not be present in the input program and are not handled.
+
+\subsection{Adding the constructors and default methods}
+After all the IR for the input program is generated, the constructors for each class and "default" methods, i.e., methods in in-built classes, are defined. The constructors are defined as follows:
+\begin{enumerate}
+	\item Starting from the root, the constructor for each class is generated. The traversal of classes is done in a depth first fashion using the inheritance graph.
+	\item For each class, a method is defined by generating a mangled name with the same name as the class name. It first creates a call in the IR for the constructor of its parent. Then, it traverses and visits each attribute node of the class, adding the IR as per the input given. The return type of the constructor is \verb|void|.
+\end{enumerate}
+
+\subsection{Name mangling}
+TODO?
+
+\section{Structure of the code}
+The code is organized into the following files
+\begin{itemize}
+	\item \textbf{AST.java} \\
+	This contains the classes defining each node in the AST. This has been left mostly unchanged. For each node class, an \verb|accept()| method has been added to accept a visitor that traverses the AST.
+	\item \textbf{Global.java} \\
+	This contains methods to perform name mangling, stores a set of constants used throughout the program, and the objects that store the scope tables, the inheritance graph, and the mangled name map.
+	\item \textbf{InheritanceGraph.java} \\
+	This defines the class for the inheritance graph and defines methods to operate on it. It also includes the methods to compute the join and check the conformance of types.
+	\item \textbf{ScopeTable.java} \\
+	This defines the scope table. A method has been added that allows an attribute to be removed from a particular scope.
+	\item \textbf{Semantic.java} \\
+	This is where the semantic analyzer starts the traversal by creating a new visitor and visiting the root of the AST.
+	\item \textbf{Visitor.java} \\
+	This defines an interface for all the \verb|visit()| methods for the visitors of each type of node.
+	\item \textbf{ExpressionVisitorImpl.java} \\
+	This defines the \verb|visit()| methods for all the AST node classes that correspond to an expression. This is an abstract class.
+	\item \textbf{VisitorImpl.java} \\
+	This defines the \verb|visit()| methods for all the other AST node classes. This extends \verb|ExpressionVisitorImpl|, and hence has access to all the \verb|visit()| methods defined there.
+	\item \textbf{ErrorReporter.java} \\
+	This defines an interface to report errors, so that errors can be reported from all files without having to pass the \verb|Semantic| class object around explicitly.
+\end{itemize}
+
+\section{Running the program and test cases}
+To run the compiler, compile it using \verb|make|, and run it as
+\begin{verbatim}
+./codegen test_program.cl
+\end{verbatim}
+The resulting IR is stored in a file \verb|test_program.ll|. The executable can be generated using 
+\begin{verbatim}
+clang test_program.ll
+\end{verbatim}
+This can then be executed using
+\begin{verbatim}
+./a.out
+\end{verbatim}
+A set of good and bad test cases have been provided to verify the correctness of this program. The aim of these cases is to cover as many semantic rules as possible, which would provide reasonable confidence that the program is accurate.
+
+
+
+\end{document}
