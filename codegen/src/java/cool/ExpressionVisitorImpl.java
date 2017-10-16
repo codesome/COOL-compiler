@@ -162,7 +162,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         }
     }
 
-    public String visit(AST.loop expr) { // incomplete
+    public String visit(AST.loop expr) {
         String whileCondLabel = IRPrinter.getLabel("while.cond",false);
         String whileBodyLabel = IRPrinter.getLabel("while.body",false);
         String whileEndLabel = IRPrinter.getLabel("while.end",false);
@@ -194,12 +194,15 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public String visit(AST.new_ expr) {
         if(Utils.isPrimitiveType(expr.typeid)) {
+            // default values for primitive types
             return Utils.getDefaultValue(expr.typeid);
         }
+        // allocating using malloc
         String bytesToAllocate = ""+Global.classSizeMap.get(expr.typeid);
         String storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate);
         String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
                                         expr.typeid, IRPrinter.BITCAST);
+        // calling constructor
         IRPrinter.createVoidCallInst(Utils.getMangledName(expr.typeid, expr.typeid), 
                                 Utils.getStructName(expr.typeid)+ "* " + returnValue);
 
@@ -219,7 +222,6 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(Utils.isPrimitiveType(expr.e1.type)) {
             return "0";
         }
-        // System.out.println("ISVOID : "+expr.type);
         String binResult = IRPrinter.createBinaryInst(IRPrinter.EQ, op, "null", expr.e1.type, false, false);
         return IRPrinter.createConvertInst(binResult, "i1", "i8", IRPrinter.ZEXT);
     }
@@ -227,7 +229,6 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.plus expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-
         return IRPrinter.createBinaryInst(IRPrinter.ADD, op1, op2, expr.type, false, true);
     }
 
@@ -247,6 +248,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
         
+        // divide by 0 check
         String ifThenLabel = IRPrinter.getLabel("if.then",false);
         String ifElseLabel = IRPrinter.getLabel("if.else",false);
         String ifEndLabel = IRPrinter.getLabel("if.end",false);
@@ -254,15 +256,15 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String cmpInst = IRPrinter.createBinaryInst(IRPrinter.EQ, op2, "0", Global.Constants.INT_TYPE, false, false);;
         IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
         
+        // if divide by 0.then
         IRPrinter.createLabel(ifThenLabel);
         IRPrinter.createVoidCallInst(Global.Constants.DIVIDE_BY_ZERO_FUNCTION, "i32 "+expr.lineNo);
         Global.out.println(IRPrinter.INDENT+"call void @exit(i32 1)");
-
         IRPrinter.createBreakInst(ifEndLabel);
  
+        // else jump to end
         IRPrinter.createLabel(ifElseLabel);
         IRPrinter.createBreakInst(ifEndLabel);
-
         
         IRPrinter.createLabel(ifEndLabel);
 
@@ -301,22 +303,21 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
     
     public String visit(AST.object expr) {
-        // System.out.println("expr name : "+expr.name+" expr type : "+expr.type+"\n");
         if("self".equals(expr.name)) {
             return "%this";
         }
         if(Global.methodParams.contains(expr.name)) {
-            // return "%"+expr.name+".addr";
             return IRPrinter.createLoadInst("%"+expr.name+".addr", Utils.getBasicTypeOrPointer(expr.type));
+        } else {
+            String objectPointer = IRPrinter.createClassAttrGEP(Global.currentClass,"%this",expr.name);
+            if(Utils.isPrimitiveType(expr.type)) {
+                objectPointer = IRPrinter.createLoadInst(objectPointer, Utils.getBasicType(expr.type));
+            }
+            else {
+                objectPointer = IRPrinter.createLoadInst(objectPointer, Utils.getBasicType(expr.type)+"*");
+            }
+            return objectPointer;
         }
-        String objectPointer = IRPrinter.createClassAttrGEP(Global.currentClass,"%this",expr.name);
-        if(Utils.isPrimitiveType(expr.type)) {
-            objectPointer = IRPrinter.createLoadInst(objectPointer, Utils.getBasicType(expr.type));
-        }
-        else {
-            objectPointer = IRPrinter.createLoadInst(objectPointer, Utils.getBasicType(expr.type)+"*");
-        }
-        return objectPointer;
     }
     
     public String visit(AST.int_const expr) {

@@ -10,6 +10,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     // Prints all the global string constants with their registers
     private void printStringConstants() {
+        Global.out.println("; String constant declarations");
         DefaultIR.addDefaultStrings();
         StringBuilder structBuilder = new StringBuilder();
         for(Map.Entry<String,String> entry: Global.stringConstantToRegisterMap.entrySet()) {
@@ -23,6 +24,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     // Prints structs for all the class and calculates the size of the struct
     private void generateStructsAndCalculateSize() {
         Global.out.println();
+        Global.out.println("; Struct declarations");
         InheritanceGraph.Node rootNode = Global.inheritanceGraph.getRootNode();
         Global.out.println(Utils.getStructName(Global.Constants.ROOT_TYPE) + " = type {i8*}");
         Global.classToVariableToIndexListMap.put(Global.Constants.ROOT_TYPE, new HashMap<>());
@@ -64,6 +66,10 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 size += Utils.getSizeForStruct(a.typeid);
                 builder.append(", ").append(Utils.getBasicTypeOrPointer(a.typeid));
                 variableToIndexListMap.put(a.name, " i32 0, i32 "+index);
+            } else {
+                // updating the function mangled names
+                AST.method m = (AST.method) f;
+                Global.functionMangledNames.add(Utils.getMangledName(cl.name, m.name));
             }
         }
 
@@ -146,16 +152,14 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.scopeTable.exitScope();
     }
 
-    private void updateFunctionMangledNames(AST.program prog) {
-        for(AST.class_ cl : prog.classes) {
-            for(AST.feature f : cl.features) {
-                if(f instanceof AST.method) {
-                    AST.method m = (AST.method) f;
-                    Global.functionMangledNames.add(Utils.getMangledName(cl.name, m.name));
-                }
-            }
-        }
+    // Updates mangled names for all the functions
+    private void updateDefaultFunctionNamesAndSize(AST.program prog) {
         // These are not defined in AST
+        Global.classSizeMap.put("Int",4);
+        Global.classSizeMap.put("Bool",1);
+        Global.classSizeMap.put("String",8);
+        Global.classSizeMap.put("Object",0);
+        Global.classSizeMap.put("IO",0);
         Global.functionMangledNames.add(Utils.getMangledName("Object", "type_name"));
         Global.functionMangledNames.add(Utils.getMangledName("Object", "abort"));
         Global.functionMangledNames.add(Utils.getMangledName("IO", "out_int"));
@@ -179,18 +183,11 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
 
         Global.inheritanceGraph.update();
-        updateFunctionMangledNames(prog);
-        
+
         // size of default classes
-        Global.classSizeMap.put("Int",4);
-        Global.classSizeMap.put("Bool",1);
-        Global.classSizeMap.put("String",8);
-        Global.classSizeMap.put("Object",0);
-        Global.classSizeMap.put("IO",0);
-        
+        updateDefaultFunctionNamesAndSize(prog);
         printStringConstants();
         generateStructsAndCalculateSize();
-
 
         programVisitorDFS(Global.inheritanceGraph.getRootNode());
 
