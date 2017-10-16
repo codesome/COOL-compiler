@@ -66,6 +66,9 @@ public class Global {
     // populated while visiting the classes
     public static String mainReturnType;
 
+    // to store variable name with type info
+    public static ScopeTable<String> scopeTable;
+
     static {
         methodParams = new HashSet<>();
         functionMangledNames = new HashSet<>();
@@ -73,6 +76,7 @@ public class Global {
         classSizeMap = new HashMap<>();
         stringConstantToRegisterMap = new HashMap<>();
         classToVariableToIndexListMap = new HashMap<>();
+        scopeTable = new ScopeTable<>();
         registerCounter = 0;
         stringRegisterCounter = 0;
     }
