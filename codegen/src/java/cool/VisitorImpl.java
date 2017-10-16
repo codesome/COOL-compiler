@@ -25,7 +25,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     private void generateStructsAndCalculateSize() {
         Global.out.println();
         InheritanceGraph.Node rootNode = Global.inheritanceGraph.getRootNode();
-        Global.out.println(Utils.getStructName(Global.Constants.ROOT_TYPE) + " = type {}");
+        Global.out.println(Utils.getStructName(Global.Constants.ROOT_TYPE) + " = type {i8*}");
         Global.classToVariableToIndexListMap.put(Global.Constants.ROOT_TYPE, new HashMap<>());
 
         for(InheritanceGraph.Node child: rootNode.getChildren()) {
@@ -147,11 +147,11 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.inheritanceGraph.update();
         
         // size of default classes
-        Global.classSizeMap.put("Int",4);
-        Global.classSizeMap.put("Bool",1);
-        Global.classSizeMap.put("String",8);
-        Global.classSizeMap.put("Object",0);
-        Global.classSizeMap.put("IO",0);
+        Global.classSizeMap.put("Int",12);
+        Global.classSizeMap.put("Bool",9);
+        Global.classSizeMap.put("String",16);
+        Global.classSizeMap.put("Object",8);
+        Global.classSizeMap.put("IO",8);
         
         printStringConstants();
         generateStructsAndCalculateSize();
@@ -159,7 +159,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         // These are not defined in AST
         Global.functionMangledNames.add(Utils.getMangledName("Object", "type_name"));
         Global.functionMangledNames.add(Utils.getMangledName("Object", "abort"));
-        Global.functionMangledNames.add(Utils.getMangledName("Object", "copy"));
+        // Global.functionMangledNames.add(Utils.getMangledName("Object", "copy"));
         Global.functionMangledNames.add(Utils.getMangledName("IO", "out_int"));
         Global.functionMangledNames.add(Utils.getMangledName("IO", "out_string"));
         Global.functionMangledNames.add(Utils.getMangledName("IO", "in_int"));

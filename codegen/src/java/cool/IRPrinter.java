@@ -224,6 +224,18 @@ class IRPrinter {
         return gepRegister;
     }
 
+    public static String createTypeNameGEP(String classRegister) {
+        String gepRegister = "%"+Global.registerCounter;
+        Global.registerCounter++;
+        String structName = Utils.getStructName(Global.Constants.ROOT_TYPE);
+        StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
+        builder.append(gepRegister)
+        .append(" = getelementptr inbounds ").append(structName).append(", ")
+        .append(structName).append("* ").append(classRegister).append(", i32 0, i32 0");
+        Global.out.println(builder.toString());
+        return gepRegister;
+    }
+
     public static String createAlloca(String className) {
         String gepRegister = "%"+Global.registerCounter;
         Global.registerCounter++;

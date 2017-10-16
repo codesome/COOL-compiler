@@ -41,6 +41,10 @@ public class Semantic{
 		}
 		
 		for(AST.class_ e : program.classes) {
+			if(!Global.stringConstantToRegisterMap.containsKey(e.name)) {
+				Global.stringConstantToRegisterMap.put(e.name, "@.str."+Global.stringRegisterCounter);
+				Global.stringRegisterCounter++;
+			}
 			filename = e.filename;				// filename for each class	
 			scopeTable.enterScope();			// enter new scope for a class
 			scopeTable.insert("self", new AST.attr("self", e.name, new AST.no_expr(e.lineNo), e.lineNo));		// self is available as attribute within the class
