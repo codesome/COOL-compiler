@@ -45,14 +45,14 @@ The string constants used in the COOL program are declared globally in the IR. T
 \begin{enumerate}
 	\item Modify the \verb|visit()| method for string constants in the semantic analyzer so that each string constant is stored in a map.
 	\item After the inheritance graph is generated in the code generator, in the \verb|program| node itself, values from this map are read and declarations are added to the output.
-	\item For facilitating input and output of integers and strings, for using in the calls to \verb|printf()| and \verb|scanf()|, we declare three more strings, which are the empty string, \verb|%d|,\verb|%d\n|, \verb|\n|, a string with at most 1024 characters ending with \verb|\n|, and \verb|%s|.
+	\item For facilitating input and output of integers and strings, for using in the calls to \verb|printf()| and \verb|scanf()|, for specifying error messages, etc. we declare a few more strings directly added to the map.
 \end{enumerate} 
 At the end of this, all the string constants have been declared in the resultant IR.
 
 \subsection{Generating structs for each class and calculating their memory requirements}
 Next, the compiler generates a \verb|struct| declaration in LLVM IR corresponding to every class. This is done as follows:
 \begin{enumerate}
-	\item First, it declares an empty struct for \verb|Object|, as it has no members.
+	\item First, it declares an a struct for \verb|Object|, which has a single member of the \verb|i8*| type. This member is used to store the name of the type of the class of any object created. Storing here is useful because every class inherits from \verb|Object|. This class has no other members.
 	\item Then, the inheritance graph is traversed in a depth first fashion. For each class, except \verb|Int|, \verb|String|, and \verb|Bool|, a \verb|struct| declaration is created based on the members of the class. For \verb|Int|, \verb|i32| is used, for \verb|Bool|, \verb|i8| is used, and for \verb|String|, \verb|i8*| is used. For other class objects, a pointer to the class \verb|struct| type is created. The first member is always an object of the current class' parent's \verb|struct|. In COOL, every class other than \verb|Object| has a parent, so this is valid.
 	\item In the case of \verb|Int|, \verb|String|, and \verb|Bool|, we use the primitive types, hence no \verb|struct| is created for them.
 	\item Here, while creating the \verb|struct|, we also create a map that maps the each class name to a variable name, which then maps to the index in the \verb|struct| for that name in that class. This is useful when calling \verb|getelementptr| in the IR, as it easily provides the index given the name.
