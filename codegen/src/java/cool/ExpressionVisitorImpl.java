@@ -59,6 +59,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String ifEndLabel = IRPrinter.getLabel("if.end",false);
 
         String cmpInst = IRPrinter.createBinaryInst(IRPrinter.EQ, caller, "null", expr.caller.type, false, false);
+    //    String truncVar = IRPrinter.createConvertInst(cmpInst, "i8", "i1", IRPrinter.TRUNC);
         IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
         
         IRPrinter.createLabel(ifThenLabel);
@@ -109,8 +110,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String retVal = IRPrinter.createAlloca(resultType);
 
         String cmpInst = expr.predicate.accept(this);
+        String truncVar = IRPrinter.createConvertInst(cmpInst, "i8", "i1", IRPrinter.TRUNC);
         
-        IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
+        IRPrinter.createCondBreak(truncVar, ifThenLabel, ifElseLabel);
         
         IRPrinter.createLabel(ifThenLabel);
         String ifBody = expr.ifbody.accept(this);
@@ -157,9 +159,9 @@ abstract class ExpressionVisitorImpl implements Visitor {
         IRPrinter.createLabel(whileCondLabel);
 
         String whilePredicate = expr.predicate.accept(this);
+        String truncVar = IRPrinter.createConvertInst(whilePredicate, "i8", "i1", IRPrinter.TRUNC);
 
-
-        IRPrinter.createCondBreak(whilePredicate,whileBodyLabel,whileEndLabel);
+        IRPrinter.createCondBreak(truncVar,whileBodyLabel,whileEndLabel);
 
         IRPrinter.createLabel(whileBodyLabel);
         String whileBody = expr.body.accept(this);
@@ -193,7 +195,12 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public String visit(AST.isvoid expr) {
         String op = expr.e1.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.EQ, op, "null", expr.type, false, false);
+        if(isPrimitiveType(expr.e1.type)) {
+            return "0";
+        }
+        System.out.println("ISVOID : "+expr.type);
+        String binResult = IRPrinter.createBinaryInst(IRPrinter.EQ, op, "null", expr.e1.type, false, false);
+        return IRPrinter.createConvertInst(binResult, "i1", "i8", IRPrinter.ZEXT);
     }
 
     public String visit(AST.plus expr) {
@@ -224,6 +231,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String ifEndLabel = IRPrinter.getLabel("if.end",false);
 
         String cmpInst = IRPrinter.createBinaryInst(IRPrinter.EQ, op2, "0", Global.Constants.INT_TYPE, false, false);;
+    //    String truncVar = IRPrinter.createConvertInst(cmpInst, "i8", "i1", IRPrinter.TRUNC);
         IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
         
         IRPrinter.createLabel(ifThenLabel);
@@ -243,25 +251,28 @@ abstract class ExpressionVisitorImpl implements Visitor {
     
     public String visit(AST.comp expr) {
         String op = expr.e1.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.XOR, op, "true", expr.e1.type, false, false);
+        return IRPrinter.createBinaryInst(IRPrinter.XOR, op, "1", expr.e1.type, false, false);
     }
     
     public String visit(AST.lt expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.SLT, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
+        String binResult = IRPrinter.createBinaryInst(IRPrinter.SLT, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
+        return IRPrinter.createConvertInst(binResult, "i1", "i8", IRPrinter.ZEXT);
     }
     
     public String visit(AST.leq expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.SLE, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
+        String binResult = IRPrinter.createBinaryInst(IRPrinter.SLE, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
+        return IRPrinter.createConvertInst(binResult, "i1", "i8", IRPrinter.ZEXT);
     }
     
     public String visit(AST.eq expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.EQ, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
+        String binResult = IRPrinter.createBinaryInst(IRPrinter.EQ, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
+        return IRPrinter.createConvertInst(binResult, "i1", "i8", IRPrinter.ZEXT);
     }
     
     public String visit(AST.neg expr) {
@@ -270,6 +281,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
     
     public String visit(AST.object expr) {
+        System.out.println("expr name : "+expr.name+" expr type : "+expr.type+"\n");
         if("self".equals(expr.name)) {
             return "%this";
         }
