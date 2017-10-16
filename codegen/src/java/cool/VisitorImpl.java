@@ -231,7 +231,18 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 IRPrinter.createDoublePointerStoreInst("null", gepRegister, at.typeid);
             } else {
                 if(!at.typeid.equals(at.value.type)) {
-                    valueRegister = IRPrinter.createConvertInst(valueRegister, at.value.type, at.typeid, IRPrinter.BITCAST);
+                    if(Global.Constants.ROOT_TYPE.equals(at.typeid) && Utils.isPrimitiveType(at.value.type)) {
+                        // creating new object, as primitive cant be stored in object struct directly
+                        AST.new_ newObj = new AST.new_(Global.Constants.ROOT_TYPE, 0);
+                        newObj.type = Global.Constants.ROOT_TYPE;
+                        valueRegister = this.visit(newObj);
+                        // fixing the typename
+                        String typenameGEP = IRPrinter.createTypeNameGEP(valueRegister);
+                        String typenameString = IRPrinter.createStringGEP(at.value.type);
+                        IRPrinter.createStoreInst(typenameString, typenameGEP, "i8*");
+                    } else {
+                        valueRegister = IRPrinter.createConvertInst(valueRegister, at.value.type, at.typeid, IRPrinter.BITCAST);
+                    }
                 }
                 IRPrinter.createDoublePointerStoreInst(valueRegister, gepRegister, at.typeid);
             }
