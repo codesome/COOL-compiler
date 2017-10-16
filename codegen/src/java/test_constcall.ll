@@ -1,5 +1,5 @@
-; ModuleID = '../test_cases/test_recurse.cl'
-source_filename = "../test_cases/test_recurse.cl"
+; ModuleID = '../test_cases/test_constcall.cl'
+source_filename = "../test_cases/test_constcall.cl"
 
 ; String constant declarations
 @.str.2 = private unnamed_addr constant [1 x i8] c"\00", align 1
@@ -27,15 +27,34 @@ Dispatch to void at line no \00", align 1
 
 ; Struct declarations
 %class.Object = type {i8*}
-%class.A = type { %class.Object, %class.A* }
-%class.Main = type { %class.Object, %class.A* }
+%class.A = type { %class.Object, i32 }
+%class.Main = type { %class.Object }
 %class.IO = type { %class.Object }
 
+
+; Class: A, Method: f1
+define i32 @_CN1A_FN2f1_(%class.A* %this) {
+
+entry:
+  ret i32 0
+}
 
 ; Class: Main, Method: main
 define i32 @_CN4Main_FN4main_(%class.Main* %this) {
 
 entry:
+  %0 = add nsw i32 1, 2
+  %1 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.14, i32 0, i32 0
+  %2 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.4, i32 0, i32 0
+  %3 = getelementptr inbounds [26 x i8], [26 x i8]* @.str.10, i32 0, i32 0
+  %4 = call i32 (i8*, ...) @printf(i8* %2, i8* %3)
+  %5 = call i32 (i8*, ...) @printf(i8* %2, i8* %1)
+  %6 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.3, i32 0, i32 0
+  %7 = call i32 (i8*, ...) @printf(i8* %2, i8* %6)
+  call void @exit(i32 0)
+  %8 = call noalias i8* @malloc(i64 0)
+  %9 = bitcast i8* %8 to %class.Object*
+  call void @_CN6Object_FN6Object_(%class.Object* %9)
   ret i32 0
 }
 
@@ -53,7 +72,7 @@ entry:
   %0 = bitcast %class.A* %this to %class.Object*
   call void @_CN6Object_FN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  store %class.A* null, %class.A** %1, align 4
+  store i32 0, i32* %1, align 4
   ret void
 }
 
@@ -63,15 +82,6 @@ define void @_CN4Main_FN4Main_(%class.Main* %this) {
 entry:
   %0 = bitcast %class.Main* %this to %class.Object*
   call void @_CN6Object_FN6Object_(%class.Object* %0)
-  %1 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
-  %2 = call noalias i8* @malloc(i64 16)
-  %3 = bitcast i8* %2 to %class.A*
-  call void @_CN1A_FN1A_(%class.A* %3)
-  %4 = bitcast %class.A* %3 to %class.Object*
-  %5 = getelementptr inbounds %class.Object, %class.Object* %4, i32 0, i32 0
-  %6 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.0, i32 0, i32 0
-  store i8* %6, i8** %5, align 8
-  store %class.A* %3, %class.A** %1, align 4
   ret void
 }
 

@@ -1,5 +1,5 @@
 class A {
-    a : A <- new A;
+    a : A;
 };
 
 class Main {

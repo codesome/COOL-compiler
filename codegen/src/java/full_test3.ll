@@ -1,6 +1,7 @@
 ; ModuleID = '../test_cases/full_test3.cl'
 source_filename = "../test_cases/full_test3.cl"
 
+; String constant declarations
 @.str.30 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.0 = private unnamed_addr constant [2 x i8] c"A\00", align 1
 @.str.1 = private unnamed_addr constant [2 x i8] c"B\00", align 1
@@ -75,6 +76,7 @@ concat() 'A String': \00", align 1
 @.str.33 = private unnamed_addr constant [10 x i8] c"%1024[^
 ]\00", align 1
 
+; Struct declarations
 %class.Object = type {i8*}
 %class.A = type { %class.Object, i32 }
 %class.B = type { %class.A, i32 }

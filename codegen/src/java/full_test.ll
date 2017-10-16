@@ -1,6 +1,7 @@
 ; ModuleID = '../test_cases/full_test.cl'
 source_filename = "../test_cases/full_test.cl"
 
+; String constant declarations
 @.str.34 = private unnamed_addr constant [1 x i8] c"\00", align 1
 @.str.4 = private unnamed_addr constant [8 x i8] c"
 Sum : \00", align 1
@@ -86,6 +87,7 @@ Completed
 @.str.36 = private unnamed_addr constant [10 x i8] c"%1024[^
 ]\00", align 1
 
+; Struct declarations
 %class.Object = type {i8*}
 %class.Main = type { %class.Object, %class.SimpleExprTests* }
 %class.IO = type { %class.Object }
@@ -1495,7 +1497,7 @@ entry:
 define i32 @_CN2IO_FN6in_int_(%class.IO* %this) {
 entry:
   %0 = alloca i32, align 8
-  %1 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.38, i32 0, i32 0
+  %1 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.37, i32 0, i32 0
   %call = call i32 (i8*, ...) @scanf(i8* %1, i32* %0)
   %2 = load i32, i32* %0, align 4
   ret i32 %2

@@ -108,8 +108,8 @@ class C {
 	ifWithDifferentReturnTypes(b : Bool) : A {
 		{	
 			j <- if b then new B else new E fi;
-		--	g@IO.out_string(j@A.type_name());
-		--	j;
+			g@IO.out_string(j@A.type_name());
+			j;
 		}
 	};
 };
