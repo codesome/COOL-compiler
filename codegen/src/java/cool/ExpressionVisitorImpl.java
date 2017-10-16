@@ -125,6 +125,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         
         IRPrinter.createCondBreak(truncVar, ifThenLabel, ifElseLabel);
         
+        // if then
         IRPrinter.createLabel(ifThenLabel);
         String ifBody = expr.ifbody.accept(this);
         if(!resultType.equals(expr.ifbody.type)) {
@@ -138,6 +139,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         }
         IRPrinter.createBreakInst(ifEndLabel);
         
+        // if else
         IRPrinter.createLabel(ifElseLabel);
         String ifElse = expr.elsebody.accept(this);
         if(!resultType.equals(expr.elsebody.type)) {
@@ -153,7 +155,6 @@ abstract class ExpressionVisitorImpl implements Visitor {
         IRPrinter.createBreakInst(ifEndLabel);
         IRPrinter.createLabel(ifEndLabel);
 
-        
         if(Utils.isPrimitiveType(resultType)) {
             return IRPrinter.createLoadInst(retVal, Utils.getBasicType(resultType));
         } else {

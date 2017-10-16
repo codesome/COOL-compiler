@@ -36,7 +36,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     // DFS helper for generateStructsAndCalculateSize
     private void generateStructsAndCalculateSizeDFS(InheritanceGraph.Node node) {
         AST.class_ cl = node.getAstClass();
-        int size = 0;
+        int size = 8; // initial 8 bytes for the type name in Object
         
         // Primitive types are i32, i8, i8*. No need of structs
         if(Utils.isPrimitiveType(cl.name))
@@ -182,11 +182,11 @@ class VisitorImpl extends ExpressionVisitorImpl {
         updateFunctionMangledNames(prog);
         
         // size of default classes
-        Global.classSizeMap.put("Int",12);
-        Global.classSizeMap.put("Bool",9);
-        Global.classSizeMap.put("String",16);
-        Global.classSizeMap.put("Object",8);
-        Global.classSizeMap.put("IO",8);
+        Global.classSizeMap.put("Int",4);
+        Global.classSizeMap.put("Bool",1);
+        Global.classSizeMap.put("String",8);
+        Global.classSizeMap.put("Object",0);
+        Global.classSizeMap.put("IO",0);
         
         printStringConstants();
         generateStructsAndCalculateSize();
@@ -241,7 +241,14 @@ class VisitorImpl extends ExpressionVisitorImpl {
                         String typenameString = IRPrinter.createStringGEP(at.value.type);
                         IRPrinter.createStoreInst(typenameString, typenameGEP, "i8*");
                     } else {
-                        valueRegister = IRPrinter.createConvertInst(valueRegister, at.value.type, at.typeid, IRPrinter.BITCAST);
+                        String oldClass = at.value.type;
+                        String pClass = Global.inheritanceGraph.getParentClassName(at.value.type);
+                        while(!pClass.equals(at.typeid)) {
+                            valueRegister = IRPrinter.createConvertInst(valueRegister, oldClass, pClass, IRPrinter.BITCAST);
+                            oldClass = pClass;
+                            pClass = Global.inheritanceGraph.getParentClassName(pClass);
+                        }
+                        valueRegister = IRPrinter.createConvertInst(valueRegister, oldClass, at.typeid, IRPrinter.BITCAST);
                     }
                 }
                 IRPrinter.createDoublePointerStoreInst(valueRegister, gepRegister, at.typeid);

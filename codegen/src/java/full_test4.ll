@@ -481,7 +481,7 @@ entry:
   %0 = bitcast %class.E* %this to %class.Object*
   call void @_CN6Object_FN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 1
-  %2 = call noalias i8* @malloc(i64 12)
+  %2 = call noalias i8* @malloc(i64 20)
   %3 = bitcast i8* %2 to %class.A*
   call void @_CN1A_FN1A_(%class.A* %3)
   %4 = bitcast %class.A* %3 to %class.Object*
@@ -499,7 +499,7 @@ entry:
   store i8* %12, i8** %11, align 8
   store %class.B* %9, %class.B** %7, align 4
   %13 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 3
-  %14 = call noalias i8* @malloc(i64 16)
+  %14 = call noalias i8* @malloc(i64 24)
   %15 = bitcast i8* %14 to %class.C*
   call void @_CN1C_FN1C_(%class.C* %15)
   %16 = bitcast %class.C* %15 to %class.Object*
@@ -508,88 +508,89 @@ entry:
   store i8* %18, i8** %17, align 8
   store %class.C* %15, %class.C** %13, align 4
   %19 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 4
-  %20 = call noalias i8* @malloc(i64 12)
+  %20 = call noalias i8* @malloc(i64 20)
   %21 = bitcast i8* %20 to %class.A*
   call void @_CN1A_FN1A_(%class.A* %21)
   %22 = bitcast %class.A* %21 to %class.Object*
   %23 = getelementptr inbounds %class.Object, %class.Object* %22, i32 0, i32 0
   %24 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.0, i32 0, i32 0
   store i8* %24, i8** %23, align 8
-  %25 = bitcast %class.A* %21 to %class.Object*
-  store %class.Object* %25, %class.Object** %19, align 4
-  %26 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 5
-  %27 = call noalias i8* @malloc(i64 8)
-  %28 = bitcast i8* %27 to %class.Object*
-  call void @_CN6Object_FN6Object_(%class.Object* %28)
-  %29 = getelementptr inbounds %class.Object, %class.Object* %28, i32 0, i32 0
-  %30 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.25, i32 0, i32 0
-  store i8* %30, i8** %29, align 8
-  %31 = getelementptr inbounds %class.Object, %class.Object* %28, i32 0, i32 0
-  %32 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.28, i32 0, i32 0
-  store i8* %32, i8** %31, align 8
-  store %class.Object* %28, %class.Object** %26, align 4
-  %33 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 6
-  %34 = call noalias i8* @malloc(i64 8)
-  %35 = bitcast i8* %34 to %class.IO*
-  call void @_CN2IO_FN2IO_(%class.IO* %35)
-  %36 = bitcast %class.IO* %35 to %class.Object*
-  %37 = getelementptr inbounds %class.Object, %class.Object* %36, i32 0, i32 0
-  %38 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.26, i32 0, i32 0
-  store i8* %38, i8** %37, align 8
-  %39 = bitcast %class.IO* %35 to %class.Object*
-  store %class.Object* %39, %class.Object** %33, align 4
-  %40 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 7
-  %41 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.16, i32 0, i32 0
-  %42 = call noalias i8* @malloc(i64 8)
-  %43 = bitcast i8* %42 to %class.Object*
-  call void @_CN6Object_FN6Object_(%class.Object* %43)
-  %44 = getelementptr inbounds %class.Object, %class.Object* %43, i32 0, i32 0
-  %45 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.25, i32 0, i32 0
-  store i8* %45, i8** %44, align 8
-  %46 = getelementptr inbounds %class.Object, %class.Object* %43, i32 0, i32 0
-  %47 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.27, i32 0, i32 0
-  store i8* %47, i8** %46, align 8
-  store %class.Object* %43, %class.Object** %40, align 4
-  %48 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 8
-  %49 = call noalias i8* @malloc(i64 8)
-  %50 = bitcast i8* %49 to %class.Object*
-  call void @_CN6Object_FN6Object_(%class.Object* %50)
-  %51 = getelementptr inbounds %class.Object, %class.Object* %50, i32 0, i32 0
-  %52 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.25, i32 0, i32 0
-  store i8* %52, i8** %51, align 8
-  %53 = getelementptr inbounds %class.Object, %class.Object* %50, i32 0, i32 0
-  %54 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.29, i32 0, i32 0
-  store i8* %54, i8** %53, align 8
-  store %class.Object* %50, %class.Object** %48, align 4
-  %55 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 9
-  %56 = call noalias i8* @malloc(i64 8)
-  %57 = bitcast i8* %56 to %class.IO*
-  call void @_CN2IO_FN2IO_(%class.IO* %57)
-  %58 = bitcast %class.IO* %57 to %class.Object*
-  %59 = getelementptr inbounds %class.Object, %class.Object* %58, i32 0, i32 0
-  %60 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.26, i32 0, i32 0
-  store i8* %60, i8** %59, align 8
-  store %class.IO* %57, %class.IO** %55, align 4
-  %61 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 10
-  %62 = call noalias i8* @malloc(i64 12)
-  %63 = bitcast i8* %62 to %class.A*
-  call void @_CN1A_FN1A_(%class.A* %63)
-  %64 = bitcast %class.A* %63 to %class.Object*
-  %65 = getelementptr inbounds %class.Object, %class.Object* %64, i32 0, i32 0
-  %66 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.0, i32 0, i32 0
-  store i8* %66, i8** %65, align 8
-  %67 = bitcast %class.A* %63 to %class.IO*
-  store %class.IO* %67, %class.IO** %61, align 4
-  %68 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 11
-  %69 = call noalias i8* @malloc(i64 16)
-  %70 = bitcast i8* %69 to %class.C*
-  call void @_CN1C_FN1C_(%class.C* %70)
-  %71 = bitcast %class.C* %70 to %class.Object*
-  %72 = getelementptr inbounds %class.Object, %class.Object* %71, i32 0, i32 0
-  %73 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.2, i32 0, i32 0
-  store i8* %73, i8** %72, align 8
-  %74 = bitcast %class.C* %70 to %class.B*
-  store %class.B* %74, %class.B** %68, align 4
+  %25 = bitcast %class.A* %21 to %class.IO*
+  %26 = bitcast %class.IO* %25 to %class.Object*
+  store %class.Object* %26, %class.Object** %19, align 4
+  %27 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 5
+  %28 = call noalias i8* @malloc(i64 0)
+  %29 = bitcast i8* %28 to %class.Object*
+  call void @_CN6Object_FN6Object_(%class.Object* %29)
+  %30 = getelementptr inbounds %class.Object, %class.Object* %29, i32 0, i32 0
+  %31 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.25, i32 0, i32 0
+  store i8* %31, i8** %30, align 8
+  %32 = getelementptr inbounds %class.Object, %class.Object* %29, i32 0, i32 0
+  %33 = getelementptr inbounds [4 x i8], [4 x i8]* @.str.28, i32 0, i32 0
+  store i8* %33, i8** %32, align 8
+  store %class.Object* %29, %class.Object** %27, align 4
+  %34 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 6
+  %35 = call noalias i8* @malloc(i64 8)
+  %36 = bitcast i8* %35 to %class.IO*
+  call void @_CN2IO_FN2IO_(%class.IO* %36)
+  %37 = bitcast %class.IO* %36 to %class.Object*
+  %38 = getelementptr inbounds %class.Object, %class.Object* %37, i32 0, i32 0
+  %39 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.26, i32 0, i32 0
+  store i8* %39, i8** %38, align 8
+  %40 = bitcast %class.IO* %36 to %class.Object*
+  store %class.Object* %40, %class.Object** %34, align 4
+  %41 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 7
+  %42 = getelementptr inbounds [1 x i8], [1 x i8]* @.str.16, i32 0, i32 0
+  %43 = call noalias i8* @malloc(i64 0)
+  %44 = bitcast i8* %43 to %class.Object*
+  call void @_CN6Object_FN6Object_(%class.Object* %44)
+  %45 = getelementptr inbounds %class.Object, %class.Object* %44, i32 0, i32 0
+  %46 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.25, i32 0, i32 0
+  store i8* %46, i8** %45, align 8
+  %47 = getelementptr inbounds %class.Object, %class.Object* %44, i32 0, i32 0
+  %48 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.27, i32 0, i32 0
+  store i8* %48, i8** %47, align 8
+  store %class.Object* %44, %class.Object** %41, align 4
+  %49 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 8
+  %50 = call noalias i8* @malloc(i64 0)
+  %51 = bitcast i8* %50 to %class.Object*
+  call void @_CN6Object_FN6Object_(%class.Object* %51)
+  %52 = getelementptr inbounds %class.Object, %class.Object* %51, i32 0, i32 0
+  %53 = getelementptr inbounds [7 x i8], [7 x i8]* @.str.25, i32 0, i32 0
+  store i8* %53, i8** %52, align 8
+  %54 = getelementptr inbounds %class.Object, %class.Object* %51, i32 0, i32 0
+  %55 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.29, i32 0, i32 0
+  store i8* %55, i8** %54, align 8
+  store %class.Object* %51, %class.Object** %49, align 4
+  %56 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 9
+  %57 = call noalias i8* @malloc(i64 8)
+  %58 = bitcast i8* %57 to %class.IO*
+  call void @_CN2IO_FN2IO_(%class.IO* %58)
+  %59 = bitcast %class.IO* %58 to %class.Object*
+  %60 = getelementptr inbounds %class.Object, %class.Object* %59, i32 0, i32 0
+  %61 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.26, i32 0, i32 0
+  store i8* %61, i8** %60, align 8
+  store %class.IO* %58, %class.IO** %56, align 4
+  %62 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 10
+  %63 = call noalias i8* @malloc(i64 20)
+  %64 = bitcast i8* %63 to %class.A*
+  call void @_CN1A_FN1A_(%class.A* %64)
+  %65 = bitcast %class.A* %64 to %class.Object*
+  %66 = getelementptr inbounds %class.Object, %class.Object* %65, i32 0, i32 0
+  %67 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.0, i32 0, i32 0
+  store i8* %67, i8** %66, align 8
+  %68 = bitcast %class.A* %64 to %class.IO*
+  store %class.IO* %68, %class.IO** %62, align 4
+  %69 = getelementptr inbounds %class.E, %class.E* %this, i32 0, i32 11
+  %70 = call noalias i8* @malloc(i64 24)
+  %71 = bitcast i8* %70 to %class.C*
+  call void @_CN1C_FN1C_(%class.C* %71)
+  %72 = bitcast %class.C* %71 to %class.Object*
+  %73 = getelementptr inbounds %class.Object, %class.Object* %72, i32 0, i32 0
+  %74 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.2, i32 0, i32 0
+  store i8* %74, i8** %73, align 8
+  %75 = bitcast %class.C* %71 to %class.B*
+  store %class.B* %75, %class.B** %69, align 4
   ret void
 }
 
@@ -667,7 +668,7 @@ entry:
   %6 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.17, i32 0, i32 0
   %7 = call i32 (i8*, ...) @printf(i8* %2, i8* %6)
   call void @exit(i32 0)
-  %8 = call noalias i8* @malloc(i64 8)
+  %8 = call noalias i8* @malloc(i64 0)
   %9 = bitcast i8* %8 to %class.Object*
   call void @_CN6Object_FN6Object_(%class.Object* %9)
   ret %class.Object* %9
