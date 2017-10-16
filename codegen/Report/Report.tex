@@ -152,7 +152,35 @@ This can then be executed using
 \begin{verbatim}
 ./a.out
 \end{verbatim}
-A set of good and bad test cases have been provided to verify the correctness of this program. The aim of these cases is to cover as many semantic rules as possible, which would provide reasonable confidence that the program is accurate.
+A set of cases have been provided to verify the correctness of the compiler. The aim of these cases is to cover and test the generated code for all the AST nodes, so as to provide reasonable confidence that the resulting IR is accurate.
+
+\begin{itemize}
+	\item \textbf{test1.cl} \\
+	This tests the following:
+	\begin{enumerate}
+		\item all the binary arithmetic operations - +,-,*,/, the relational operations - <,<=,=, negation, and complement. 
+		\item the runtime check on division by zero.
+		\item the conditional and nested conditional constructs. 
+		\item loops and nested loops.
+	\end{enumerate}
+	\item \textbf{test2.cl} \\
+	This tests the following:
+	\begin{enumerate}
+		\item checks that the default values of \verb|Int|, \verb|String|, and \verb|Bool| are correctly initialized.
+		\item checks that uninitialized class objects of other classes are \verb|void| while initialized objects are not.
+		\item static dispatch given a set of classes inheriting from each other, where the dynamic type, static type, and the class called upon on each dispatch is varied.
+		\item the runtime check on static dispatch on \verb|void|.
+		\item code generated for constants in the code, by checking that they are printed out correctly.
+		\item conditional where each branch has a different type.
+	\end{enumerate}
+	\item \textbf{test3.cl} \\
+	This tests the following:
+	\begin{enumerate}
+		\item checks that inherited attributes have the correct values in derived classes.
+		\item the in-built functions of classes \verb|Object|, \verb|IO|, and \verb|String|.
+	\end{enumerate}
+	
+\end{itemize}
 
 
 
