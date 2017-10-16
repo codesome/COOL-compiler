@@ -146,8 +146,28 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.scopeTable.exitScope();
     }
 
-    public void visit(AST.program prog) {
+    private void updateFunctionMangledNames(AST.program prog) {
+        for(AST.class_ cl : prog.classes) {
+            for(AST.feature f : cl.features) {
+                if(f instanceof AST.method) {
+                    AST.method m = (AST.method) f;
+                    Global.functionMangledNames.add(Utils.getMangledName(cl.name, m.name));
+                }
+            }
+        }
+        // These are not defined in AST
+        Global.functionMangledNames.add(Utils.getMangledName("Object", "type_name"));
+        Global.functionMangledNames.add(Utils.getMangledName("Object", "abort"));
+        Global.functionMangledNames.add(Utils.getMangledName("IO", "out_int"));
+        Global.functionMangledNames.add(Utils.getMangledName("IO", "out_string"));
+        Global.functionMangledNames.add(Utils.getMangledName("IO", "in_int"));
+        Global.functionMangledNames.add(Utils.getMangledName("IO", "in_string"));
+        Global.functionMangledNames.add(Utils.getMangledName("String", "length"));
+        Global.functionMangledNames.add(Utils.getMangledName("String", "concat"));
+        Global.functionMangledNames.add(Utils.getMangledName("String", "substr"));
+    }
 
+    public void visit(AST.program prog) {
         // preparing inheritance graph
         Global.inheritanceGraph = new InheritanceGraph();
         for(AST.class_ cl: prog.classes) {
@@ -159,6 +179,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
 
         Global.inheritanceGraph.update();
+        updateFunctionMangledNames(prog);
         
         // size of default classes
         Global.classSizeMap.put("Int",12);
@@ -170,17 +191,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
         printStringConstants();
         generateStructsAndCalculateSize();
 
-        // These are not defined in AST
-        Global.functionMangledNames.add(Utils.getMangledName("Object", "type_name"));
-        Global.functionMangledNames.add(Utils.getMangledName("Object", "abort"));
-        // Global.functionMangledNames.add(Utils.getMangledName("Object", "copy"));
-        Global.functionMangledNames.add(Utils.getMangledName("IO", "out_int"));
-        Global.functionMangledNames.add(Utils.getMangledName("IO", "out_string"));
-        Global.functionMangledNames.add(Utils.getMangledName("IO", "in_int"));
-        Global.functionMangledNames.add(Utils.getMangledName("IO", "in_string"));
-        Global.functionMangledNames.add(Utils.getMangledName("String", "length"));
-        Global.functionMangledNames.add(Utils.getMangledName("String", "concat"));
-        Global.functionMangledNames.add(Utils.getMangledName("String", "substr"));
 
         programVisitorDFS(Global.inheritanceGraph.getRootNode());
 
@@ -230,7 +240,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     public void visit(AST.method mthd) {
         Global.scopeTable.enterScope();
-        Global.functionMangledNames.add(Utils.getMangledName(Global.currentClass, mthd.name));
         Global.registerCounter = 0;
         if(Global.currentClass.equals("Main") && mthd.name.equals("main")) {
            Global.mainReturnType = mthd.typeid;
