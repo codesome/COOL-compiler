@@ -191,22 +191,47 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
         programVisitorDFS(Global.inheritanceGraph.getRootNode());
 
-        generateConstructors();
+        // generateConstructors();
         DefaultIR.generateDefaultMethods();
 
     }
 
     public void visit(AST.class_ cl) {
         Global.currentClass = cl.name;
-
         for(AST.feature f : cl.features) {
-            if(f instanceof AST.method) {
-                ((AST.method) f).accept(this);
-            } else {
+            if(f instanceof AST.attr) {
                 AST.attr at = ((AST.attr) f);
                 Global.scopeTable.insert(at.name, at.typeid);
             }
         }
+        for(AST.feature f : cl.features) {
+            if(f instanceof AST.method) {
+                ((AST.method) f).accept(this);
+            }
+        }
+
+        // constructor
+        if(Utils.isPrimitiveType(cl.name)) 
+            return;
+
+        Global.out.println("\n; Constructor of class '" + cl.name + "'");
+        Global.labelToCountMap.clear();
+        Global.registerCounter = 0;
+        Global.currentClass = cl.name;
+        Global.out.println("define void @" + Utils.getMangledName(cl.name, cl.name) + "(" + Utils.getStructName(cl.name) + "* %this) {");
+        IRPrinter.createLabel("entry");
+        createCallForParentConstructor(Global.currentClass, "%this");
+
+        // Individual attributes of constructor are taken care in visit of AST.attr
+        for(AST.feature f : cl.features) {
+            if(f instanceof AST.attr) {
+                AST.attr a = (AST.attr) f;
+                a.accept(this);
+            }
+        }
+
+        Global.out.println(IRPrinter.INDENT+"ret void");
+        Global.out.println("}");
     }
 
     public void visit(AST.attr at) {
