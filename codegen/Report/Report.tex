@@ -150,7 +150,8 @@ The following assumptions have been made:
 \begin{enumerate}
 	\item There is no \verb|SELF_TYPE|, \verb|let|, \verb|case|, and dynamic dispatch.
 	\item \verb|copy()| method in \verb|Object| has not been implemented as its return type is \verb|SELF_TYPE|.
-	\item \verb|CodegenTest| has been modified so that the file name can be passed to \verb|Codegen|, which is then displayed in the IR.
+	\item \verb|CodegenTest.java| has been modified so that the file name can be passed to \verb|Codegen.java|, which is then displayed in the IR.
+	\item \verb|Semantic.java| was modified to update the map containing the string constants. In this file, we also store all the class names as string constants which will be used for \verb|type_name()|.
 \end{enumerate}
 
 \section{Running the program and test cases}
