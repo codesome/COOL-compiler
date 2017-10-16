@@ -64,9 +64,14 @@ class C inherits B {
 			i@IO.out_int(l);
 			i@IO.out_string("\nlength() : ");
 			i@IO.out_int(s1@String.length());
+			i@IO.out_string("\nlength() of 'A String' : ");
+			i@IO.out_int("A String"@String.length());
 			i@IO.out_string("\nconcat() : ");
 			i@IO.out_string(s1@String.concat(s2));
+			i@IO.out_string("\nconcat() 'A String': ");
+			i@IO.out_string("A String"@String.concat(s2));
 			i@IO.out_string("\nsubstr() : ");
+			i@IO.out_string(s1@String.substr(x,l));
 			i@IO.out_string("\nCompleted\n\n");
 			0;
 		}
