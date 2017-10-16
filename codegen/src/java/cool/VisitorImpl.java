@@ -191,7 +191,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
         programVisitorDFS(Global.inheritanceGraph.getRootNode());
 
-        // generateConstructors();
+        generateConstructors();
         DefaultIR.generateDefaultMethods();
 
     }
@@ -209,29 +209,6 @@ class VisitorImpl extends ExpressionVisitorImpl {
                 ((AST.method) f).accept(this);
             }
         }
-
-        // constructor
-        if(Utils.isPrimitiveType(cl.name)) 
-            return;
-
-        Global.out.println("\n; Constructor of class '" + cl.name + "'");
-        Global.labelToCountMap.clear();
-        Global.registerCounter = 0;
-        Global.currentClass = cl.name;
-        Global.out.println("define void @" + Utils.getMangledName(cl.name, cl.name) + "(" + Utils.getStructName(cl.name) + "* %this) {");
-        IRPrinter.createLabel("entry");
-        createCallForParentConstructor(Global.currentClass, "%this");
-
-        // Individual attributes of constructor are taken care in visit of AST.attr
-        for(AST.feature f : cl.features) {
-            if(f instanceof AST.attr) {
-                AST.attr a = (AST.attr) f;
-                a.accept(this);
-            }
-        }
-
-        Global.out.println(IRPrinter.INDENT+"ret void");
-        Global.out.println("}");
     }
 
     public void visit(AST.attr at) {
