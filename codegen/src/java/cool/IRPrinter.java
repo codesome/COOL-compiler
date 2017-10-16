@@ -225,6 +225,7 @@ class IRPrinter {
     }
 
     public static String createTypeNameGEP(String classRegister) {
+        // NOTE: classRegister should already be bit casted to Object 
         String gepRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         String structName = Utils.getStructName(Global.Constants.ROOT_TYPE);
@@ -253,6 +254,13 @@ class IRPrinter {
         builder.append(gepRegister).append(" = alloca ").append(className).append(", align 8");
         Global.out.println(builder.toString());
         return gepRegister;
+    }
+
+    public static void createCallForConstructor(String className, String reg) {
+        StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
+        builder.append("call void @").append(Utils.getMangledName(className, className))
+        .append("(").append(Utils.getStructName(className)).append("* ").append(reg).append(")");
+        Global.out.println(builder.toString());
     }
 
 }

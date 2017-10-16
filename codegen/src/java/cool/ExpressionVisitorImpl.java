@@ -5,53 +5,51 @@ abstract class ExpressionVisitorImpl implements Visitor {
              Check Visitor.java 
     */
 
-    private boolean isPrimitiveType(String type) {
-        return Global.Constants.STRING_TYPE.equals(type)
-                || Global.Constants.INT_TYPE.equals(type)
-                || Global.Constants.BOOL_TYPE.equals(type);
-    }
-
     public String visit(AST.no_expr expr) {
         return null;
     }
 
     public String visit(AST.assign expr) {
+        // first generating IR to calculate value for assignment
         String retVal = expr.e1.accept(this);
         String castVal = retVal;
         String storeID;
         if(!expr.type.equals(expr.e1.type)) {
+            // bitcast if type of assignment is not same as object
             castVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
         }
         if(Global.methodParams.contains(expr.name)) {
+            // Function parameter can be directly got
             storeID = "%" + expr.name + ".addr";
         } else {
+            // GEP to get object from class struct
             storeID = IRPrinter.createClassAttrGEP(Global.currentClass, "%this", expr.name);
         }
         IRPrinter.createStoreInst(castVal, storeID, Utils.getBasicTypeOrPointer(expr.type));
         return retVal;
     }
 
-    private boolean isDefaultMethod(String methodName) {
-        return "abort".equals(methodName) || "out_int".equals(methodName) || "out_string".equals(methodName) 
-        || "in_int".equals(methodName) || "in_string".equals(methodName); 
-    }
-
+    // handles few selected methods differently, rest all default methods
+    // are handled by static_dispatch in normal way
     private String handleDefaultMethod(AST.static_dispatch expr) {
         String def = null;
         if("abort".equals(expr.name)) {
+            // calling the abort method without any arguments
             expr.caller.accept(this);
-            def = IRPrinter.createCallInst("Object", Utils.getMangledName("Object", 
-                            "abort"), "");
+            def = IRPrinter.createCallInst("Object", Utils.getMangledName("Object", "abort"), "");
         } else if("length".equals(expr.name) && Global.Constants.STRING_TYPE.equals(expr.typeid)) {
+            // directly using strlen of C, no separate function written in IR
             String stringReg = expr.caller.accept(this);
             String strlenReg = IRPrinter.createCallInst("i64", "strlen", "i8* " + stringReg);
             def = IRPrinter.createConvertInst(strlenReg,"i64","i32",IRPrinter.TRUNC);
         } else if("type_name".equals(expr.name)) {
+            // directly getting from object class variable
             String callerReg = expr.caller.accept(this);
             String objBitcast = callerReg;
-            if(!Global.Constants.ROOT_TYPE.equals(expr.caller.type))
+            if(!Global.Constants.ROOT_TYPE.equals(expr.caller.type)) {
                 objBitcast = IRPrinter.createConvertInst(callerReg, expr.caller.type, 
                                 Global.Constants.ROOT_TYPE, IRPrinter.BITCAST);
+            }
             String typenameGEP = IRPrinter.createTypeNameGEP(objBitcast);
             String loadReg = IRPrinter.createLoadInst(typenameGEP, "i8*");
             def = loadReg;
@@ -88,7 +86,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             return def;
         }
         String mthdClass = Utils.getNearestParentWithMethod(expr.typeid, expr.name);
-        if(isPrimitiveType(mthdClass)) {
+        if(Utils.isPrimitiveType(mthdClass)) {
             // TODO
         }
         if(!mthdClass.equals(expr.caller.type)) {
@@ -190,7 +188,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }   
 
     public String visit(AST.new_ expr) {
-        if(isPrimitiveType(expr.typeid)) {
+        if(Utils.isPrimitiveType(expr.typeid)) {
             return Utils.getDefaultValue(expr.typeid);
         }
         String bytesToAllocate = ""+Global.classSizeMap.get(expr.typeid);
@@ -213,7 +211,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
 
     public String visit(AST.isvoid expr) {
         String op = expr.e1.accept(this);
-        if(isPrimitiveType(expr.e1.type)) {
+        if(Utils.isPrimitiveType(expr.e1.type)) {
             return "0";
         }
         System.out.println("ISVOID : "+expr.type);
@@ -308,7 +306,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             return IRPrinter.createLoadInst("%"+expr.name+".addr", Utils.getBasicTypeOrPointer(expr.type));
         }
         String objectPointer = IRPrinter.createClassAttrGEP(Global.currentClass,"%this",expr.name);
-        if(isPrimitiveType(expr.type)) {
+        if(Utils.isPrimitiveType(expr.type)) {
             objectPointer = IRPrinter.createLoadInst(objectPointer, Utils.getBasicType(expr.type));
         }
         else {

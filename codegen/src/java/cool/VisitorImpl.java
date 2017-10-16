@@ -86,19 +86,13 @@ class VisitorImpl extends ExpressionVisitorImpl {
         generateConstructorsDFS(rootNode);
     }
 
-    private void createCallForConstructor(String className, String reg) {
-        StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
-        builder.append("call void @").append(Utils.getMangledName(className, className))
-        .append("(").append(Utils.getStructName(className)).append("* ").append(reg).append(")");
-        Global.out.println(builder.toString());
-    }
-
+    // Calls constructor of parent by taking child class register
     private void createCallForParentConstructor(String className, String childReg) {
         String parentType = Global.inheritanceGraph.getParentClassName(className);
         if(parentType!=null) {
             String bitcastRegister = IRPrinter.createConvertInst(childReg, Global.currentClass, 
                 parentType, IRPrinter.BITCAST);
-            createCallForConstructor(parentType, bitcastRegister);
+            IRPrinter.createCallForConstructor(parentType, bitcastRegister);
         }
     }
 
@@ -254,6 +248,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.formal fm) {
+        // function paramaters
         Global.methodParams.add(fm.name);
         Global.out.print(Utils.getBasicTypeOrPointer(fm.typeid) + " %" + fm.name);
     }

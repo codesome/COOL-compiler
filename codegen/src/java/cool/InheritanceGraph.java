@@ -12,8 +12,6 @@ import java.util.Collections;
 public class InheritanceGraph {
 
     /* Member variables */
-    // Index in the graph list where root node is stored
-    private static final int ROOT_CLASS_INDEX = 0;
 
     // List of nodes in the graph
     private List<Node> graph;
@@ -25,15 +23,10 @@ public class InheritanceGraph {
     // in graph list
     private Map<String,Integer> classNameToIndexMap;
 
-    private Node rootNode;
-
-    /* Constructor */
     public InheritanceGraph() {
-        rootNode = null;
         graph = new ArrayList<>();
         classNameToIndexMap = new HashMap<>();
     }
-
 
     // Adds the root class Object into the graph
     private void addObject() {
