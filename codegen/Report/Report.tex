@@ -139,6 +139,22 @@ The code is organized into the following files
 	This defines an interface to report errors, so that errors can be reported from all files without having to pass the \verb|Semantic| class object around explicitly.
 \end{itemize}
 
+\section{Miscellaneous Design Points}
+
+\subsection{Printing the IR}
+To easily convert diverse kinds of functions to IR, and to maintain sanity while printing each kind of instruction, we created a separate class, \verb|IRPrinter.java|. Here, static functions are defined for each type of LLVM Instruction. The operands for the instruction are passed as arguments. The instruction is created using a \verb|StringBuilder| and printed out inside the function to the output. A global register counter variable is used to keep track of unnamed variables in the IR. For instructions that store something in a register, the register name is returned. These instructions are called from the \verb|visit()| methods to easily create the instructions needed for each node.
+
+\subsection{Memory allocation, IO, and String manipulation}
+For functionality such as allocating memory dynamically on the heap, accepting input and displaying output, and performing string manipulation such as concatenation or finding the length, the corresponding functions in C were used. As the IR is compiled with \verb|clang|, the C libraries are linked and can be used in our IR. We added the declaration of the functions we used as they appear in the IR. The functions are - \verb|malloc()|, \verb|strlen()|, \verb|strcpy()|, \verb|strcat()|, \verb|strncpy()|, \verb|scanf()|, \verb|printf()|, and \verb|exit()|. Calls were made to these when needed.
+
+\subsection{Assumptions and Modifications}
+The following assumptions have been made:
+\begin{enumerate}
+	\item There is no \verb|SELF_TYPE|, \verb|let|, \verb|case|, and dynamic dispatch.
+	\item \verb|copy()| method in \verb|Object| has not been implemented as its return type is \verb|SELF_TYPE|.
+	\item \verb|CodegenTest| has been modified so that the file name can be passed to \verb|Codegen|, which is then displayed in the IR.
+\end{enumerate}
+
 \section{Running the program and test cases}
 To run the compiler, compile it using \verb|make|, and run it as
 \begin{verbatim}

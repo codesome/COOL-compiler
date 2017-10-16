@@ -6,4 +6,8 @@
 \BOOKMARK [2][-]{subsection.1.5}{Traversing the AST}{section.1}% 6
 \BOOKMARK [2][-]{subsection.1.6}{Adding the constructors and default methods}{section.1}% 7
 \BOOKMARK [1][-]{section.2}{Structure of the code}{}% 8
-\BOOKMARK [1][-]{section.3}{Running the program and test cases}{}% 9
+\BOOKMARK [1][-]{section.3}{Miscellaneous Design Points}{}% 9
+\BOOKMARK [2][-]{subsection.3.1}{Printing the IR}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.2}{Memory allocation, IO, and String manipulation}{section.3}% 11
+\BOOKMARK [2][-]{subsection.3.3}{Assumptions and Modifications}{section.3}% 12
+\BOOKMARK [1][-]{section.4}{Running the program and test cases}{}% 13

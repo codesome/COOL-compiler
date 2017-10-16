@@ -190,7 +190,7 @@ public class DefaultIR {
             Utils.getMangledName(Global.Constants.IO_TYPE, "in_int") +"("+Utils.getStructName(Global.Constants.IO_TYPE)+"* %this) {");
         Global.out.println("entry:");
         String allocaReg = IRPrinter.createAlloca(Global.Constants.INT_TYPE);
-        arg1 = IRPrinter.createStringGEP("%d\n");
+        arg1 = IRPrinter.createStringGEP("%d");
         Global.out.println(IRPrinter.INDENT+"%call = call i32 (i8*, ...) @scanf(i8* "+arg1+", i32* "+allocaReg+")");
         returnValue = IRPrinter.createLoadInst(allocaReg, "i32");
         Global.out.println(IRPrinter.INDENT+"ret i32 "+returnValue);
