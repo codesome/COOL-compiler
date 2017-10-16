@@ -117,26 +117,24 @@ After all the IR for the input program is generated, the constructors for each c
 \end{enumerate}
 
 \section{Structure of the code}
-The code is organized into the following files
+The code is organized into the following files. We mention the files that we have added:
 \begin{itemize}
-	\item \textbf{AST.java} \\
-	This contains the classes defining each node in the AST. This has been left mostly unchanged. For each node class, an \verb|accept()| method has been added to accept a visitor that traverses the AST.
 	\item \textbf{Global.java} \\
-	This contains methods to perform name mangling, stores a set of constants used throughout the program, and the objects that store the scope tables, the inheritance graph, and the mangled name map.
+	This contains methods to perform name mangling, stores a set of constants used throughout the program, and the objects that store the scope tables, and the inheritance graph.
 	\item \textbf{InheritanceGraph.java} \\
 	This defines the class for the inheritance graph and defines methods to operate on it. It also includes the methods to compute the join and check the conformance of types.
-	\item \textbf{ScopeTable.java} \\
-	This defines the scope table. A method has been added that allows an attribute to be removed from a particular scope.
-	\item \textbf{Semantic.java} \\
-	This is where the semantic analyzer starts the traversal by creating a new visitor and visiting the root of the AST.
 	\item \textbf{Visitor.java} \\
 	This defines an interface for all the \verb|visit()| methods for the visitors of each type of node.
 	\item \textbf{ExpressionVisitorImpl.java} \\
-	This defines the \verb|visit()| methods for all the AST node classes that correspond to an expression. This is an abstract class.
+	This defines the \verb|visit()| methods for all the AST node classes that correspond to an expression. The code that is to be generated for each kind of expression node is defined in these methods.
 	\item \textbf{VisitorImpl.java} \\
-	This defines the \verb|visit()| methods for all the other AST node classes. This extends \verb|ExpressionVisitorImpl|, and hence has access to all the \verb|visit()| methods defined there.
-	\item \textbf{ErrorReporter.java} \\
-	This defines an interface to report errors, so that errors can be reported from all files without having to pass the \verb|Semantic| class object around explicitly.
+	This defines the \verb|visit()| methods for all the other AST node classes. This extends \verb|ExpressionVisitorImpl|, and hence has access to all the \verb|visit()| methods defined there. The code that is to be generated for all other kinds of nodes is defined in these methods.
+	\item \textbf{IRPrinter.java} \\
+	This defines a set of static functions that each correspond to a particular type of LLVM instruction. Operands are passed as arguments, and the functions print out the corresponding instruction to the output, and return the register used.
+	\item \textbf{DefaultIR.java} \\
+	This prints all the C function declarations, and the function definitions of the in-built types of COOL to the output.
+	\item \textbf{Utils.java} \\
+	This contains a set of useful functions for converting the class name in COOL to struct name in IR, to get the type of a class in the IR, etc.
 \end{itemize}
 
 \section{Miscellaneous Design Points}
