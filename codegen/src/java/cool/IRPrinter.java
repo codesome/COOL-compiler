@@ -263,4 +263,26 @@ class IRPrinter {
         Global.out.println(builder.toString());
     }
 
+    public static String createAbortForPrimitive(String className) {
+        String loadNameReg = IRPrinter.createStringGEP(className);
+        String arg1 = IRPrinter.createStringGEP("%s");
+        String arg2 = IRPrinter.createStringGEP(Global.Constants.ABORT_MESSAGE);
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+loadNameReg+")");
+        Global.registerCounter++;
+        arg2 = IRPrinter.createStringGEP("\n");
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        Global.out.println(IRPrinter.INDENT+"call void @exit(i32 0)");
+
+        String bytesToAllocate = ""+Global.classSizeMap.get(Global.Constants.ROOT_TYPE);
+        String storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate);
+        String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
+                                        Global.Constants.ROOT_TYPE, IRPrinter.BITCAST);
+        IRPrinter.createVoidCallInst(Utils.getMangledName(Global.Constants.ROOT_TYPE, Global.Constants.ROOT_TYPE), 
+                                Utils.getStructName(Global.Constants.ROOT_TYPE)+ "* " + returnValue);
+        return returnValue;
+    }
+
 }

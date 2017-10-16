@@ -22,7 +22,8 @@ class Main inherits IO {
             self@IO.out_string(a1@A.type_name()@String.concat("\n"));
             self@IO.out_string(b1@B.type_name()@String.concat("\n"));
             self@IO.out_string(a2@A.type_name()@String.concat("\n"));
-            a@A.abort();
+            self@IO.out_string((1+2)@Object.type_name()@String.concat("\n"));
+            123@Int.abort();
             0;
         }
     };

@@ -37,38 +37,46 @@ abstract class ExpressionVisitorImpl implements Visitor {
             String stringReg = expr.caller.accept(this);
             String strlenReg = IRPrinter.createCallInst("i64", "strlen", "i8* " + stringReg);
             def = IRPrinter.createConvertInst(strlenReg,"i64","i32",IRPrinter.TRUNC);
+        } else if(Utils.isPrimitiveType(expr.caller.type) && "abort".equals(expr.name)) {
+            expr.caller.accept(this);
+            def = IRPrinter.createAbortForPrimitive(expr.caller.type);
+        } else if(Utils.isPrimitiveType(expr.caller.type) && "type_name".equals(expr.name)) {
+            expr.caller.accept(this);
+            def = IRPrinter.createStringGEP(expr.caller.type);
         }
         return def;
     }
 
     public String visit(AST.static_dispatch expr) {
 
-        String caller = expr.caller.accept(this);
-
-        String ifThenLabel = IRPrinter.getLabel("if.then",false);
-        String ifElseLabel = IRPrinter.getLabel("if.else",false);
-        String ifEndLabel = IRPrinter.getLabel("if.end",false);
-
-        String cmpInst = IRPrinter.createBinaryInst(IRPrinter.EQ, caller, "null", expr.caller.type, false, false);
-    //    String truncVar = IRPrinter.createConvertInst(cmpInst, "i8", "i1", IRPrinter.TRUNC);
-        IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
-        
-        IRPrinter.createLabel(ifThenLabel);
-        IRPrinter.createVoidCallInst(Global.Constants.VOID_CALL_FUNCTION, "i32 "+expr.lineNo);
-        Global.out.println(IRPrinter.INDENT+"call void @exit(i32 1)");
-        
-        IRPrinter.createBreakInst(ifEndLabel);
- 
-        IRPrinter.createLabel(ifElseLabel);
-        IRPrinter.createBreakInst(ifEndLabel);
-
-        
-        IRPrinter.createLabel(ifEndLabel);
-
         String def = handleDefaultMethod(expr);
         if(def!=null) {
+            // default method got handled
             return def;
         }
+
+        String caller = expr.caller.accept(this);
+        if(!Utils.isPrimitiveType(expr.caller.type)) {
+            // Adding check for dispatch on void
+            String ifThenLabel = IRPrinter.getLabel("if.then",false);
+            String ifElseLabel = IRPrinter.getLabel("if.else",false);
+            String ifEndLabel = IRPrinter.getLabel("if.end",false);
+
+            String cmpInst = IRPrinter.createBinaryInst(IRPrinter.EQ, caller, "null", expr.caller.type, false, false);
+            IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
+            
+            IRPrinter.createLabel(ifThenLabel);
+            IRPrinter.createVoidCallInst(Global.Constants.VOID_CALL_FUNCTION, "i32 "+expr.lineNo);
+            Global.out.println(IRPrinter.INDENT+"call void @exit(i32 1)");
+            
+            IRPrinter.createBreakInst(ifEndLabel);
+     
+            IRPrinter.createLabel(ifElseLabel);
+            IRPrinter.createBreakInst(ifEndLabel);
+            
+            IRPrinter.createLabel(ifEndLabel);
+        }
+
         String mthdClass = Utils.getNearestParentWithMethod(expr.typeid, expr.name);
         if(Utils.isPrimitiveType(mthdClass)) {
             // TODO
