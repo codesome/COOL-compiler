@@ -6,8 +6,7 @@ import java.util.HashMap;
 
 class VisitorImpl extends ExpressionVisitorImpl {
     /* NOTE: to know about the individual visit functions
-             Check Visitor.java 
-    */
+             Check Visitor.java */
 
     // Prints all the global string constants with their registers
     private void printStringConstants() {

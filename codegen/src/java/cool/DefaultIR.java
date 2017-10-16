@@ -105,7 +105,7 @@ public class DefaultIR {
             +"("+Utils.getStructName(Global.Constants.ROOT_TYPE)+"* %this) {");
         Global.out.println("entry:");
 
-
+        // Printing message for abort
         String typenameGEP = IRPrinter.createTypeNameGEP("%this");
         String loadNameReg = IRPrinter.createLoadInst(typenameGEP, "i8*");
         String arg1 = IRPrinter.createStringGEP("%s");
@@ -118,8 +118,10 @@ public class DefaultIR {
         Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
         Global.registerCounter++;
 
-
+        // calling exit
         Global.out.println(IRPrinter.INDENT+"call void @exit(i32 0)");
+        
+        // creating dummy Object for return
         String bytesToAllocate = ""+Global.classSizeMap.get(Global.Constants.ROOT_TYPE);
         String storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate);
         String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
@@ -128,6 +130,20 @@ public class DefaultIR {
                                 Utils.getStructName(Global.Constants.ROOT_TYPE)+ "* " + returnValue);
         Global.out.println(IRPrinter.INDENT+"ret "+Utils.getStructName(Global.Constants.ROOT_TYPE)+"* "+returnValue);
         Global.out.println("}");
+
+
+        // type_name method of Object
+        Global.registerCounter = 0;
+        Global.out.println("\n; Class: Object, Method: type_name");
+        Global.out.println("define i8* @"+ 
+            Utils.getMangledName(Global.Constants.ROOT_TYPE, "type_name") 
+            +"("+Utils.getStructName(Global.Constants.ROOT_TYPE)+"* %this) {");
+        Global.out.println("entry:");
+        typenameGEP = IRPrinter.createTypeNameGEP("%this");
+        String loadReg = IRPrinter.createLoadInst(typenameGEP, "i8*");
+        Global.out.println(IRPrinter.INDENT+"ret i8* "+loadReg);
+        Global.out.println("}");
+
 
     }
 

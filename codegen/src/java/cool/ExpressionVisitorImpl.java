@@ -2,8 +2,7 @@ package cool;
 
 abstract class ExpressionVisitorImpl implements Visitor {
     /* NOTE: to know about the individual visit functions
-             Check Visitor.java 
-    */
+             Check Visitor.java */
 
     public String visit(AST.no_expr expr) {
         return null;
@@ -33,26 +32,11 @@ abstract class ExpressionVisitorImpl implements Visitor {
     // are handled by static_dispatch in normal way
     private String handleDefaultMethod(AST.static_dispatch expr) {
         String def = null;
-        if("abort".equals(expr.name)) {
-            // calling the abort method without any arguments
-            // expr.caller.accept(this);
-            // def = IRPrinter.createCallInst("Object", Utils.getMangledName("Object", "abort"), "");
-        } else if("length".equals(expr.name) && Global.Constants.STRING_TYPE.equals(expr.typeid)) {
+        if("length".equals(expr.name) && Global.Constants.STRING_TYPE.equals(expr.typeid)) {
             // directly using strlen of C, no separate function written in IR
             String stringReg = expr.caller.accept(this);
             String strlenReg = IRPrinter.createCallInst("i64", "strlen", "i8* " + stringReg);
             def = IRPrinter.createConvertInst(strlenReg,"i64","i32",IRPrinter.TRUNC);
-        } else if("type_name".equals(expr.name)) {
-            // directly getting from object class variable
-            String callerReg = expr.caller.accept(this);
-            String objBitcast = callerReg;
-            if(!Global.Constants.ROOT_TYPE.equals(expr.caller.type)) {
-                objBitcast = IRPrinter.createConvertInst(callerReg, expr.caller.type, 
-                                Global.Constants.ROOT_TYPE, IRPrinter.BITCAST);
-            }
-            String typenameGEP = IRPrinter.createTypeNameGEP(objBitcast);
-            String loadReg = IRPrinter.createLoadInst(typenameGEP, "i8*");
-            def = loadReg;
         }
         return def;
     }

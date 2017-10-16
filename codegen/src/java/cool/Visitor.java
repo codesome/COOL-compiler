@@ -20,7 +20,11 @@ interface Visitor {
     public void visit(AST.formal fm);
 
     // Expression visitors
-
+    // All the expressions returns the resultant register 
+    // of the evaluated expression. 
+    // For primitie types its directly the value (i32, i8 or i8*)
+    // For other objects, its a pointer to the object
+    
     // Used for no_expression
     public String visit(AST.no_expr expr);
 
