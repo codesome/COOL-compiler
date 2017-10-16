@@ -13,9 +13,20 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String retVal = expr.e1.accept(this);
         String castVal = retVal;
         String storeID;
-        if(!expr.type.equals(expr.e1.type)) {
-            // bitcast if type of assignment is not same as object
-            castVal = IRPrinter.createConvertInst(retVal, expr.e1.type, expr.type, IRPrinter.BITCAST);
+        String variableType = Global.scopeTable.lookUpGlobal(expr.name);
+        if(!variableType.equals(expr.e1.type)) {
+            if(Utils.isPrimitiveType(expr.e1.type)) {
+                AST.new_ newObj = new AST.new_(Global.Constants.ROOT_TYPE, 0);
+                newObj.type = Global.Constants.ROOT_TYPE;
+                castVal = this.visit(newObj);
+                // fixing the typename
+                String typenameGEP = IRPrinter.createTypeNameGEP(castVal);
+                String typenameString = IRPrinter.createStringGEP(expr.e1.type);
+                IRPrinter.createStoreInst(typenameString, typenameGEP, "i8*");
+            } else {
+                // bitcast if type of assignment is not same as object
+                castVal = IRPrinter.createConvertInst(retVal, expr.e1.type, variableType, IRPrinter.BITCAST);
+            }
         }
         if(Global.methodParams.contains(expr.name)) {
             // Function parameter can be directly got
@@ -24,7 +35,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
             // GEP to get object from class struct
             storeID = IRPrinter.createClassAttrGEP(Global.currentClass, "%this", expr.name);
         }
-        IRPrinter.createStoreInst(castVal, storeID, Utils.getBasicTypeOrPointer(expr.type));
+        IRPrinter.createStoreInst(castVal, storeID, Utils.getBasicTypeOrPointer(variableType));
         return retVal;
     }
 
@@ -62,50 +73,50 @@ abstract class ExpressionVisitorImpl implements Visitor {
             String ifElseLabel = IRPrinter.getLabel("if.else",false);
             String ifEndLabel = IRPrinter.getLabel("if.end",false);
 
+            // checking for null
             String cmpInst = IRPrinter.createBinaryInst(IRPrinter.EQ, caller, "null", expr.caller.type, false, false);
             IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
-            
+
+            // exit if null
             IRPrinter.createLabel(ifThenLabel);
             IRPrinter.createVoidCallInst(Global.Constants.VOID_CALL_FUNCTION, "i32 "+expr.lineNo);
             Global.out.println(IRPrinter.INDENT+"call void @exit(i32 1)");
-            
+
             IRPrinter.createBreakInst(ifEndLabel);
-     
+
             IRPrinter.createLabel(ifElseLabel);
             IRPrinter.createBreakInst(ifEndLabel);
-            
+
             IRPrinter.createLabel(ifEndLabel);
         }
 
         String mthdClass = Utils.getNearestParentWithMethod(expr.typeid, expr.name);
-        if(Utils.isPrimitiveType(mthdClass)) {
-            // TODO
-        }
+
         if(!mthdClass.equals(expr.caller.type)) {
-            // TODO : check if the cast is for pointers
+            // bitcast caller if method is not from same class
             caller = IRPrinter.createConvertInst(caller, expr.caller.type, mthdClass, IRPrinter.BITCAST);
         }
 
+        // building parameters
         StringBuilder builder = new StringBuilder();
         builder.append(Utils.getBasicTypeOrPointer(mthdClass)).append(" ").append(caller);
         for(AST.expression argument : expr.actuals) {
-            builder.append(", ");
-            builder.append(Utils.getBasicTypeOrPointer(argument.type));
-            builder.append(" ");
-            String pointerReg = argument.accept(this);
-        //    String loadReg = IRPrinter.createLoadInst(pointerReg, argument.type);
-            builder.append(pointerReg);
+            builder.append(", ").append(Utils.getBasicTypeOrPointer(argument.type))
+            .append(" ").append(argument.accept(this));
         }
+        // calling function
         String returnValue = IRPrinter.createCallInst(expr.type, Utils.getMangledName(mthdClass, 
                             expr.name), builder.toString());
         return returnValue;
     }
 
-    public String visit(AST.cond expr) { // incomplete TODO: what is incomplete?
+    public String visit(AST.cond expr) {
         String ifThenLabel = IRPrinter.getLabel("if.then",false);
         String ifElseLabel = IRPrinter.getLabel("if.else",false);
         String ifEndLabel = IRPrinter.getLabel("if.end",false);
         String resultType = Global.inheritanceGraph.getJoinOf(expr.ifbody.type,expr.elsebody.type);
+        
+        // result of if.then and if.else will be stored in this register
         String retVal = IRPrinter.createAlloca(resultType);
 
         String cmpInst = expr.predicate.accept(this);
@@ -215,19 +226,19 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
 
-        return IRPrinter.createBinaryInst(IRPrinter.ADD, op1, op2, expr.type, false, true); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.ADD, op1, op2, expr.type, false, true);
     }
 
     public String visit(AST.sub expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.SUB, op1, op2, expr.type, false, true); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.SUB, op1, op2, expr.type, false, true);
     }
     
     public String visit(AST.mul expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.MUL, op1, op2, expr.type, false, true); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.MUL, op1, op2, expr.type, false, true);
     }
     
     public String visit(AST.divide expr) {
@@ -253,7 +264,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         
         IRPrinter.createLabel(ifEndLabel);
 
-        return IRPrinter.createBinaryInst(IRPrinter.DIV, op1, op2, expr.type, false, false); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.DIV, op1, op2, expr.type, false, false);
     }
     
     public String visit(AST.comp expr) {
@@ -264,27 +275,27 @@ abstract class ExpressionVisitorImpl implements Visitor {
     public String visit(AST.lt expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        String binResult = IRPrinter.createBinaryInst(IRPrinter.SLT, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
+        String binResult = IRPrinter.createBinaryInst(IRPrinter.SLT, op1, op2, expr.e1.type, false, false);
         return IRPrinter.createConvertInst(binResult, "i1", "i8", IRPrinter.ZEXT);
     }
     
     public String visit(AST.leq expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        String binResult = IRPrinter.createBinaryInst(IRPrinter.SLE, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
+        String binResult = IRPrinter.createBinaryInst(IRPrinter.SLE, op1, op2, expr.e1.type, false, false);
         return IRPrinter.createConvertInst(binResult, "i1", "i8", IRPrinter.ZEXT);
     }
     
     public String visit(AST.eq expr) {
         String op1 = expr.e1.accept(this);
         String op2 = expr.e2.accept(this);
-        String binResult = IRPrinter.createBinaryInst(IRPrinter.EQ, op1, op2, expr.e1.type, false, false); // TODO - set flags correctly
+        String binResult = IRPrinter.createBinaryInst(IRPrinter.EQ, op1, op2, expr.e1.type, false, false);
         return IRPrinter.createConvertInst(binResult, "i1", "i8", IRPrinter.ZEXT);
     }
     
     public String visit(AST.neg expr) {
         String op = expr.e1.accept(this);
-        return IRPrinter.createBinaryInst(IRPrinter.SUB, "0", op, expr.type, false, true); // TODO - set flags correctly
+        return IRPrinter.createBinaryInst(IRPrinter.SUB, "0", op, expr.type, false, true);
     }
     
     public String visit(AST.object expr) {

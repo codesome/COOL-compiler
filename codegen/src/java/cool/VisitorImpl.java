@@ -125,6 +125,27 @@ class VisitorImpl extends ExpressionVisitorImpl {
         }
     }
 
+    // Used to visit classes in depth first manner
+    // Depth first is used to preserve the parent class member variable
+    // and method info while we go into depth
+    private void programVisitorDFS(InheritanceGraph.Node node) {
+
+        // enter scope for the new class
+        Global.scopeTable.enterScope();
+
+        // visit the class
+        if(!Utils.isDefaultClass(node.getAstClass().name))
+            node.getAstClass().accept(this);
+
+        // iterate through all the child nodes
+        for(InheritanceGraph.Node child: node.getChildren()) {
+            programVisitorDFS(child);
+        }
+
+        // exit scope
+        Global.scopeTable.exitScope();
+    }
+
     public void visit(AST.program prog) {
 
         // preparing inheritance graph
@@ -161,10 +182,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.functionMangledNames.add(Utils.getMangledName("String", "concat"));
         Global.functionMangledNames.add(Utils.getMangledName("String", "substr"));
 
-        for(AST.class_ cl: prog.classes) {
-            if(!Utils.isDefaultClass(cl.name))
-                cl.accept(this);
-        }
+        programVisitorDFS(Global.inheritanceGraph.getRootNode());
 
         generateConstructors();
         DefaultIR.generateDefaultMethods();
@@ -177,6 +195,9 @@ class VisitorImpl extends ExpressionVisitorImpl {
         for(AST.feature f : cl.features) {
             if(f instanceof AST.method) {
                 ((AST.method) f).accept(this);
+            } else {
+                AST.attr at = ((AST.attr) f);
+                Global.scopeTable.insert(at.name, at.typeid);
             }
         }
     }
@@ -208,6 +229,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     }
 
     public void visit(AST.method mthd) {
+        Global.scopeTable.enterScope();
         Global.functionMangledNames.add(Utils.getMangledName(Global.currentClass, mthd.name));
         Global.registerCounter = 0;
         if(Global.currentClass.equals("Main") && mthd.name.equals("main")) {
@@ -244,10 +266,12 @@ class VisitorImpl extends ExpressionVisitorImpl {
         Global.out.println(IRPrinter.INDENT + "ret " + Utils.getBasicTypeOrPointer(mthd.typeid) + " " + returnReg);
         Global.out.println("}");
 
+        Global.scopeTable.exitScope();
     }
 
     public void visit(AST.formal fm) {
         // function paramaters
+        Global.scopeTable.insert(fm.name, fm.typeid);
         Global.methodParams.add(fm.name);
         Global.out.print(Utils.getBasicTypeOrPointer(fm.typeid) + " %" + fm.name);
     }
