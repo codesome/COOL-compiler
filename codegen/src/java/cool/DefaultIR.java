@@ -60,11 +60,14 @@ public class DefaultIR {
         Global.out.println("declare i64 @strlen(i8*)");
 
         // for concat
-        Global.out.println("\n; C strlen declaration");
+        Global.out.println("\n; C strcpy declaration");
         Global.out.println("declare i8* @strcpy(i8*, i8*)");
 
-        Global.out.println("\n; C strlen declaration");
+        Global.out.println("\n; C strcat declaration");
         Global.out.println("declare i8* @strcat(i8*, i8*)");
+
+        Global.out.println("\n; C strncpy declaration");
+        Global.out.println("declare i8* @strncpy(i8*, i8*, i64)");        
 
     }
 
@@ -169,6 +172,31 @@ public class DefaultIR {
         IRPrinter.createCallInst(Global.Constants.STRING_TYPE, "strcpy", "i8* "+newStringReg+", i8* %s1");
         IRPrinter.createCallInst(Global.Constants.STRING_TYPE, "strcat", "i8* "+newStringReg+", i8* %s2");
         Global.out.println(IRPrinter.INDENT+"ret i8* "+newStringReg);
+        Global.out.println("}");
+
+        // substr method of String
+        Global.registerCounter = 0;
+        Global.out.println("\n; Class: String, Method: substr");
+        Global.out.println("define i8* @"+ 
+            Utils.getMangledName(Global.Constants.STRING_TYPE, "substr") +"(i8* %s1, i32 %index, i32 %len) {");
+        Global.out.println("entry:");
+    //    String destPtr = IRPrinter.createAlloca("String");
+        // String lenPtr = IRPrinter.createAlloca("Int");
+      //  IRPrinter.createStoreInst("%len", lenPtr, "i32");
+      //  String loadLen = IRPrinter.createLoadInst(lenPtr, "i32");
+        String convert = IRPrinter.createConvertInst("%len", "i32", "i64", IRPrinter.ZEXT);
+        String mallocInst = IRPrinter.createMallocInst(convert);
+        // String lenS1 = IRPrinter.createCallInst("i64", "strlen", "i8* %s1");
+        String gepRegister = "%"+Global.registerCounter;
+        Global.registerCounter++;
+        StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
+        builder.append(gepRegister).append(" = ").append("getelementptr inbounds ");
+        builder.append("i8, i8* %s1, i32 %index");
+        Global.out.println(builder.toString());
+        String callCopy = IRPrinter.createCallInst(Global.Constants.STRING_TYPE, "strncpy", "i8* "
+                +mallocInst+", i8* "+gepRegister+", i64 "+convert);
+    //    IRPrinter.createStoreInst(mallocInst, destPtr, "i8*");
+        Global.out.println(IRPrinter.INDENT+"ret i8* "+mallocInst);
         Global.out.println("}");
 
     }

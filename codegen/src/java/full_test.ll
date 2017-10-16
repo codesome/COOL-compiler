@@ -15,6 +15,9 @@ Divide by 0 exception at line no \00", align 1
 Quotient : \00", align 1
 @.str.15 = private unnamed_addr constant [20 x i8] c"Bool value is true
 \00", align 1
+@.str.19 = private unnamed_addr constant [12 x i8] c"Completed
+
+\00", align 1
 @.str.1 = private unnamed_addr constant [16 x i8] c"Operands are : \00", align 1
 @.str.8 = private unnamed_addr constant [31 x i8] c"
 Comparing these operands now
@@ -65,13 +68,12 @@ Dispatch to void at line no \00", align 1
 Checking value returned by loop
 \00", align 1
 @.str.35 = private unnamed_addr constant [3 x i8] c"%s\00", align 1
-@.str.19 = private unnamed_addr constant [11 x i8] c"Completed
-\00", align 1
 @.str.29 = private unnamed_addr constant [28 x i8] c"Value returned is not void
 \00", align 1
 @.str.9 = private unnamed_addr constant [13 x i8] c"Less than : \00", align 1
-@.str.23 = private unnamed_addr constant [12 x i8] c"
+@.str.23 = private unnamed_addr constant [13 x i8] c"
 Completed
+
 \00", align 1
 @.str.33 = private unnamed_addr constant [5 x i8] c"Main\00", align 1
 @.str.36 = private unnamed_addr constant [10 x i8] c"%1024[^
@@ -667,7 +669,7 @@ if.else.34:
 
 if.end.34:
   %212 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %213 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.19, i32 0, i32 0
+  %213 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.19, i32 0, i32 0
   %214 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %212, i8* %213)
   ret i32 0
 }
@@ -891,7 +893,7 @@ if.else.47:
 
 if.end.47:
   %74 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %75 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.23, i32 0, i32 0
+  %75 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.23, i32 0, i32 0
   %76 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %74, i8* %75)
   ret i32 0
 }
@@ -1096,7 +1098,7 @@ if.else.58:
 
 if.end.58:
   %70 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %71 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.19, i32 0, i32 0
+  %71 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.19, i32 0, i32 0
   %72 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %70, i8* %71)
   ret i32 0
 }
@@ -1255,7 +1257,7 @@ if.else.65:
 
 if.end.65:
   %55 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %56 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.19, i32 0, i32 0
+  %56 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.19, i32 0, i32 0
   %57 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %55, i8* %56)
   ret i32 0
 }
@@ -1421,11 +1423,14 @@ declare i32 @scanf(i8*, ...)
 ; C strlen declaration
 declare i64 @strlen(i8*)
 
-; C strlen declaration
+; C strcpy declaration
 declare i8* @strcpy(i8*, i8*)
 
-; C strlen declaration
+; C strcat declaration
 declare i8* @strcat(i8*, i8*)
+
+; C strncpy declaration
+declare i8* @strncpy(i8*, i8*, i64)
 
 ; Class: Object, Method: abort
 define %class.Object* @_CN6Object_FN5abort_() {
@@ -1491,6 +1496,17 @@ entry:
   %5 = call i8* @strcpy(i8* %4, i8* %s1)
   %6 = call i8* @strcat(i8* %4, i8* %s2)
   ret i8* %4
+}
+
+; Class: String, Method: substr
+define i8* @_CN6String_FN6substr_(i8* %s1, i32 %index, i32 %len) {
+entry:
+  %0 = alloca i8*, align 8
+  %1 = call noalias i8* @malloc(i64 %len)
+  store i8* %1, i8** %0, align 8
+  %2 = getelementptr inbounds i8, i8* %s1, i32 %index
+  %3 = call i8* @strncpy(i8* %0, i32 %2, i32 %len)
+  ret i8* %0
 }
 define void @print_div_by_zero_err_msg(i32 %lineNo) {
 entry:
