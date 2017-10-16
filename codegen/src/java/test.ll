@@ -42,52 +42,6 @@ entry:
   ret i32 99
 }
 
-; Constructor of class 'A'
-define void @_CN1A_FN1A_(%class.A* %this) {
-
-entry:
-  %0 = bitcast %class.A* %this to %class.Object*
-  call void @_CN6Object_FN6Object_(%class.Object* %0)
-  %1 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  store i32 100, i32* %1, align 4
-  %2 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 2
-  br label %while.cond
-
-while.cond:
-  %3 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
-  %4 = load i8, i8* %3, align 4
-  %5 = trunc i8 %4 to i1
-  br i1 %5, label %while.body, label %while.end
-
-while.body:
-  %6 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  %7 = load i32, i32* %6, align 4
-  %8 = add nsw i32 %7, 1
-  %9 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
-  store i32 %8, i32* %9, align 4
-  br label %while.cond
-
-while.end:
-  store %class.Object* null, %class.Object** %2, align 4
-  %10 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
-  store i8 1, i8* %10, align 4
-  ret void
-}
-
-; Constructor of class 'B'
-define void @_CN1B_FN1B_(%class.B* %this) {
-
-entry:
-  %0 = bitcast %class.B* %this to %class.A*
-  call void @_CN1A_FN1A_(%class.A* %0)
-  %1 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 1
-  %2 = getelementptr inbounds [17 x i8], [17 x i8]* @.str.2, i32 0, i32 0
-  store i8* %2, i8** %1, align 8
-  %3 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 2
-  store %class.A* null, %class.A** %3, align 4
-  ret void
-}
-
 ; Class: Main, Method: main
 define i32 @_CN4Main_FN4main_(%class.Main* %this) {
 
@@ -136,6 +90,59 @@ entry:
   ret %class.A* %5
 }
 
+; Constructor of class 'Object'
+define void @_CN6Object_FN6Object_(%class.Object* %this) {
+
+entry:
+  ret void
+}
+
+; Constructor of class 'A'
+define void @_CN1A_FN1A_(%class.A* %this) {
+
+entry:
+  %0 = bitcast %class.A* %this to %class.Object*
+  call void @_CN6Object_FN6Object_(%class.Object* %0)
+  %1 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
+  store i32 100, i32* %1, align 4
+  %2 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 2
+  br label %while.cond
+
+while.cond:
+  %3 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
+  %4 = load i8, i8* %3, align 4
+  %5 = trunc i8 %4 to i1
+  br i1 %5, label %while.body, label %while.end
+
+while.body:
+  %6 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
+  %7 = load i32, i32* %6, align 4
+  %8 = add nsw i32 %7, 1
+  %9 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 1
+  store i32 %8, i32* %9, align 4
+  br label %while.cond
+
+while.end:
+  store %class.Object* null, %class.Object** %2, align 4
+  %10 = getelementptr inbounds %class.A, %class.A* %this, i32 0, i32 3
+  store i8 1, i8* %10, align 4
+  ret void
+}
+
+; Constructor of class 'B'
+define void @_CN1B_FN1B_(%class.B* %this) {
+
+entry:
+  %0 = bitcast %class.B* %this to %class.A*
+  call void @_CN1A_FN1A_(%class.A* %0)
+  %1 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 1
+  %2 = getelementptr inbounds [17 x i8], [17 x i8]* @.str.2, i32 0, i32 0
+  store i8* %2, i8** %1, align 8
+  %3 = getelementptr inbounds %class.B, %class.B* %this, i32 0, i32 2
+  store %class.A* null, %class.A** %3, align 4
+  ret void
+}
+
 ; Constructor of class 'Main'
 define void @_CN4Main_FN4Main_(%class.Main* %this) {
 
@@ -155,6 +162,15 @@ entry:
   %8 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.0, i32 0, i32 0
   store i8* %8, i8** %7, align 8
   store %class.A* %5, %class.A** %3, align 4
+  ret void
+}
+
+; Constructor of class 'IO'
+define void @_CN2IO_FN2IO_(%class.IO* %this) {
+
+entry:
+  %0 = bitcast %class.IO* %this to %class.Object*
+  call void @_CN6Object_FN6Object_(%class.Object* %0)
   ret void
 }
 

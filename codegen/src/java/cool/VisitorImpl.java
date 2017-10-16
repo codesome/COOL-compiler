@@ -103,6 +103,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     // DFS helper for generateConstructors
     private void generateConstructorsDFS(InheritanceGraph.Node node) {
+        Global.scopeTable.enterScope();
         AST.class_ cl = node.getAstClass();
 
         if(Utils.isPrimitiveType(cl.name)) 
@@ -121,6 +122,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
             if(f instanceof AST.attr) {
                 AST.attr a = (AST.attr) f;
                 a.accept(this);
+                Global.scopeTable.insert(a.name, a.typeid);
             }
         }
 
@@ -129,6 +131,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
         for(InheritanceGraph.Node child: node.getChildren()) {
             generateConstructorsDFS(child);
         }
+        Global.scopeTable.exitScope();
     }
 
     // Used to visit classes in depth first manner
