@@ -10,6 +10,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
 
     // Prints all the global string constants with their registers
     private void printStringConstants() {
+        Global.out.println("; String constant declarations");
         DefaultIR.addDefaultStrings();
         StringBuilder structBuilder = new StringBuilder();
         for(Map.Entry<String,String> entry: Global.stringConstantToRegisterMap.entrySet()) {
@@ -23,6 +24,7 @@ class VisitorImpl extends ExpressionVisitorImpl {
     // Prints structs for all the class and calculates the size of the struct
     private void generateStructsAndCalculateSize() {
         Global.out.println();
+        Global.out.println("; Struct declarations");
         InheritanceGraph.Node rootNode = Global.inheritanceGraph.getRootNode();
         Global.out.println(Utils.getStructName(Global.Constants.ROOT_TYPE) + " = type {i8*}");
         Global.classToVariableToIndexListMap.put(Global.Constants.ROOT_TYPE, new HashMap<>());

@@ -236,13 +236,8 @@ public class DefaultIR {
         Global.out.println("define i8* @"+ 
             Utils.getMangledName(Global.Constants.STRING_TYPE, "substr") +"(i8* %s1, i32 %index, i32 %len) {");
         Global.out.println("entry:");
-    //    String destPtr = IRPrinter.createAlloca("String");
-        // String lenPtr = IRPrinter.createAlloca("Int");
-      //  IRPrinter.createStoreInst("%len", lenPtr, "i32");
-      //  String loadLen = IRPrinter.createLoadInst(lenPtr, "i32");
         String convert = IRPrinter.createConvertInst("%len", "i32", "i64", IRPrinter.ZEXT);
         String mallocInst = IRPrinter.createMallocInst(convert);
-        // String lenS1 = IRPrinter.createCallInst("i64", "strlen", "i8* %s1");
         String gepRegister = "%"+Global.registerCounter;
         Global.registerCounter++;
         StringBuilder builder = new StringBuilder(IRPrinter.INDENT);
@@ -251,7 +246,6 @@ public class DefaultIR {
         Global.out.println(builder.toString());
         String callCopy = IRPrinter.createCallInst(Global.Constants.STRING_TYPE, "strncpy", "i8* "
                 +mallocInst+", i8* "+gepRegister+", i64 "+convert);
-    //    IRPrinter.createStoreInst(mallocInst, destPtr, "i8*");
         Global.out.println(IRPrinter.INDENT+"ret i8* "+mallocInst);
         Global.out.println("}");
 
