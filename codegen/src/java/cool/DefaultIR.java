@@ -35,6 +35,26 @@ public class DefaultIR {
             Global.stringConstantToRegisterMap.put(Global.Constants.VOID_CALL_ERROR, "@.str."+Global.stringRegisterCounter);
             Global.stringRegisterCounter++;
         }
+        if(!Global.stringConstantToRegisterMap.containsKey(Global.Constants.ROOT_TYPE)) {
+            Global.stringConstantToRegisterMap.put(Global.Constants.ROOT_TYPE, "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
+        if(!Global.stringConstantToRegisterMap.containsKey(Global.Constants.IO_TYPE)) {
+            Global.stringConstantToRegisterMap.put(Global.Constants.IO_TYPE, "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
+        if(!Global.stringConstantToRegisterMap.containsKey(Global.Constants.STRING_TYPE)) {
+            Global.stringConstantToRegisterMap.put(Global.Constants.STRING_TYPE, "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
+        if(!Global.stringConstantToRegisterMap.containsKey(Global.Constants.INT_TYPE)) {
+            Global.stringConstantToRegisterMap.put(Global.Constants.INT_TYPE, "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
+        if(!Global.stringConstantToRegisterMap.containsKey(Global.Constants.BOOL_TYPE)) {
+            Global.stringConstantToRegisterMap.put(Global.Constants.BOOL_TYPE, "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
 	}
 	
     private static void generateCDeclarations() {

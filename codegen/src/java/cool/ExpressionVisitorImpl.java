@@ -46,6 +46,15 @@ abstract class ExpressionVisitorImpl implements Visitor {
             String stringReg = expr.caller.accept(this);
             String strlenReg = IRPrinter.createCallInst("i64", "strlen", "i8* " + stringReg);
             def = IRPrinter.createConvertInst(strlenReg,"i64","i32",IRPrinter.TRUNC);
+        } else if("type_name".equals(expr.name)) {
+            String callerReg = expr.caller.accept(this);
+            String objBitcast = callerReg;
+            if(!Global.Constants.ROOT_TYPE.equals(expr.caller.type))
+                objBitcast = IRPrinter.createConvertInst(callerReg, expr.caller.type, 
+                                Global.Constants.ROOT_TYPE, IRPrinter.BITCAST);
+            String typenameGEP = IRPrinter.createTypeNameGEP(objBitcast);
+            String loadReg = IRPrinter.createLoadInst(typenameGEP, "i8*");
+            def = loadReg;
         }
         return def;
     }
@@ -181,15 +190,24 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }   
 
     public String visit(AST.new_ expr) {
-        if(isPrimitiveType(expr.type)) {
-            return Utils.getDefaultValue(expr.type);
+        if(isPrimitiveType(expr.typeid)) {
+            return Utils.getDefaultValue(expr.typeid);
         }
-        String bytesToAllocate = ""+Global.classSizeMap.get(expr.type);
+        String bytesToAllocate = ""+Global.classSizeMap.get(expr.typeid);
         String storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate);
         String returnValue = IRPrinter.createConvertInst(storeRegisterForCall, "i8*", 
                                         expr.typeid, IRPrinter.BITCAST);
         IRPrinter.createVoidCallInst(Utils.getMangledName(expr.typeid, expr.typeid), 
                                 Utils.getStructName(expr.typeid)+ "* " + returnValue);
+
+        // store the name here
+        String objBitcast = returnValue;
+        if(!Global.Constants.ROOT_TYPE.equals(expr.typeid))
+            objBitcast = IRPrinter.createConvertInst(returnValue, expr.typeid, 
+                            Global.Constants.ROOT_TYPE, IRPrinter.BITCAST);
+        String typenameGEP = IRPrinter.createTypeNameGEP(objBitcast);
+        String typenameString = IRPrinter.createStringGEP(expr.typeid);
+        IRPrinter.createStoreInst(typenameString, typenameGEP, "i8*");
         return returnValue;
     }
 

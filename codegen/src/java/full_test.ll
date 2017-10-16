@@ -2,82 +2,84 @@
 source_filename = "../test_cases/full_test.cl"
 
 @.str.34 = private unnamed_addr constant [1 x i8] c"\00", align 1
-@.str.3 = private unnamed_addr constant [8 x i8] c"
+@.str.4 = private unnamed_addr constant [8 x i8] c"
 Sum : \00", align 1
-@.str.25 = private unnamed_addr constant [5 x i8] c"n = \00", align 1
+@.str.26 = private unnamed_addr constant [5 x i8] c"n = \00", align 1
 @.str.39 = private unnamed_addr constant [35 x i8] c"
 Divide by 0 exception at line no \00", align 1
-@.str.26 = private unnamed_addr constant [2 x i8] c"
+@.str.27 = private unnamed_addr constant [2 x i8] c"
 \00", align 1
 @.str.38 = private unnamed_addr constant [4 x i8] c"%d
 \00", align 1
-@.str.6 = private unnamed_addr constant [13 x i8] c"
+@.str.7 = private unnamed_addr constant [13 x i8] c"
 Quotient : \00", align 1
-@.str.15 = private unnamed_addr constant [20 x i8] c"Bool value is true
+@.str.16 = private unnamed_addr constant [20 x i8] c"Bool value is true
 \00", align 1
-@.str.1 = private unnamed_addr constant [16 x i8] c"Operands are : \00", align 1
-@.str.8 = private unnamed_addr constant [31 x i8] c"
+@.str.20 = private unnamed_addr constant [12 x i8] c"Completed
+
+\00", align 1
+@.str.2 = private unnamed_addr constant [16 x i8] c"Operands are : \00", align 1
+@.str.9 = private unnamed_addr constant [31 x i8] c"
 Comparing these operands now
 \00", align 1
-@.str.13 = private unnamed_addr constant [16 x i8] c"Both are equal
+@.str.14 = private unnamed_addr constant [16 x i8] c"Both are equal
 \00", align 1
-@.str.14 = private unnamed_addr constant [20 x i8] c"Both are not equal
+@.str.15 = private unnamed_addr constant [20 x i8] c"Both are not equal
 \00", align 1
-@.str.20 = private unnamed_addr constant [58 x i8] c"Testing if-else by finding the smallest of three numbers
+@.str.21 = private unnamed_addr constant [58 x i8] c"Testing if-else by finding the smallest of three numbers
 \00", align 1
-@.str.4 = private unnamed_addr constant [15 x i8] c"
+@.str.5 = private unnamed_addr constant [15 x i8] c"
 Difference : \00", align 1
-@.str.10 = private unnamed_addr constant [26 x i8] c"First is lesser or equal
+@.str.11 = private unnamed_addr constant [26 x i8] c"First is lesser or equal
 \00", align 1
-@.str.22 = private unnamed_addr constant [31 x i8] c"
+@.str.23 = private unnamed_addr constant [31 x i8] c"
 The smallest among them is : \00", align 1
-@.str.32 = private unnamed_addr constant [16 x i8] c"SimpleExprTests\00", align 1
-@.str.0 = private unnamed_addr constant [38 x i8] c"Testing binary arithmetic operations
+@.str.0 = private unnamed_addr constant [16 x i8] c"SimpleExprTests\00", align 1
+@.str.1 = private unnamed_addr constant [38 x i8] c"Testing binary arithmetic operations
 \00", align 1
-@.str.18 = private unnamed_addr constant [26 x i8] c"It's complement is false
+@.str.19 = private unnamed_addr constant [26 x i8] c"It's complement is false
 \00", align 1
-@.str.16 = private unnamed_addr constant [21 x i8] c"Bool value is false
+@.str.17 = private unnamed_addr constant [21 x i8] c"Bool value is false
 \00", align 1
-@.str.17 = private unnamed_addr constant [25 x i8] c"It's complement is true
+@.str.18 = private unnamed_addr constant [25 x i8] c"It's complement is true
 \00", align 1
-@.str.5 = private unnamed_addr constant [12 x i8] c"
+@.str.6 = private unnamed_addr constant [12 x i8] c"
 Product : \00", align 1
-@.str.28 = private unnamed_addr constant [24 x i8] c"Value returned is void
+@.str.29 = private unnamed_addr constant [24 x i8] c"Value returned is void
 \00", align 1
-@.str.11 = private unnamed_addr constant [27 x i8] c"First is greater or equal
+@.str.12 = private unnamed_addr constant [27 x i8] c"First is greater or equal
 \00", align 1
 @.str.37 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
-@.str.2 = private unnamed_addr constant [2 x i8] c" \00", align 1
-@.str.24 = private unnamed_addr constant [41 x i8] c"Loop Test 1 : Print numbers from 1 to n
+@.str.3 = private unnamed_addr constant [2 x i8] c" \00", align 1
+@.str.25 = private unnamed_addr constant [41 x i8] c"Loop Test 1 : Print numbers from 1 to n
 \00", align 1
-@.str.21 = private unnamed_addr constant [20 x i8] c"The numbers are : 
+@.str.22 = private unnamed_addr constant [20 x i8] c"The numbers are : 
 \00", align 1
-@.str.30 = private unnamed_addr constant [70 x i8] c"Loop Test 2 : Print a right angled triangle using * given the size n
+@.str.31 = private unnamed_addr constant [70 x i8] c"Loop Test 2 : Print a right angled triangle using * given the size n
 \00", align 1
-@.str.12 = private unnamed_addr constant [18 x i8] c"First is greater
+@.str.13 = private unnamed_addr constant [18 x i8] c"First is greater
 \00", align 1
-@.str.7 = private unnamed_addr constant [22 x i8] c"
+@.str.8 = private unnamed_addr constant [22 x i8] c"
 Negation of first : \00", align 1
-@.str.31 = private unnamed_addr constant [2 x i8] c"*\00", align 1
+@.str.32 = private unnamed_addr constant [2 x i8] c"*\00", align 1
 @.str.40 = private unnamed_addr constant [30 x i8] c"
 Dispatch to void at line no \00", align 1
-@.str.27 = private unnamed_addr constant [34 x i8] c"
+@.str.28 = private unnamed_addr constant [34 x i8] c"
 Checking value returned by loop
 \00", align 1
 @.str.35 = private unnamed_addr constant [3 x i8] c"%s\00", align 1
-@.str.19 = private unnamed_addr constant [11 x i8] c"Completed
+@.str.30 = private unnamed_addr constant [28 x i8] c"Value returned is not void
 \00", align 1
-@.str.29 = private unnamed_addr constant [28 x i8] c"Value returned is not void
-\00", align 1
-@.str.9 = private unnamed_addr constant [13 x i8] c"Less than : \00", align 1
-@.str.23 = private unnamed_addr constant [12 x i8] c"
+@.str.10 = private unnamed_addr constant [13 x i8] c"Less than : \00", align 1
+@.str.24 = private unnamed_addr constant [13 x i8] c"
 Completed
+
 \00", align 1
 @.str.33 = private unnamed_addr constant [5 x i8] c"Main\00", align 1
 @.str.36 = private unnamed_addr constant [10 x i8] c"%1024[^
 ]\00", align 1
 
-%class.Object = type {}
+%class.Object = type {i8*}
 %class.Main = type { %class.Object, %class.SimpleExprTests* }
 %class.IO = type { %class.Object }
 %class.SimpleExprTests = type { %class.IO, i32, i8, %class.Object*, i32, %class.Object* }
@@ -104,7 +106,7 @@ if.else:
 
 if.end:
   %2 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %3 = getelementptr inbounds [38 x i8], [38 x i8]* @.str.0, i32 0, i32 0
+  %3 = getelementptr inbounds [38 x i8], [38 x i8]* @.str.1, i32 0, i32 0
   %4 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %2, i8* %3)
   %5 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %5, label %if.then.1, label %if.else.1
@@ -119,7 +121,7 @@ if.else.1:
 
 if.end.1:
   %7 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %8 = getelementptr inbounds [16 x i8], [16 x i8]* @.str.1, i32 0, i32 0
+  %8 = getelementptr inbounds [16 x i8], [16 x i8]* @.str.2, i32 0, i32 0
   %9 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %7, i8* %8)
   %10 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %10, label %if.then.2, label %if.else.2
@@ -149,7 +151,7 @@ if.else.3:
 
 if.end.3:
   %17 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %18 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.2, i32 0, i32 0
+  %18 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.3, i32 0, i32 0
   %19 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %17, i8* %18)
   %20 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %20, label %if.then.4, label %if.else.4
@@ -179,7 +181,7 @@ if.else.5:
 
 if.end.5:
   %27 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %28 = getelementptr inbounds [8 x i8], [8 x i8]* @.str.3, i32 0, i32 0
+  %28 = getelementptr inbounds [8 x i8], [8 x i8]* @.str.4, i32 0, i32 0
   %29 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %27, i8* %28)
   %30 = load i32, i32* %x.addr, align 4
   %31 = load i32, i32* %y.addr, align 4
@@ -215,7 +217,7 @@ if.else.7:
 
 if.end.7:
   %42 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %43 = getelementptr inbounds [15 x i8], [15 x i8]* @.str.4, i32 0, i32 0
+  %43 = getelementptr inbounds [15 x i8], [15 x i8]* @.str.5, i32 0, i32 0
   %44 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %42, i8* %43)
   %45 = load i32, i32* %x.addr, align 4
   %46 = load i32, i32* %y.addr, align 4
@@ -251,7 +253,7 @@ if.else.9:
 
 if.end.9:
   %57 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %58 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.5, i32 0, i32 0
+  %58 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.6, i32 0, i32 0
   %59 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %57, i8* %58)
   %60 = load i32, i32* %x.addr, align 4
   %61 = load i32, i32* %y.addr, align 4
@@ -287,7 +289,7 @@ if.else.11:
 
 if.end.11:
   %72 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %73 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.6, i32 0, i32 0
+  %73 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.7, i32 0, i32 0
   %74 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %72, i8* %73)
   %75 = load i32, i32* %x.addr, align 4
   %76 = load i32, i32* %y.addr, align 4
@@ -335,7 +337,7 @@ if.else.14:
 
 if.end.14:
   %89 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %90 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.7, i32 0, i32 0
+  %90 = getelementptr inbounds [22 x i8], [22 x i8]* @.str.8, i32 0, i32 0
   %91 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %89, i8* %90)
   %92 = load i32, i32* %x.addr, align 4
   %93 = sub nsw i32 0, %92
@@ -370,7 +372,7 @@ if.else.16:
 
 if.end.16:
   %103 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %104 = getelementptr inbounds [31 x i8], [31 x i8]* @.str.8, i32 0, i32 0
+  %104 = getelementptr inbounds [31 x i8], [31 x i8]* @.str.9, i32 0, i32 0
   %105 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %103, i8* %104)
   %106 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %106, label %if.then.17, label %if.else.17
@@ -385,7 +387,7 @@ if.else.17:
 
 if.end.17:
   %108 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %109 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.9, i32 0, i32 0
+  %109 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.10, i32 0, i32 0
   %110 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %108, i8* %109)
   %111 = alloca i32, align 8
   %112 = load i32, i32* %x.addr, align 4
@@ -432,7 +434,7 @@ if.else.20:
 
 if.end.20:
   %130 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %131 = getelementptr inbounds [26 x i8], [26 x i8]* @.str.10, i32 0, i32 0
+  %131 = getelementptr inbounds [26 x i8], [26 x i8]* @.str.11, i32 0, i32 0
   %132 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %130, i8* %131)
   %133 = load %class.IO, %class.IO* %132, align 4
   store %class.IO %133, %class.IO* %121, align 4
@@ -452,7 +454,7 @@ if.else.21:
 
 if.end.21:
   %136 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %137 = getelementptr inbounds [27 x i8], [27 x i8]* @.str.11, i32 0, i32 0
+  %137 = getelementptr inbounds [27 x i8], [27 x i8]* @.str.12, i32 0, i32 0
   %138 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %136, i8* %137)
   %139 = load %class.IO, %class.IO* %138, align 4
   store %class.IO %139, %class.IO* %121, align 4
@@ -481,7 +483,7 @@ if.else.23:
 
 if.end.23:
   %148 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %149 = getelementptr inbounds [26 x i8], [26 x i8]* @.str.10, i32 0, i32 0
+  %149 = getelementptr inbounds [26 x i8], [26 x i8]* @.str.11, i32 0, i32 0
   %150 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %148, i8* %149)
   %151 = load %class.IO, %class.IO* %150, align 4
   store %class.IO %151, %class.IO* %140, align 4
@@ -501,7 +503,7 @@ if.else.24:
 
 if.end.24:
   %154 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %155 = getelementptr inbounds [18 x i8], [18 x i8]* @.str.12, i32 0, i32 0
+  %155 = getelementptr inbounds [18 x i8], [18 x i8]* @.str.13, i32 0, i32 0
   %156 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %154, i8* %155)
   %157 = load %class.IO, %class.IO* %156, align 4
   store %class.IO %157, %class.IO* %140, align 4
@@ -530,7 +532,7 @@ if.else.26:
 
 if.end.26:
   %166 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %167 = getelementptr inbounds [16 x i8], [16 x i8]* @.str.13, i32 0, i32 0
+  %167 = getelementptr inbounds [16 x i8], [16 x i8]* @.str.14, i32 0, i32 0
   %168 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %166, i8* %167)
   %169 = load %class.IO, %class.IO* %168, align 4
   store %class.IO %169, %class.IO* %158, align 4
@@ -550,7 +552,7 @@ if.else.27:
 
 if.end.27:
   %172 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %173 = getelementptr inbounds [20 x i8], [20 x i8]* @.str.14, i32 0, i32 0
+  %173 = getelementptr inbounds [20 x i8], [20 x i8]* @.str.15, i32 0, i32 0
   %174 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %172, i8* %173)
   %175 = load %class.IO, %class.IO* %174, align 4
   store %class.IO %175, %class.IO* %158, align 4
@@ -579,7 +581,7 @@ if.else.29:
 
 if.end.29:
   %183 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %184 = getelementptr inbounds [20 x i8], [20 x i8]* @.str.15, i32 0, i32 0
+  %184 = getelementptr inbounds [20 x i8], [20 x i8]* @.str.16, i32 0, i32 0
   %185 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %183, i8* %184)
   %186 = load %class.IO, %class.IO* %185, align 4
   store %class.IO %186, %class.IO* %177, align 4
@@ -599,7 +601,7 @@ if.else.30:
 
 if.end.30:
   %189 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %190 = getelementptr inbounds [21 x i8], [21 x i8]* @.str.16, i32 0, i32 0
+  %190 = getelementptr inbounds [21 x i8], [21 x i8]* @.str.17, i32 0, i32 0
   %191 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %189, i8* %190)
   %192 = load %class.IO, %class.IO* %191, align 4
   store %class.IO %192, %class.IO* %177, align 4
@@ -627,7 +629,7 @@ if.else.32:
 
 if.end.32:
   %200 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %201 = getelementptr inbounds [25 x i8], [25 x i8]* @.str.17, i32 0, i32 0
+  %201 = getelementptr inbounds [25 x i8], [25 x i8]* @.str.18, i32 0, i32 0
   %202 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %200, i8* %201)
   %203 = load %class.IO, %class.IO* %202, align 4
   store %class.IO %203, %class.IO* %193, align 4
@@ -647,7 +649,7 @@ if.else.33:
 
 if.end.33:
   %206 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %207 = getelementptr inbounds [26 x i8], [26 x i8]* @.str.18, i32 0, i32 0
+  %207 = getelementptr inbounds [26 x i8], [26 x i8]* @.str.19, i32 0, i32 0
   %208 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %206, i8* %207)
   %209 = load %class.IO, %class.IO* %208, align 4
   store %class.IO %209, %class.IO* %193, align 4
@@ -667,7 +669,7 @@ if.else.34:
 
 if.end.34:
   %212 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %213 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.19, i32 0, i32 0
+  %213 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.20, i32 0, i32 0
   %214 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %212, i8* %213)
   ret i32 0
 }
@@ -695,7 +697,7 @@ if.else.35:
 
 if.end.35:
   %2 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %3 = getelementptr inbounds [58 x i8], [58 x i8]* @.str.20, i32 0, i32 0
+  %3 = getelementptr inbounds [58 x i8], [58 x i8]* @.str.21, i32 0, i32 0
   %4 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %2, i8* %3)
   %5 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %5, label %if.then.36, label %if.else.36
@@ -710,7 +712,7 @@ if.else.36:
 
 if.end.36:
   %7 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %8 = getelementptr inbounds [20 x i8], [20 x i8]* @.str.21, i32 0, i32 0
+  %8 = getelementptr inbounds [20 x i8], [20 x i8]* @.str.22, i32 0, i32 0
   %9 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %7, i8* %8)
   %10 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %10, label %if.then.37, label %if.else.37
@@ -740,7 +742,7 @@ if.else.38:
 
 if.end.38:
   %17 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %18 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.2, i32 0, i32 0
+  %18 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.3, i32 0, i32 0
   %19 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %17, i8* %18)
   %20 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %20, label %if.then.39, label %if.else.39
@@ -770,7 +772,7 @@ if.else.40:
 
 if.end.40:
   %27 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %28 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.2, i32 0, i32 0
+  %28 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.3, i32 0, i32 0
   %29 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %27, i8* %28)
   %30 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %30, label %if.then.41, label %if.else.41
@@ -800,7 +802,7 @@ if.else.42:
 
 if.end.42:
   %37 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %38 = getelementptr inbounds [31 x i8], [31 x i8]* @.str.22, i32 0, i32 0
+  %38 = getelementptr inbounds [31 x i8], [31 x i8]* @.str.23, i32 0, i32 0
   %39 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %37, i8* %38)
   %40 = alloca i32, align 8
   %41 = load i32, i32* %x.addr, align 4
@@ -891,7 +893,7 @@ if.else.47:
 
 if.end.47:
   %74 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %75 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.23, i32 0, i32 0
+  %75 = getelementptr inbounds [13 x i8], [13 x i8]* @.str.24, i32 0, i32 0
   %76 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %74, i8* %75)
   ret i32 0
 }
@@ -915,7 +917,7 @@ if.else.48:
 
 if.end.48:
   %2 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %3 = getelementptr inbounds [41 x i8], [41 x i8]* @.str.24, i32 0, i32 0
+  %3 = getelementptr inbounds [41 x i8], [41 x i8]* @.str.25, i32 0, i32 0
   %4 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %2, i8* %3)
   %5 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %5, label %if.then.49, label %if.else.49
@@ -930,7 +932,7 @@ if.else.49:
 
 if.end.49:
   %7 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %8 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.25, i32 0, i32 0
+  %8 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.26, i32 0, i32 0
   %9 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %7, i8* %8)
   %10 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %10, label %if.then.50, label %if.else.50
@@ -960,7 +962,7 @@ if.else.51:
 
 if.end.51:
   %17 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %18 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.26, i32 0, i32 0
+  %18 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.27, i32 0, i32 0
   %19 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %17, i8* %18)
   %20 = getelementptr inbounds %class.SimpleExprTests, %class.SimpleExprTests* %this, i32 0, i32 1
   store i32 1, i32* %20, align 4
@@ -1005,7 +1007,7 @@ if.else.53:
 
 if.end.53:
   %35 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %36 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.2, i32 0, i32 0
+  %36 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.3, i32 0, i32 0
   %37 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %35, i8* %36)
   %38 = getelementptr inbounds %class.SimpleExprTests, %class.SimpleExprTests* %this, i32 0, i32 1
   %39 = load i32, i32* %38, align 4
@@ -1030,7 +1032,7 @@ if.else.54:
 
 if.end.54:
   %45 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %46 = getelementptr inbounds [34 x i8], [34 x i8]* @.str.27, i32 0, i32 0
+  %46 = getelementptr inbounds [34 x i8], [34 x i8]* @.str.28, i32 0, i32 0
   %47 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %45, i8* %46)
   %48 = alloca %class.IO, align 8
   %49 = getelementptr inbounds %class.SimpleExprTests, %class.SimpleExprTests* %this, i32 0, i32 3
@@ -1054,7 +1056,7 @@ if.else.56:
 
 if.end.56:
   %56 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %57 = getelementptr inbounds [24 x i8], [24 x i8]* @.str.28, i32 0, i32 0
+  %57 = getelementptr inbounds [24 x i8], [24 x i8]* @.str.29, i32 0, i32 0
   %58 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %56, i8* %57)
   %59 = load %class.IO, %class.IO* %58, align 4
   store %class.IO %59, %class.IO* %48, align 4
@@ -1074,7 +1076,7 @@ if.else.57:
 
 if.end.57:
   %62 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %63 = getelementptr inbounds [28 x i8], [28 x i8]* @.str.29, i32 0, i32 0
+  %63 = getelementptr inbounds [28 x i8], [28 x i8]* @.str.30, i32 0, i32 0
   %64 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %62, i8* %63)
   %65 = load %class.IO, %class.IO* %64, align 4
   store %class.IO %65, %class.IO* %48, align 4
@@ -1096,7 +1098,7 @@ if.else.58:
 
 if.end.58:
   %70 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %71 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.19, i32 0, i32 0
+  %71 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.20, i32 0, i32 0
   %72 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %70, i8* %71)
   ret i32 0
 }
@@ -1120,7 +1122,7 @@ if.else.59:
 
 if.end.59:
   %2 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %3 = getelementptr inbounds [70 x i8], [70 x i8]* @.str.30, i32 0, i32 0
+  %3 = getelementptr inbounds [70 x i8], [70 x i8]* @.str.31, i32 0, i32 0
   %4 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %2, i8* %3)
   %5 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %5, label %if.then.60, label %if.else.60
@@ -1135,7 +1137,7 @@ if.else.60:
 
 if.end.60:
   %7 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %8 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.25, i32 0, i32 0
+  %8 = getelementptr inbounds [5 x i8], [5 x i8]* @.str.26, i32 0, i32 0
   %9 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %7, i8* %8)
   %10 = icmp eq %class.SimpleExprTests* %this, null
   br i1 %10, label %if.then.61, label %if.else.61
@@ -1165,7 +1167,7 @@ if.else.62:
 
 if.end.62:
   %17 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %18 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.26, i32 0, i32 0
+  %18 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.27, i32 0, i32 0
   %19 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %17, i8* %18)
   %20 = getelementptr inbounds %class.SimpleExprTests, %class.SimpleExprTests* %this, i32 0, i32 1
   store i32 0, i32* %20, align 4
@@ -1209,7 +1211,7 @@ if.else.63:
 
 if.end.63:
   %37 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %38 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.31, i32 0, i32 0
+  %38 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.32, i32 0, i32 0
   %39 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %37, i8* %38)
   %40 = getelementptr inbounds %class.SimpleExprTests, %class.SimpleExprTests* %this, i32 0, i32 4
   %41 = load i32, i32* %40, align 4
@@ -1232,7 +1234,7 @@ if.else.64:
 
 if.end.64:
   %46 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %47 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.26, i32 0, i32 0
+  %47 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.27, i32 0, i32 0
   %48 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %46, i8* %47)
   %49 = getelementptr inbounds %class.SimpleExprTests, %class.SimpleExprTests* %this, i32 0, i32 1
   %50 = load i32, i32* %49, align 4
@@ -1255,7 +1257,7 @@ if.else.65:
 
 if.end.65:
   %55 = bitcast %class.SimpleExprTests* %this to %class.IO*
-  %56 = getelementptr inbounds [11 x i8], [11 x i8]* @.str.19, i32 0, i32 0
+  %56 = getelementptr inbounds [12 x i8], [12 x i8]* @.str.20, i32 0, i32 0
   %57 = call %class.IO* @_CN2IO_FN10out_string_(%class.IO* %55, i8* %56)
   ret i32 0
 }
@@ -1371,7 +1373,7 @@ entry:
   %0 = bitcast %class.Main* %this to %class.Object*
   call void @_CN6Object_FN6Object_(%class.Object* %0)
   %1 = getelementptr inbounds %class.Main, %class.Main* %this, i32 0, i32 1
-  %2 = call noalias i8* @malloc(i64 25)
+  %2 = call noalias i8* @malloc(i64 33)
   %3 = bitcast i8* %2 to %class.SimpleExprTests*
   call void @_CN15SimpleExprTests_FN15SimpleExprTests_(%class.SimpleExprTests* %3)
   store %class.SimpleExprTests* %3, %class.SimpleExprTests** %1, align 4
@@ -1431,7 +1433,7 @@ declare i8* @strcat(i8*, i8*)
 define %class.Object* @_CN6Object_FN5abort_() {
 entry:
   call void @exit(i32 0)
-  %0 = call noalias i8* @malloc(i64 0)
+  %0 = call noalias i8* @malloc(i64 8)
   %1 = bitcast i8* %0 to %class.Object*
   call void @_CN6Object_FN6Object_(%class.Object* %1)
   ret %class.Object* %1
@@ -1442,7 +1444,7 @@ define %class.IO* @_CN2IO_FN10out_string_(%class.IO* %this, i8* %s) {
 entry:
   %0 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.35, i32 0, i32 0
   %call = call i32 (i8*, ...) @printf(i8* %0, i8* %s)
-  %1 = call noalias i8* @malloc(i64 0)
+  %1 = call noalias i8* @malloc(i64 8)
   %2 = bitcast i8* %1 to %class.IO*
   call void @_CN2IO_FN2IO_(%class.IO* %2)
   ret %class.IO* %2
@@ -1453,7 +1455,7 @@ define %class.IO* @_CN2IO_FN7out_int_(%class.IO* %this, i32 %d) {
 entry:
   %0 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.37, i32 0, i32 0
   %call = call i32 (i8*, ...) @printf(i8* %0, i32 %d)
-  %1 = call noalias i8* @malloc(i64 0)
+  %1 = call noalias i8* @malloc(i64 8)
   %2 = bitcast i8* %1 to %class.IO*
   call void @_CN2IO_FN2IO_(%class.IO* %2)
   ret %class.IO* %2
@@ -1499,7 +1501,7 @@ entry:
   %2 = call i32 (i8*, ...) @printf(i8* %0, i8* %1)
   %3 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.37, i32 0, i32 0
   %4 = call i32 (i8*, ...) @printf(i8* %3, i32 %lineNo)
-  %5 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.26, i32 0, i32 0
+  %5 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.27, i32 0, i32 0
   %6 = call i32 (i8*, ...) @printf(i8* %0, i8* %5)
   ret void
 }
@@ -1510,7 +1512,7 @@ entry:
   %2 = call i32 (i8*, ...) @printf(i8* %0, i8* %1)
   %3 = getelementptr inbounds [3 x i8], [3 x i8]* @.str.37, i32 0, i32 0
   %4 = call i32 (i8*, ...) @printf(i8* %3, i32 %lineNo)
-  %5 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.26, i32 0, i32 0
+  %5 = getelementptr inbounds [2 x i8], [2 x i8]* @.str.27, i32 0, i32 0
   %6 = call i32 (i8*, ...) @printf(i8* %0, i8* %5)
   ret void
 }
