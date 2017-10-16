@@ -121,8 +121,13 @@ class VisitorImpl extends ExpressionVisitorImpl {
         for(AST.feature f : cl.features) {
             if(f instanceof AST.attr) {
                 AST.attr a = (AST.attr) f;
-                a.accept(this);
                 Global.scopeTable.insert(a.name, a.typeid);
+            }
+        }
+        for(AST.feature f : cl.features) {
+            if(f instanceof AST.attr) {
+                AST.attr a = (AST.attr) f;
+                a.accept(this);
             }
         }
 
