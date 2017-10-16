@@ -35,6 +35,10 @@ public class DefaultIR {
             Global.stringConstantToRegisterMap.put(Global.Constants.VOID_CALL_ERROR, "@.str."+Global.stringRegisterCounter);
             Global.stringRegisterCounter++;
         }
+        if(!Global.stringConstantToRegisterMap.containsKey(Global.Constants.ABORT_MESSAGE)) {
+            Global.stringConstantToRegisterMap.put(Global.Constants.ABORT_MESSAGE, "@.str."+Global.stringRegisterCounter);
+            Global.stringRegisterCounter++;
+        }
         if(!Global.stringConstantToRegisterMap.containsKey(Global.Constants.ROOT_TYPE)) {
             Global.stringConstantToRegisterMap.put(Global.Constants.ROOT_TYPE, "@.str."+Global.stringRegisterCounter);
             Global.stringRegisterCounter++;
@@ -97,8 +101,24 @@ public class DefaultIR {
         Global.registerCounter = 0;
         Global.out.println("\n; Class: Object, Method: abort");
         Global.out.println("define "+Utils.getStructName(Global.Constants.ROOT_TYPE)+"* @"+ 
-            Utils.getMangledName(Global.Constants.ROOT_TYPE, "abort") +"() {");
+            Utils.getMangledName(Global.Constants.ROOT_TYPE, "abort") 
+            +"("+Utils.getStructName(Global.Constants.ROOT_TYPE)+"* %this) {");
         Global.out.println("entry:");
+
+
+        String typenameGEP = IRPrinter.createTypeNameGEP("%this");
+        String loadNameReg = IRPrinter.createLoadInst(typenameGEP, "i8*");
+        String arg1 = IRPrinter.createStringGEP("%s");
+        String arg2 = IRPrinter.createStringGEP(Global.Constants.ABORT_MESSAGE);
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+loadNameReg+")");
+        Global.registerCounter++;
+        arg2 = IRPrinter.createStringGEP("\n");
+        Global.out.println(IRPrinter.INDENT+"%"+Global.registerCounter+" = call i32 (i8*, ...) @printf(i8* "+arg1+", i8* "+arg2+")");
+        Global.registerCounter++;
+
+
         Global.out.println(IRPrinter.INDENT+"call void @exit(i32 0)");
         String bytesToAllocate = ""+Global.classSizeMap.get(Global.Constants.ROOT_TYPE);
         String storeRegisterForCall = IRPrinter.createMallocInst(bytesToAllocate);

@@ -20,6 +20,7 @@ public class Global {
         public static final String DIVIDE_BY_ZERO_FUNCTION = "print_div_by_zero_err_msg";
         public static final String VOID_CALL_ERROR = "\nDispatch to void at line no ";
         public static final String VOID_CALL_FUNCTION = "print_dispatch_on_void_error";
+        public static final String ABORT_MESSAGE = "\nAbort called from class ";
     }
 
     // Contains graph after parsing all the classes and its parents

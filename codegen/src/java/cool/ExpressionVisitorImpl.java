@@ -35,8 +35,8 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String def = null;
         if("abort".equals(expr.name)) {
             // calling the abort method without any arguments
-            expr.caller.accept(this);
-            def = IRPrinter.createCallInst("Object", Utils.getMangledName("Object", "abort"), "");
+            // expr.caller.accept(this);
+            // def = IRPrinter.createCallInst("Object", Utils.getMangledName("Object", "abort"), "");
         } else if("length".equals(expr.name) && Global.Constants.STRING_TYPE.equals(expr.typeid)) {
             // directly using strlen of C, no separate function written in IR
             String stringReg = expr.caller.accept(this);
@@ -71,7 +71,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         
         IRPrinter.createLabel(ifThenLabel);
         IRPrinter.createVoidCallInst(Global.Constants.VOID_CALL_FUNCTION, "i32 "+expr.lineNo);
-        IRPrinter.createCallInst("Object", Utils.getMangledName("Object", "abort"), "");
+        Global.out.println(IRPrinter.INDENT+"call void @exit(i32 1)");
         
         IRPrinter.createBreakInst(ifEndLabel);
  
@@ -247,13 +247,12 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String ifEndLabel = IRPrinter.getLabel("if.end",false);
 
         String cmpInst = IRPrinter.createBinaryInst(IRPrinter.EQ, op2, "0", Global.Constants.INT_TYPE, false, false);;
-    //    String truncVar = IRPrinter.createConvertInst(cmpInst, "i8", "i1", IRPrinter.TRUNC);
         IRPrinter.createCondBreak(cmpInst, ifThenLabel, ifElseLabel);
         
         IRPrinter.createLabel(ifThenLabel);
         IRPrinter.createVoidCallInst(Global.Constants.DIVIDE_BY_ZERO_FUNCTION, "i32 "+expr.lineNo);
-        IRPrinter.createCallInst("Object", Utils.getMangledName("Object", "abort"), "");
-        
+        Global.out.println(IRPrinter.INDENT+"call void @exit(i32 1)");
+
         IRPrinter.createBreakInst(ifEndLabel);
  
         IRPrinter.createLabel(ifElseLabel);
