@@ -16,6 +16,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         String variableType = Global.scopeTable.lookUpGlobal(expr.name);
         if(!variableType.equals(expr.e1.type)) {
             if(Utils.isPrimitiveType(expr.e1.type)) {
+                // creating new object, as primitive cant be stored in object struct directly
                 AST.new_ newObj = new AST.new_(Global.Constants.ROOT_TYPE, 0);
                 newObj.type = Global.Constants.ROOT_TYPE;
                 castVal = this.visit(newObj);
@@ -217,7 +218,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
         if(Utils.isPrimitiveType(expr.e1.type)) {
             return "0";
         }
-        System.out.println("ISVOID : "+expr.type);
+        // System.out.println("ISVOID : "+expr.type);
         String binResult = IRPrinter.createBinaryInst(IRPrinter.EQ, op, "null", expr.e1.type, false, false);
         return IRPrinter.createConvertInst(binResult, "i1", "i8", IRPrinter.ZEXT);
     }
@@ -299,7 +300,7 @@ abstract class ExpressionVisitorImpl implements Visitor {
     }
     
     public String visit(AST.object expr) {
-        System.out.println("expr name : "+expr.name+" expr type : "+expr.type+"\n");
+        // System.out.println("expr name : "+expr.name+" expr type : "+expr.type+"\n");
         if("self".equals(expr.name)) {
             return "%this";
         }
